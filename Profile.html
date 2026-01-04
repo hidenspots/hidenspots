@@ -304,7 +304,18 @@ async function loadProfile() {
   }
 
   // Avatar
-  let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(targetUsername)}&background=FFD88D&color=0c0f18&size=256&bold=true`;
+  let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(targetUsername)}&background=FFD88D&color=0c0f18&size=256&bold=true`; // fallback
+
+// Try to load from R2
+const r2AvatarUrl = `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/file/avatars/${targetUsername}-avatar.jpg`;
+const testImg = new Image();
+testImg.onload = () => {
+  avatarUrl = r2AvatarUrl;
+  document.getElementById('avatar').src = avatarUrl + '?t=' + Date.now();
+};
+testImg.src = r2AvatarUrl; // triggers onload if exists
+
+document.getElementById('avatar').src = avatarUrl;
   try {
     const res = await fetch(`http://127.0.0.1:5000/api/get-avatar?username=${encodeURIComponent(targetUsername)}`);
     if (res.ok) {
@@ -392,19 +403,32 @@ if (spots && spots.length > 0) {
 
     avatarImg.style.cursor = 'pointer';
     avatarImg.onclick = () => dpInput.click();
-    dpInput.onchange = async () => {
-      const file = dpInput.files[0];
-      if (!file) return;
-      const fd = new FormData();
-      fd.append('avatar', file);
-      fd.append('username', currentUser.user_metadata?.username || currentUser.email.split('@')[0]);
-      const res = await fetch('http://127.0.0.1:5000/upload-avatar', { method: 'POST', body: fd });
-      const data = await res.json();
-      if (data.url) {
-        avatarImg.src = data.url + '?t=' + Date.now();
-        alert('Profile picture updated!');
+      dpInput.onchange = async () => {
+    const file = dpInput.files[0];
+    if (!file) return;
+
+    const username = currentUser.user_metadata?.username || currentUser.email.split('@')[0];
+    const filename = `${username}-avatar.jpg`; // you can use .png if you want
+
+    const uploadUrl = `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/avatar/${filename}`;
+
+    const uploadRes = await fetch(uploadUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type || 'image/jpeg'
       }
-    };
+    });
+
+    if (!uploadRes.ok) {
+      alert('Avatar upload failed');
+      return;
+    }
+
+    const avatarUrl = `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/file/avatars/${filename}`;
+    avatarImg.src = avatarUrl + '?t=' + Date.now(); // cache bust
+    alert('Profile picture updated! 🎉');
+  };
   } else {
     followBtn.style.display = 'block';
 
@@ -484,3 +508,4 @@ loadProfile();
 </body>
 
 </html>
+

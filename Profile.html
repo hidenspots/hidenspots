@@ -336,47 +336,51 @@ async function loadProfile() {
   document.getElementById('followingCount').innerText = counts.following || 0;
 
   // Load spots + last spot for background
-  const { data: spots } = await sb
-    .from('spots')
-    .select('id, name, place, city, media_url, media_urls, user_id')
-    .eq('user_id', targetUserId)
-    .order('created_at', { ascending: false });
+// Load spots
+const { data: spots } = await sb
+  .from('spots')
+  .select('id, name, place, city, media_urls, media_url, user_id, created_at')
+  .eq('user_id', targetUserId)
+  .order('created_at', { ascending: false });
 
-  // Set profile cover to last uploaded spot's first media
-  let coverUrl = 'https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600'; // default
-  if (spots && spots.length > 0) {
-    const lastSpot = spots[0];
-    const mediaList = lastSpot.media_urls || [];
-    if (mediaList.length > 0) {
-      coverUrl = `http://127.0.0.1:5000${mediaList[0].url}`;
-    } else if (lastSpot.media_url) {
-      coverUrl = `http://127.0.0.1:5000${lastSpot.media_url}`;
-    }
+// Set profile cover to last uploaded spot's first media
+let coverUrl = 'https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600'; // default
+if (spots && spots.length > 0) {
+  const lastSpot = spots[0];
+  const firstMedia = lastSpot.media_urls?.[0]?.url || lastSpot.media_url;
+  if (firstMedia) {
+    coverUrl = firstMedia;
   }
-  document.getElementById('profileCover').style.backgroundImage = `url('${coverUrl}')`;
+}
+document.getElementById('profileCover').style.backgroundImage = `url('${coverUrl}')`;
 
-  const grid = document.getElementById('profileGrid');
-  if (spots && spots.length > 0) {
-    grid.innerHTML = spots.map(p => {
-      const isOwnPost = p.user_id === currentUser.id;
-      const deleteBtn = isOwnPost ? `<div class="delete-btn" onclick="deleteSpot('${p.id}', this)">🗑️</div>` : '';
+// Render posts grid
+const grid = document.getElementById('profileGrid');
+if (spots && spots.length > 0) {
+  grid.innerHTML = spots.map(p => {
+    const isOwnPost = p.user_id === currentUser.id;
+    const deleteBtn = isOwnPost ? `<div class="delete-btn" onclick="deleteSpot('${p.id}', this)">🗑️</div>` : '';
 
-      return `
+    // Use first image from media_urls array (R2), fallback to media_url or placeholder
+    const firstImage = p.media_urls?.[0]?.url || p.media_url || 'https://via.placeholder.com/300x190/141824/FFD88D?text=No+Image';
+
+    return `
       <div class="card">
         <div style="position:relative;">
-          <img src="http://127.0.0.1:5000${p.media_url}" alt="${p.name}">
+          <img src="${firstImage}" alt="${p.name}" style="width:100%;height:190px;object-fit:cover;" 
+               onerror="this.src='https://via.placeholder.com/300x190/141824/FFD88D?text=No+Image'">
           ${deleteBtn}
         </div>
         <div class="card-body">
-          <div class="card-title">${p.name}</div>
-          <div class="card-sub">${p.place}, ${p.city}</div> 
+          <div class="card-title">${p.name || 'Untitled Spot'}</div>
+          <div class="card-sub">${p.place || ''}, ${p.city || ''}</div>
           <div class="story"><a href="spot.html?id=${p.id}">Read more</a></div>
         </div>
       </div>`;
-    }).join('');
-  } else {
-    grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;opacity:0.7;margin:3rem;">No hidden spots yet</p>`;
-  }
+  }).join('');
+} else {
+  grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;opacity:0.7;margin:3rem;">No hidden spots yet</p>`;
+}
 
   // Follow button and avatar upload (unchanged)
   const followBtn = document.getElementById('followBtn');
@@ -478,4 +482,5 @@ async function deleteSpot(spotId, buttonElement) {
 loadProfile();
 </script>
 </body>
+
 </html>

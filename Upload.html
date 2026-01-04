@@ -413,43 +413,18 @@ form.addEventListener('submit', async (e) => {
     alert('Please log in first!');
     return;
   }
-
   if (selectedFiles.length === 0) {
     alert('Please select at least one photo or video');
     return;
   }
-
   if (!safetyInput.value) {
     alert('Please select safety rating');
     return;
   }
 
-  const fd = new FormData();
-  selectedFiles.forEach(file => {
-    fd.append('files', file);
-  });
+  const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
 
-  fd.append('name', document.getElementById('name').value.trim());
-  fd.append('place', document.getElementById('place').value.trim());
-  fd.append('city', document.getElementById('city').value.trim());
-fd.append('state', document.getElementById('state').value.trim());
-fd.append('country', document.getElementById('country').value.trim());
-  fd.append('emotion', document.getElementById('emotion').value);
-  fd.append('category', document.getElementById('category').value);
-  fd.append('story', document.getElementById('story').value.trim());
-  fd.append('safety', safetyInput.value);
-  fd.append('besttime', document.getElementById('besttime').value.trim());
-  fd.append('tips', document.getElementById('tips').value.trim());
-  fd.append('hashtags', document.getElementById('hashtags').value.trim());
-  fd.append('credits', document.getElementById('credits').value.trim());
-  fd.append('user_id', session.user.id);
-
-  const username = session.user.user_metadata?.username || session.user.email.split('@')[0];
-  fd.append('username', username);
-
-      try {
-    const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
-
+  try {
     const mediaUrls = [];
     for (const file of selectedFiles) {
       const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
@@ -464,8 +439,8 @@ fd.append('country', document.getElementById('country').value.trim());
       });
 
       if (!uploadRes.ok) {
-        const err = await uploadRes.text();
-        throw new Error(`Upload failed: ${err}`);
+        const errText = await uploadRes.text();
+        throw new Error(`Upload failed: ${errText}`);
       }
 
       const publicUrl = `${WORKER_URL}/file/${filename}`;
@@ -493,14 +468,13 @@ fd.append('country', document.getElementById('country').value.trim());
       hashtags: document.getElementById('hashtags').value.trim(),
       credits: document.getElementById('credits').value.trim(),
       media_urls: mediaUrls,
-      media_url: mediaUrls[0]?.url || null,
-      media_type: mediaUrls[0]?.type || 'image'
+      media_url: mediaUrls[0]?.url || null
     }]);
 
     if (error) {
       alert('Save failed: ' + error.message);
     } else {
-      alert('Uploaded successfully! 🎉');
+      alert('Hidden gem uploaded successfully! 🎉');
       form.reset();
       selectedFiles = [];
       mediaPreview.innerHTML = '';
@@ -516,4 +490,5 @@ fd.append('country', document.getElementById('country').value.trim());
 </body>
 
 </html>
+
 

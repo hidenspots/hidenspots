@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Profile • Hiden Spots</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+   background:#0c0f18;
+   font-family:'Playfair Display', serif;
+   color:#fff;
+   overflow-x:hidden;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+header{
+  position:fixed;
+  top:0;left:0;width:100%;
+  padding:1.1rem 3rem;
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(10,12,20,.35);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.1);
+  z-index:50;
+}
+.brand{display:flex;align-items:center;gap:.7rem;color:#fff;text-decoration:none}
+.brand span{font-size:1.4rem;letter-spacing:3px}
+.brand:hover{color:#ffd88d;transition:.35s}
+
+.profile-cover{
+  height:32vh;
+  background-size:cover;
+  background-position:center;
+  border-radius:0 0 18px 18px;
+  margin-top:84px;
+  position:relative;
+}
+.profile-cover::after{
+  content:"";
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom, rgba(0,0,0,0), rgba(12,15,25,.9));
+}
+
+.profile-info{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-top:-70px;
+  z-index:3;
+  position:relative;
+  animation:fadeUp .8s both;
+}
+.profile-avatar{
+  width:110px;height:110px;border-radius:50%;
+  border:3px solid rgba(255,255,255,.35);
+  object-fit:cover;
+  box-shadow:0 8px 25px rgba(0,0,0,.35);
+}
+.profile-name{font-size:1.7rem;margin-top:.7rem;color:#ffd88d}
+.username-tag{opacity:.85;margin-top:-.25rem;font-size:.95rem}
+
+.profile-stats{
+  margin-top:1rem;
+  display:flex;gap:2rem;
+}
+.stat{text-align:center}
+.stat-number{font-size:1.3rem;font-weight:600;color:#ffd88d}
+.stat-label{font-size:.85rem;opacity:.8}
+.story{padding:0 14px 14px}
+.story p{
+  margin:6px 0 0; font-size:15px; opacity:.9; line-height:1.5;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.story a{color:var(--gold); text-decoration:none; font-size:14px}
+.story a:hover{text-decoration:underline}
+.follow-btn{
+  margin-top:1.3rem;
+  padding:.55rem 1.4rem;
+  border-radius:30px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.07);
+  cursor:pointer;
+  color:#fff;
+  font-size:.95rem;
+  transition:.3s;
+}
+.follow-btn:hover{
+  background:linear-gradient(90deg,#ffd88d,#ffb347);
+  color:#0c0f18;
+  border-color:transparent;
+}
+.delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.7);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  z-index: 10;
+  transition: all 0.3s;
+}
+.delete-btn:hover {
+  background: rgba(255,0,0,0.8);
+  transform: scale(1.1);
+}
+.tabs{
+  display:flex;
+  justify-content:center;
+  gap:2.5rem;
+  margin:2.2rem auto 1rem;
+}
+.tab{
+  padding:.5rem 1rem;
+  font-size:1rem;
+  opacity:.75;
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:.3s;
+}
+.tab.active{
+  opacity:1;
+  color:#ffd88d;
+  border-color:#ffd88d;
+}
+
+.grid{
+  padding:1rem 2rem 5rem;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
+  gap:1.4rem;
+}
+.card{
+  background:#141824;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 8px 22px rgba(0,0,0,.25);
+  animation:fadeUp .8s both;
+}
+.card img{
+  width:100%;height:190px;object-fit:cover;
+}
+.card-body{
+  padding:1rem;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+.card-title{color:#ffd88d;font-size:1.05rem;margin-bottom:.25rem}
+.card-sub{font-size:.9rem;opacity:.8}
+
+.nav-bar{
+    background:rgba(255,255,255,.05);
+    backdrop-filter:blur(25px);
+    border-radius:60px;
+    padding:1rem 2.5rem;
+    border:1px solid rgba(255,255,255,.12);
+   position: fixed;
+    bottom:1rem;left:50%;transform:translateX(-50%);
+    display:flex;gap:3rem;
+    box-shadow:0 8px 30px rgba(0,0,0,.25)
+  }
+  .nav-icon{color:rgba(255,255,255,.7);transition:.4s}
+  .nav-icon:hover{color:#ffd88d;transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
+  .nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+@media(max-width:768px){
+  header{padding:1rem 1.5rem}
+  .brand span{font-size:1.2rem}
+  .profile-cover{height:28vh}
+  .profile-avatar{width:95px;height:95px}
+  .grid{padding:1rem 1rem 6rem}
+}
+
+@media(max-width:480px){
+  header{padding:0.9rem 1.2rem}
+  .brand span{font-size:1rem;letter-spacing:2px}
+  .profile-cover{height:26vh;margin-top:70px}
+  .profile-avatar{width:85px;height:85px}
+  .profile-name{font-size:1.4rem}
+  .username-tag{font-size:.8rem}
+  .profile-stats{gap:1.5rem;margin-top:.8rem}
+  .stat-number{font-size:1.1rem}
+  .stat-label{font-size:.75rem}
+  .follow-btn{padding:.45rem 1.2rem;font-size:.85rem;margin-top:1rem}
+  .tabs{gap:1.5rem;margin-top:1.8rem}
+  .tab{font-size:.9rem}
+  .grid{grid-template-columns:1fr;padding:1rem 1rem 6rem}
+  .card img{height:170px}
+  .nav-bar{gap:1.8rem;padding:.8rem 1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="brand">
+    <svg width="34" viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+      <path d="M24 10 L28 24 L24 38 L20 24 Z" fill="rgba(255,216,155,0.9)"/>
+      <circle cx="24" cy="24" r="2.6" fill="#fff"/>
+    </svg>
+    <span>Hiden Spots</span>
+  </a>
+</header>
+
+<div class="profile-cover" id="profileCover" style="background-image:url('https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600');"></div>
+
+<section class="profile-info">
+  <img id="avatar" class="profile-avatar" src="default-avatar.png">
+  <input type="file" id="dpInput" accept="image/*" hidden>
+  <h1 id="name" class="profile-name">Full Name</h1>
+  <p id="email" class="username-tag">@username</p>
+
+  <div class="profile-stats">
+    <div class="stat"><div class="stat-number" id="postsCount">0</div><div class="stat-label">Posts</div></div>
+    <div class="stat"><div class="stat-number" id="followersCount">0</div><div class="stat-label">Followers</div></div>
+    <div class="stat"><div class="stat-number" id="followingCount">0</div><div class="stat-label">Following</div></div>
+  </div>
+
+  <button class="follow-btn" id="followBtn" style="display:none;">Follow</button>
+</section>
+
+<div class="tabs">
+  <div class="tab active" data-tab="posts">Posts</div>
+  <div class="tab" data-tab="saved">Saved</div>
+  <div class="tab" data-tab="destiny">Destiny List</div>
+</div>
+
+<section class="grid" id="profileGrid"></section>
+
+<nav class="nav-bar" aria-label="Primary">
+    <a href="Mainhome.html" class="nav-icon" title="Home">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </a>
+    <a href="Home.html" class="nav-icon" title="Search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </a>
+    <a href="Upload.html" class="nav-icon" title="Create">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </a>
+    <a href="Explore.html" class="nav-icon" title="Destiny List">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+        <circle cx="12" cy="9" r="2.5" fill="none"/>
+        <path d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z" fill="currentColor"/>
+      </svg>
+    </a>
+    <a href="Profile.html" class="nav-icon active" title="Profile">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </a>
+  </nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const sb = supabase.createClient(
+  "https://bhktkjegansxplpdtack.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
+);
+
+async function loadProfile() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchedUsername = urlParams.get('user');
+
+  const { data: { user: currentUser }, error: authError } = await sb.auth.getUser();
+
+  if (authError || !currentUser) {
+    alert('Please log in');
+    window.location.href = 'index.html';
+    return;
+  }
+
+  let targetUsername;
+  let targetUserId;
+  let isOwnProfile = false;
+
+  if (searchedUsername) {
+    targetUsername = searchedUsername;
+  } else {
+    targetUsername = currentUser.user_metadata?.username || currentUser.email.split('@')[0];
+    targetUserId = currentUser.id;
+    isOwnProfile = true;
+  }
+
+  if (!targetUserId) {
+    const { data: spots } = await sb
+      .from('spots')
+      .select('user_id')
+      .eq('username', targetUsername)
+      .limit(1);
+
+    if (!spots || spots.length === 0) {
+      alert('User not found or no posts yet');
+      return;
+    }
+    targetUserId = spots[0].user_id;
+    isOwnProfile = targetUserId === currentUser.id;
+  }
+
+  // Avatar
+  let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(targetUsername)}&background=FFD88D&color=0c0f18&size=256&bold=true`;
+  try {
+    const res = await fetch(`http://127.0.0.1:5000/api/get-avatar?username=${encodeURIComponent(targetUsername)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.avatar_url) avatarUrl = data.avatar_url;
+    }
+  } catch (err) {}
+
+  // Full name
+  const fullName = isOwnProfile
+    ? (currentUser.user_metadata?.full_name || targetUsername)
+    : targetUsername;
+
+  document.getElementById('avatar').src = avatarUrl;
+  document.getElementById('name').innerText = fullName;
+  document.getElementById('email').innerText = `@${targetUsername}`;
+
+  // Posts count
+  const { count: postsCount } = await sb
+    .from('spots')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', targetUserId);
+  document.getElementById('postsCount').innerText = postsCount || 0;
+
+  // Followers & Following counts
+  const countsRes = await fetch(`http://127.0.0.1:5000/api/follow-counts?user_id=${targetUserId}`);
+  const counts = await countsRes.json();
+  document.getElementById('followersCount').innerText = counts.followers || 0;
+  document.getElementById('followingCount').innerText = counts.following || 0;
+
+  // Load spots + last spot for background
+  const { data: spots } = await sb
+    .from('spots')
+    .select('id, name, place, city, media_url, media_urls, user_id')
+    .eq('user_id', targetUserId)
+    .order('created_at', { ascending: false });
+
+  // Set profile cover to last uploaded spot's first media
+  let coverUrl = 'https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600'; // default
+  if (spots && spots.length > 0) {
+    const lastSpot = spots[0];
+    const mediaList = lastSpot.media_urls || [];
+    if (mediaList.length > 0) {
+      coverUrl = `http://127.0.0.1:5000${mediaList[0].url}`;
+    } else if (lastSpot.media_url) {
+      coverUrl = `http://127.0.0.1:5000${lastSpot.media_url}`;
+    }
+  }
+  document.getElementById('profileCover').style.backgroundImage = `url('${coverUrl}')`;
+
+  const grid = document.getElementById('profileGrid');
+  if (spots && spots.length > 0) {
+    grid.innerHTML = spots.map(p => {
+      const isOwnPost = p.user_id === currentUser.id;
+      const deleteBtn = isOwnPost ? `<div class="delete-btn" onclick="deleteSpot('${p.id}', this)">🗑️</div>` : '';
+
+      return `
+      <div class="card">
+        <div style="position:relative;">
+          <img src="http://127.0.0.1:5000${p.media_url}" alt="${p.name}">
+          ${deleteBtn}
+        </div>
+        <div class="card-body">
+          <div class="card-title">${p.name}</div>
+          <div class="card-sub">${p.place}, ${p.city}</div> 
+          <div class="story"><a href="spot.html?id=${p.id}">Read more</a></div>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;opacity:0.7;margin:3rem;">No hidden spots yet</p>`;
+  }
+
+  // Follow button and avatar upload (unchanged)
+  const followBtn = document.getElementById('followBtn');
+  const avatarImg = document.getElementById('avatar');
+  const dpInput = document.getElementById('dpInput');
+
+  if (isOwnProfile) {
+    followBtn.style.display = 'none';
+
+    avatarImg.style.cursor = 'pointer';
+    avatarImg.onclick = () => dpInput.click();
+    dpInput.onchange = async () => {
+      const file = dpInput.files[0];
+      if (!file) return;
+      const fd = new FormData();
+      fd.append('avatar', file);
+      fd.append('username', currentUser.user_metadata?.username || currentUser.email.split('@')[0]);
+      const res = await fetch('http://127.0.0.1:5000/upload-avatar', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.url) {
+        avatarImg.src = data.url + '?t=' + Date.now();
+        alert('Profile picture updated!');
+      }
+    };
+  } else {
+    followBtn.style.display = 'block';
+
+    const { data: existing } = await sb
+      .from('follows')
+      .select('id')
+      .eq('follower_id', currentUser.id)
+      .eq('following_id', targetUserId)
+      .maybeSingle();
+
+    const isFollowing = !!existing;
+    followBtn.textContent = isFollowing ? 'Following' : 'Follow';
+    followBtn.classList.toggle('following', isFollowing);
+
+    followBtn.onclick = async () => {
+      const res = await fetch('http://127.0.0.1:5000/api/toggle-follow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ follower_id: currentUser.id, following_id: targetUserId })
+      });
+      const result = await res.json();
+      if (res.ok) {
+        followBtn.textContent = result.action === 'followed' ? 'Following' : 'Follow';
+        followBtn.classList.toggle('following', result.action === 'followed');
+
+        const newCounts = await fetch(`http://127.0.0.1:5000/api/follow-counts?user_id=${targetUserId}`);
+        const newData = await newCounts.json();
+        document.getElementById('followersCount').innerText = newData.followers || 0;
+      }
+    };
+
+    avatarImg.style.cursor = 'default';
+    avatarImg.onclick = null;
+  }
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelector('.tab.active').classList.remove('active');
+      tab.classList.add('active');
+    });
+  });
+}
+
+async function deleteSpot(spotId, buttonElement) {
+  if (!confirm('Are you sure you want to delete this spot? This cannot be undone.')) {
+    return;
+  }
+
+  try {
+    const { error } = await sb
+      .from('spots')
+      .delete()
+      .eq('id', spotId);
+
+    if (error) throw error;
+
+    const card = buttonElement.closest('.card');
+    card.style.transition = 'opacity 0.5s, transform 0.5s';
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    setTimeout(() => card.remove(), 500);
+
+    alert('Spot deleted successfully!');
+
+    // Update posts count
+    const currentCount = parseInt(document.getElementById('postsCount').innerText);
+    document.getElementById('postsCount').innerText = currentCount - 1;
+  } catch (err) {
+    console.error('Delete error:', err);
+    alert('Failed to delete spot');
+  }
+}
+
+loadProfile();
+</script>
+</body>
+</html>

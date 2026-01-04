@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Travel Destiny Map • Hiden Spots</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+:root{
+  --bg:#0c0f18; --panel:#121624; --glass:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.12); --gold:#FFD88D; --amber:#FFB347; --red:#ff4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:#fff;font-family:'Playfair Display',serif}
+
+/* Header */
+.header{
+  position:sticky;top:0;z-index:1000;
+  backdrop-filter:blur(12px);
+  background:linear-gradient(180deg,rgba(12,15,24,.85),rgba(12,15,24,.55));
+  border-bottom:1px solid var(--border);
+  padding:12px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+.brand svg{width:30px;height:30px}
+.brand span{letter-spacing:3px}
+
+/* Main */
+.main{padding:100px 20px 40px;max-width:1400px;margin:0 auto}
+.title{font-size:36px;color:var(--gold);text-align:center;margin-bottom:20px}
+.subtitle{text-align:center;font-size:18px;opacity:.9;margin-bottom:40px}
+
+/* Stats */
+.stats{text-align:center;margin-bottom:40px}
+.stats span{font-size:24px;color:var(--gold);font-weight:600}
+.stats .heart{font-size:28px;margin-left:10px}
+
+/* Clear All */
+.clear-all{
+  display:block;margin:20px auto;padding:10px 24px;
+  background:var(--red);border:none;border-radius:30px;
+  color:#fff;font-size:16px;cursor:pointer;transition:.3s;
+}
+.clear-all:hover{background:#ff6666;transform:scale(1.05)}
+
+/* Map */
+.map-section{
+  height:500px;border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;margin-bottom:40px;box-shadow:0 12px 30px rgba(0,0,0,.3);
+}
+#destinyMap{height:100%}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px}
+.card{
+  background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden;
+  box-shadow:0 12px 26px rgba(0,0,0,.25);position:relative;
+  opacity:0;transform:translateY(30px);transition:all .6s ease;
+}
+.card.visible{opacity:1;transform:translateY(0)}
+.card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,.4)}
+.media{height:220px;overflow:hidden;position:relative}
+.media img{width:100%;height:100%;object-fit:cover;transition:transform .8s}
+.card:hover .media img{transform:scale(1.08)}
+.info{padding:18px}
+.spot-title{color:var(--gold);font-size:22px;margin-bottom:8px}
+.spot-sub{opacity:.85;font-size:16px;margin-bottom:12px}
+.tags{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.tag{padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--border);font-size:13px;opacity:.9}
+.remove-btn{
+  position:absolute;top:12px;right:12px;
+  background:rgba(0,0,0,.7);border-radius:50%;
+  width:42px;height:42px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:22px;z-index:10;transition:.3s;
+}
+.remove-btn:hover{background:var(--red);transform:scale(1.1)}
+.empty{
+  text-align:center;padding:120px 20px;font-size:22px;opacity:.7;
+}
+.empty svg{width:80px;height:80px;opacity:.3;margin-bottom:20px}
+.user-info{
+  display:flex;align-items:center;gap:10px;margin-top:16px;padding-top:16px;
+  border-top:1px solid var(--border);opacity:.9;font-size:14px;
+}
+.user-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);}
+
+/* Suggestions */
+.suggestions{margin-top:60px}
+.suggestions-title{font-size:28px;color:var(--gold);text-align:center;margin-bottom:30px}
+.suggestion-card{
+  background:var(--glass);border:1px solid var(--border);border-radius:16px;overflow:hidden;
+  box-shadow:0 8px 20px rgba(0,0,0,.25);position:relative;transition:transform .3s;
+}
+.suggestion-card:hover{transform:translateY(-6px)}
+.suggestion-media{height:180px;overflow:hidden}
+.suggestion-media img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.suggestion-card:hover .suggestion-media img{transform:scale(1.06)}
+.suggestion-info{padding:14px}
+.suggestion-title{color:var(--amber);font-size:18px;margin-bottom:6px}
+.suggestion-sub{opacity:.85;font-size:14px;margin-bottom:8px}
+.suggestion-reason{font-size:13px;opacity:.8;color:var(--gold);margin-top:10px}
+.add-btn{
+  position:absolute;bottom:14px;right:14px;
+  background:var(--amber);border-radius:50%;width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  font-size:24px;color:var(--bg);transition:.3s;
+}
+.add-btn:hover{background:var(--gold);transform:scale(1.1)}
+.heart-add {
+  font-size: 28px;
+  color: #fff;
+  transition: all .3s;
+}
+.heart-add:hover {
+  transform: scale(1.2);
+}
+.nav-bar{
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(25px);
+  border-radius:60px;
+  padding:1rem 2.5rem;
+  border:1px solid rgba(255,255,255,.12);
+  position: fixed;
+  bottom:1rem;left:50%;transform:translateX(-50%);
+  display:flex;gap:3rem;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+  z-index:80;
+}
+.nav-icon{color:rgba(255,255,255,.7);transition:.4s}
+.nav-icon:hover{color:#FFD88D;transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
+.nav-icon.active{color:#FFD88D;filter:drop-shadow(0 0 15px rgba(255,216,155,.8))}
+.nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+@media(max-width:768px){
+  .nav-bar{gap:2rem;padding:.9rem 1.6rem}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="brand">
+    <svg viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+      <path d="M24 10 L28 24 L24 38 L20 24 Z" fill="rgba(255,216,155,0.9)"/>
+      <circle cx="24" cy="24" r="2.6" fill="#ffffff"/>
+    </svg>
+    <span>Hiden Spots</span>
+  </a>
+</div>
+
+<div class="main">
+  <h1 class="title">My Travel Destiny Map</h1>
+  <p class="subtitle">All the hidden gems you’ve saved — visualized on your personal India adventure map</p>
+
+  <div class="stats">
+    <span id="spotCount">0</span><span class="heart">❤️</span> spots saved
+  </div>
+
+  <button class="clear-all" id="clearAllBtn" style="display:none;" onclick="clearAllDestiny()">Clear All Saves</button>
+
+  <div class="map-section">
+    <div id="destinyMap"></div>
+  </div>
+
+  <div class="grid" id="destinyGrid">
+    <p class="empty">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5" fill="none"/><path fill="currentColor" d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z"/></svg>
+      Your destiny list is empty.<br>Save spots from home to see your map come alive ❤️
+    </p>
+  </div>
+
+  <div class="suggestions" id="suggestionsSection">
+    <h2 class="suggestions-title" id="suggestionsTitle">Suggested for You</h2>
+    <div class="grid" id="suggestionsGrid"></div>
+  </div>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="nav-bar" aria-label="Primary">
+  <a href="Mainhome.html" class="nav-icon" title="Home">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </a>
+  <a href="Home.html" class="nav-icon" title="Search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  </a>
+  <a href="Upload.html" class="nav-icon" title="Create">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </a>
+  <a href="Explore.html" class="nav-icon active" title="Destiny List">
+    <svg viewBox="0 0 24 24">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5" fill="none"/>
+      <path d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z" fill="currentColor"/>
+    </svg>
+  </a>
+  <a href="Profile.html" class="nav-icon" title="Profile">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </a>
+</nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const sb = supabase.createClient(
+  "https://bhktkjegansxplpdtack.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
+);
+
+let currentUserId = null;
+let destinySpots = [];
+let map;
+let markers = [];
+const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family'};
+const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
+
+// Initialize
+async function init() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) {
+    alert('Please log in to view your Destiny Map');
+    window.location.href = 'index.html';
+    return;
+  }
+  currentUserId = user.id;
+  initMap();
+  loadDestiny();
+}
+
+// Initialize map
+function initMap() {
+  map = L.map('destinyMap').setView([20.5937, 78.9629], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+}
+
+// Load saved spots
+// Load saved spots - BEST FIX (join with foreign key)
+// Load saved spots - BEST FIX (join with foreign key)
+async function loadDestiny() {
+  const { data: saves, error } = await sb
+  .from('destiny_saves')
+  .select('spots!inner(id, name, place, city, media_url, media_type, username, category_id, emotion_id)')  // ← Removed lat, lng
+  .eq('user_id', currentUserId);
+
+  if (error) {
+    console.error('Error loading destiny saves:', error);
+  }
+
+  if (!saves || saves.length === 0) {
+    document.getElementById('destinyGrid').innerHTML = `
+      <p class="empty">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5" fill="none"/><path fill="currentColor" d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z"/></svg>
+        Your destiny list is empty.<br>Save spots from home to see your map come alive ❤️
+      </p>`;
+    document.getElementById('spotCount').textContent = '0';
+    document.getElementById('clearAllBtn').style.display = 'none';
+    loadSuggestions([]);
+    return;
+  }
+
+  // saves is array of { spots: { ...spot data... } }
+  const spots = saves.map(save => save.spots);
+
+  destinySpots = spots;
+  document.getElementById('spotCount').textContent = spots.length;
+  document.getElementById('clearAllBtn').style.display = 'block';
+
+  renderMap(spots);
+  renderGrid(spots);
+  loadSuggestions(spots);
+}
+// Render Map
+function renderMap(spots) {
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+
+  spots.forEach(spot => {
+    const lat = spot.lat || (20 + Math.random() * 10);
+    const lng = spot.lng || (70 + Math.random() * 15);
+
+    const marker = L.marker([lat, lng]).addTo(map)
+      .bindPopup(`<b>${spot.name}</b><br>${spot.place}, ${spot.city}`);
+
+    markers.push(marker);
+  });
+
+  if (spots.length > 1) {
+    const group = new L.featureGroup(markers);
+    map.fitBounds(group.getBounds().pad(0.3));
+  }
+}
+
+// Render Grid
+function renderGrid(spots) {
+  const html = spots.map(spot => {
+    const mediaUrl = `http://127.0.0.1:5000${spot.media_url}`;
+    const isVideo = spot.media_type === 'video';
+
+    return `
+    <div class="card">
+      <div class="media">
+        ${isVideo ? `<video src="${mediaUrl}" loop muted playsinline autoplay></video>` : `<img src="${mediaUrl}" alt="${spot.name}">`}
+        <div class="remove-btn" onclick="removeFromDestiny('${spot.id}', this.parentElement.parentElement)">✕</div>
+      </div>
+      <div class="info">
+        <h3 class="spot-title">${spot.name}</h3>
+        <p class="spot-sub">${spot.place}, ${spot.city}</p>
+        <div class="tags">
+          <span class="tag">${categoryNames[spot.category_id] || 'Other'}</span>
+          <span class="tag">${emotionNames[spot.emotion_id] || ''}</span>
+        </div>
+        <a href="spot.html?id=${spot.id}" style="color:var(--gold);font-size:14px;text-decoration:none;">View details →</a>
+        <div class="user-info">
+          <img class="user-avatar" src="https://ui-avatars.com/api/?name=${encodeURIComponent(spot.username || 'User')}&background=FFD88D&color=0c0f18&size=80" alt="">
+          <span>by @${spot.username || 'traveller'}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const grid = document.getElementById('destinyGrid');
+  grid.innerHTML = html;
+
+  const cards = grid.querySelectorAll('.card');
+  cards.forEach((card, i) => {
+    setTimeout(() => card.classList.add('visible'), i * 100);
+  });
+}
+
+// Load Suggestions
+// Load Suggestions - IMPROVED
+async function loadSuggestions(savedSpots) {
+  let suggestions = [];
+
+  if (savedSpots.length === 0) {
+    // Popular suggestions when empty
+    const { data } = await sb
+      .from('spots')
+      .select('id, name, place, city, media_url')
+      .order('created_at', { ascending: false })
+      .limit(6);
+    suggestions = data || [];
+    document.getElementById('suggestionsTitle').textContent = 'Popular Hidden Spots';
+  } else {
+    // Get unique categories and emotions from saved spots
+    const categories = [...new Set(savedSpots.map(s => s.category_id).filter(Boolean))];
+    const emotions = [...new Set(savedSpots.map(s => s.emotion_id).filter(Boolean))];
+
+    // Build filter
+    let query = sb.from('spots').select('id, name, place, city, media_url');
+
+    if (categories.length > 0 && emotions.length > 0) {
+      query = query.or(`category_id.in.(${categories.join(',')}),emotion_id.in.(${emotions.join(',')})`);
+    } else if (categories.length > 0) {
+      query = query.in('category_id', categories);
+    } else if (emotions.length > 0) {
+      query = query.in('emotion_id', emotions);
+    } else {
+      // Fallback to popular
+      query = query.order('created_at', { ascending: false }).limit(6);
+    }
+
+    // Exclude already saved spots
+    const savedIds = savedSpots.map(s => s.id);
+    if (savedIds.length > 0) {
+      query = query.not('id', 'in', `(${savedIds.join(',')})`);
+    }
+
+    query = query.limit(6);
+
+    const { data } = await query;
+    suggestions = data || [];
+    document.getElementById('suggestionsTitle').textContent = 'More Like Your Saves';
+  }
+
+  renderSuggestions(suggestions);
+}
+// Render Suggestions
+// Render Suggestions
+function renderSuggestions(suggestions) {
+  if (suggestions.length === 0) {
+    document.getElementById('suggestionsGrid').innerHTML = '<p style="grid-column:1/-1;text-align:center;opacity:.7;padding:40px;">No suggestions yet</p>';
+    return;
+  }
+
+  const html = suggestions.map(spot => {
+    const mediaUrl = `http://127.0.0.1:5000${spot.media_url}`;
+    return `
+    <div class="suggestion-card">
+      <div class="suggestion-media">
+        <img src="${mediaUrl}" alt="${spot.name}">
+      </div>
+      <div class="suggestion-info">
+        <h3 class="suggestion-title">${spot.name}</h3>
+        <p class="suggestion-sub">${spot.place}, ${spot.city}</p>
+        <p class="suggestion-reason">You might like this hidden gem</p>
+      </div>
+      <div class="add-btn heart-add" onclick="addToDestiny('${spot.id}', this)">♡</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('suggestionsGrid').innerHTML = html;
+}
+
+// Add from suggestion
+// Add from suggestion
+// Add from suggestion with heart animation
+async function addToDestiny(spotId, buttonElement) {
+  const { error } = await sb.from('destiny_saves').insert({ user_id: currentUserId, spot_id: spotId });
+  if (!error) {
+    buttonElement.textContent = '❤️';
+    buttonElement.style.color = '#ff4444';
+    buttonElement.style.transform = 'scale(1.3)';
+    setTimeout(() => {
+      buttonElement.style.transform = 'scale(1)';
+    }, 200);
+    loadDestiny(); // Reload to update count and list
+  }
+}
+// Remove single
+async function removeFromDestiny(spotId, cardElement) {
+  const { error } = await sb
+    .from('destiny_saves')
+    .delete()
+    .eq('user_id', currentUserId)
+    .eq('spot_id', spotId);
+
+  if (!error) {
+    cardElement.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    cardElement.style.opacity = '0';
+    cardElement.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      loadDestiny(); // Reload after animation
+    }, 500);
+  }
+}
+
+// Clear All
+async function clearAllDestiny() {
+  if (!confirm('Remove ALL saved spots?')) return;
+  const { error } = await sb
+    .from('destiny_saves')
+    .delete()
+    .eq('user_id', currentUserId);
+
+  if (!error) loadDestiny();
+}
+
+init();
+</script>
+</body>
+</html>

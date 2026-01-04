@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hiden Spots – Home • Discover Hidden Places</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;width:100%;font-family:'Playfair Display',serif;background:#0c0f18;color:#fff;overflow-x:hidden;scroll-behavior:smooth}
+/* Anim */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+/* HEADER */
+header{
+  position:fixed;top:0;left:0;width:100%;z-index:50;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1.1rem 3rem;background:rgba(10,12,20,.3);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.brand{display:flex;align-items:center;gap:.7rem;color:#fff;text-decoration:none}
+.brand svg{width:36px;height:36px;flex:0 0 36px}
+.brand span{font-size:1.5rem;letter-spacing:3px}
+.brand:hover{color:#ffd88d;transition:.35s}
+/* HERO with themed frames */
+.hero{margin-top:84px;height:70vh;position:relative;overflow:hidden;border-radius:20px;margin-inline:3%;animation:fadeUp 1.2s ease-out both;}
+.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s ease-in-out;}
+.hero-slide.active{opacity:1;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(12,15,25,.9) 0%,rgba(12,15,25,.4) 60%,transparent 100%);z-index:1;}
+.hero-text{position:absolute;bottom:2.6rem;left:2.6rem;z-index:2;max-width:560px}
+.hero-kicker{font-size:.9rem;letter-spacing:2px;opacity:.85;text-transform:uppercase;margin-bottom:.35rem}
+.hero-title{font-size:2.4rem;margin-bottom:.6rem;color:#ffd88d;line-height:1.15}
+.hero-sub{opacity:.9;font-size:1.06rem;line-height:1.5}
+.hero-cta{margin-top:1rem;padding:.6rem 1.5rem;font-size:1rem;border:none;border-radius:40px;background:linear-gradient(90deg,#ffd88d,#ffb347);color:#0c0f18;font-weight:600;cursor:pointer;transition:.28s;}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 0 10px rgba(255,216,141,.4)}
+/* CATEGORY RIBBON */
+.categories{display:flex;overflow-x:auto;gap:1rem;padding:1.1rem 2.5rem;margin-top:1rem;scrollbar-width:none;}
+.categories::-webkit-scrollbar{display:none;}
+.category{padding:.5rem 1.3rem;border-radius:30px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);white-space:nowrap;font-size:.95rem;cursor:pointer;transition:.3s;}
+.category:hover,.category.active{background:linear-gradient(90deg,#ffd88d,#19547b);color:#0c0f18;font-weight:600}
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;padding:1.5rem 3rem 6.5rem;}
+.card{background:#141824;border-radius:16px;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.25);animation:fadeUp .8s ease both;}
+.card-media{position:relative;height:220px;overflow:hidden;}
+.card-media img{width:100%;height:100%;object-fit:cover;transition:.8s;}
+.card-media:hover img{transform:scale(1.05);filter:brightness(.85);}
+.card-badge{position:absolute;left:.75rem;bottom:.75rem;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);padding:.28rem .55rem;border-radius:20px;font-size:.8rem;letter-spacing:.5px;border:1px solid rgba(255,255,255,.12);color:#ffd88d}
+.card-info{padding:1rem 1rem .75rem;border-top:1px solid rgba(255,255,255,.06);}
+.card-title{font-size:1.05rem;margin-bottom:.25rem;color:#ffd88d;}
+.card-sub{font-size:.9rem;opacity:.8}
+/* Meta row */
+.card-meta{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.65rem 1rem;border-top:1px solid rgba(255,255,255,.06);}
+.meta-left{display:flex;align-items:center;gap:.6rem;}
+.avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.2)}
+.username{font-size:.9rem;opacity:.9;cursor:pointer;color:#ffd88d} /* Made clickable */
+.username:hover{text-decoration:underline}
+/* Added hover for username */
+.meta-right{display:flex;align-items:center;gap:.5rem;}
+.follow{padding:.25rem .7rem;border-radius:20px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font-size:.85rem;cursor:pointer;transition:.25s}
+.follow:hover{background:linear-gradient(90deg,#ffd88d,#ffb347);color:#0c0f18;border-color:transparent}
+.menu{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);cursor:pointer}
+.menu:after{content:"⋯";font-size:18px;line-height:0;opacity:.85}
+.heart{
+  font-size:20px;cursor:pointer;
+}
+/* Story snippet */
+.card-story{padding:0 1rem 1rem;}
+.story-text{
+  font-size:.92rem;opacity:.88;line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.read-more{display:inline-block;margin-top:.2rem;font-size:.9rem;color:#ffd88d;text-decoration:none;opacity:.95}
+.read-more:hover{text-decoration:underline}
+/* FLOAT + NAV */
+.floating-btn{position:fixed;bottom:100px;right:50px;background:linear-gradient(135deg,#ffd88d,#ffb347);border:none;border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#0c0f18;cursor:pointer;box-shadow:0 0 15px rgba(255,216,141,.4);transition:.4s;z-index:60}
+.floating-btn:hover{transform:scale(1.05) rotate(10deg)}
+.nav-bar{background:rgba(255,255,255,.05);backdrop-filter:blur(25px);border-radius:60px;padding:1rem 2.5rem;border:1px solid rgba(255,255,255,.12);position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;gap:3rem;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:80}
+.nav-icon{color:rgba(255,255,255,.7);transition:.4s}
+.nav-icon:hover{color:#FFD88D;transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
+.nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
+@media(max-width:900px){
+  .hero{height:58vh}
+  .hero-title{font-size:2rem}
+  .hero-sub{font-size:1rem}
+}
+@media(max-width:768px){
+  header{padding:1rem 1.5rem}
+  .hero-text{left:1.2rem;right:1.2rem}
+  .grid{padding:1rem 1rem 6.5rem}
+  .floating-btn{bottom:90px;right:22px}
+  .nav-bar{gap:2rem;padding:.9rem 1.6rem}
+}
+</style>
+</head>
+<body>
+<!-- Header with compass + Paledius -->
+<header>
+  <a href="#" class="brand" aria-label="Paledius Home">
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+      <path d="M24 10 L28 24 L24 38 L20 24 Z" fill="rgba(255,216,155,0.9)"/>
+      <circle cx="24" cy="24" r="2.6" fill="#ffffff"/>
+    </svg>
+    <span>Hiden Spots</span>
+  </a>
+</header>
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-slide active"></div>
+  <div class="hero-slide"></div>
+  <div class="hero-slide"></div>
+  <div class="hero-slide"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-text">
+    <div class="hero-kicker" id="heroTheme"></div>
+    <h1 class="hero-title" id="heroTitle"></h1>
+    <p class="hero-sub" id="heroSub"></p>
+    <button class="hero-cta" id="heroCta">View Location</button>
+  </div>
+</section>
+<!-- Categories -->
+<div class="categories">
+  <div class="category active">🌄 Mountains</div>
+  <div class="category">💧 Waterfalls</div>
+  <div class="category">🌅 Beaches</div>
+  <div class="category">🌲 Forests</div>
+  <div class="category">🏕️ Camping</div>
+  <div class="category">🛕 Culture</div>
+  <div class="category">🏞️ Lakes</div>
+  <div class="category">🧭 Nearby</div>
+</div>
+<!-- Discovery Grid -->
+<section class="grid" id="grid"></section>
+<!-- Floating Add -->
+<button class="floating-btn" onclick="window.location.href='Upload.html'" title="Add Destination">+</button>
+<!-- Sticky Nav -->
+<nav class="nav-bar" aria-label="Primary">
+  <a href="Mainhome.html" class="nav-icon" title="Home" aria-label="Home">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </a>
+  <a href="Home.html" class="nav-icon" title="Search" aria-label="Search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  </a>
+  <a href="Upload.html" class="nav-icon" title="Create" aria-label="Create">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </a>
+  <a href="Explore.html" class="nav-icon" title="Destiny List" aria-label="Destiny List">
+    <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5" fill="none"/><path d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z" fill="currentColor"/></svg>
+  </a>
+  <a href="Profile.html" class="nav-icon" title="Profile" aria-label="Profile">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const sb = supabase.createClient(
+  "https://bhktkjegansxplpdtack.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
+);
+
+const slideEls = document.querySelectorAll('.hero-slide');
+const themeEl = document.getElementById('heroTheme');
+const titleEl = document.getElementById('heroTitle');
+const subEl = document.getElementById('heroSub');
+const ctaBtn = document.getElementById('heroCta');
+
+let heroSpots = [];
+let heroIdx = 0;
+
+// Load 4 random spots for hero slideshow - SUPPORTS MULTIPLE MEDIA
+async function loadHeroSlides() {
+  const { data: spots } = await sb
+    .from('spots')
+    .select('id, name, place, city, story, media_url, media_urls, category_id')
+    .order('created_at', { ascending: false })
+    .limit(12);
+
+  if (!spots || spots.length === 0) return;
+
+  heroSpots = spots.sort(() => 0.5 - Math.random()).slice(0, 4);
+
+  heroSpots.forEach((spot, i) => {
+    let mediaList = [];
+    if (spot.media_urls && Array.isArray(spot.media_urls)) {
+      mediaList = spot.media_urls;
+    } else if (spot.media_url) {
+      mediaList = [{ url: spot.media_url, type: 'image' }];
+    }
+
+    const randomMedia = mediaList[Math.floor(Math.random() * mediaList.length)] || { url: '/placeholder.jpg', type: 'image' };
+
+    const fullUrl = `http://127.0.0.1:5000${randomMedia.url}`;
+    slideEls[i].style.backgroundImage = `url('${fullUrl}')`;
+  });
+
+  renderHero(0);
+}
+
+// Render current slide
+function renderHero(i) {
+  const spot = heroSpots[i];
+  if (!spot) return;
+
+  slideEls.forEach(s => s.classList.remove('active'));
+  slideEls[i].classList.add('active');
+
+  themeEl.textContent = spot.category_id === 1 ? 'Adventure' : 'Hidden Gem';
+  titleEl.textContent = spot.name;
+  subEl.textContent = spot.story?.slice(0, 120) + '...' || 'Discover this hidden place...';
+
+  ctaBtn.onclick = () => {
+    window.location.href = `spot.html?id=${spot.id}`;
+  };
+}
+
+// Auto change every 5.2 seconds
+setInterval(() => {
+  heroIdx = (heroIdx + 1) % heroSpots.length;
+  renderHero(heroIdx);
+}, 5200);
+
+// Start hero
+loadHeroSlides();
+
+let currentUser = null;
+
+// Get current user
+async function init() {
+  const { data: { user } } = await sb.auth.getUser();
+  currentUser = user;
+  loadSpots();
+}
+
+// Load real spots from Supabase
+async function loadSpots() {
+  const { data: spots, error } = await sb
+    .from('spots')
+    .select('id, name, place, city, story, media_url, username, category_id, emotion_id, lat, lng')
+    .order('created_at', { ascending: false });
+
+  if (error || !spots) {
+    document.getElementById('grid').innerHTML = '<p style="text-align:center;padding:50px;">No spots yet.</p>';
+    return;
+  }
+
+  // Get saved spot IDs if user is logged in
+  let savedSpotIds = [];
+  if (currentUser) {
+    const { data: saves, error: savesError } = await sb
+      .from('destiny_saves')
+      .select('spot_id')
+      .eq('user_id', currentUser.id);
+
+    if (savesError) {
+      console.error('Error loading saves:', savesError);
+    } else {
+      savedSpotIds = saves.map(s => s.spot_id);
+    }
+  }
+
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family'};
+  const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
+
+  const html = spots.map(spot => {
+    // Use real lat/lng if available, else random
+    const lat = spot.lat || (20 + Math.random() * 10);
+    const lng = spot.lng || (70 + Math.random() * 15);
+
+    const mediaUrl = spot.media_url ? `http://127.0.0.1:5000${spot.media_url}` : '/placeholder.jpg';
+    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(spot.username || 'User')}&background=FFD88D&color=0c0f18&size=80`;
+
+    const isSaved = savedSpotIds.includes(spot.id);
+    const heartIcon = isSaved ? '❤️' : '♡';
+
+    return `
+    <article class="card">
+      <div class="card-media">
+        <img src="${mediaUrl}" alt="${spot.name}">
+        <span class="card-badge">${spot.city} • ${categoryNames[spot.category_id] || 'Other'}</span>
+      </div>
+      <div class="card-info">
+        <h3 class="card-title">${spot.name}</h3>
+        <p class="card-sub">${spot.place}, ${spot.city}</p>
+      </div>
+      <div class="card-meta">
+        <div class="meta-left">
+          <img class="avatar" src="${avatarUrl}" alt="">
+          <span class="username" onclick="goToProfile('${spot.username}')">@${spot.username || 'traveller'}</span>
+        </div>
+        <div class="meta-right">
+          <button class="follow" onclick="toggleFollow('${spot.username}', this)">Follow</button>
+          <div class="heart" onclick="toggleDestiny('${spot.id}', this)">${heartIcon}</div>
+        </div>
+      </div>
+      <div class="card-story">
+        <p class="story-text">${spot.story || 'No story shared.'}</p>
+        <a class="read-more" href="spot.html?id=${spot.id}">Read more</a>
+      </div>
+    </article>`;
+  }).join('');
+
+  document.getElementById('grid').innerHTML = html;
+}
+
+// Navigate to user profile on username click
+function goToProfile(username) {
+  if (username) {
+    window.location.href = `Profile.html?user=${username}`;
+  }
+}
+
+// Toggle Follow (backend)
+async function toggleFollow(username, button) {
+  if (!currentUser) {
+    alert('Login required');
+    return;
+  }
+  // Your follow logic here
+  button.textContent = button.textContent === 'Follow' ? 'Following' : 'Follow';
+}
+
+// Toggle Destiny (save to wishlist)
+async function toggleDestiny(spotId, button) {
+  if (!currentUser) {
+    alert('Login required');
+    return;
+  }
+
+  const { data: existing } = await sb
+    .from('destiny_saves')
+    .select('id')
+    .eq('user_id', currentUser.id)
+    .eq('spot_id', spotId)
+    .maybeSingle();
+
+  if (existing) {
+    await sb.from('destiny_saves').delete().eq('id', existing.id);
+    button.textContent = '♡';
+  } else {
+    await sb.from('destiny_saves').insert({ user_id: currentUser.id, spot_id: spotId });
+    button.textContent = '❤️';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

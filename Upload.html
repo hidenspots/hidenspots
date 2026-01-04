@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Upload • Hiden Spots</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+   background:#0c0f18;
+   font-family:'Playfair Display', serif;
+   color:#fff;
+   overflow-x:hidden;
+}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+header{
+  position:fixed;
+  top:0;left:0;width:100%;
+  padding:1.1rem 3rem;
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(10,12,20,.35);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.1);
+  z-index:50;
+}
+.brand{display:flex;align-items:center;gap:.7rem;color:#fff;text-decoration:none}
+.brand span{font-size:1.4rem;letter-spacing:3px}
+.brand:hover{color:#ffd88d;transition:.35s}
+
+/* FORM */
+.upload-container{
+  max-width: 700px;
+  margin: 120px auto 100px;
+  padding: 1.5rem;
+  background:#141824;
+  border-radius:16px;
+  box-shadow:0 8px 25px rgba(0,0,0,.35);
+  animation:fadeUp .8s both;
+}
+.upload-container h2{
+  color:#ffd88d;
+  text-align:center;
+  margin-bottom:1rem;
+}
+.upload-container form{
+  display:flex;
+  flex-direction:column;
+  gap:1rem;
+}
+.upload-container label{
+  font-size:0.95rem;
+  margin-bottom:0.2rem;
+  opacity:0.9;
+}
+.upload-container input,
+.upload-container select,
+.upload-container textarea{
+  padding:0.65rem 0.9rem;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);
+  color:#fff;
+  font-size:0.95rem;
+  font-family:'Playfair Display', serif;
+  transition:border .3s;
+}
+.upload-container input:focus,
+.upload-container select:focus,
+.upload-container textarea:focus{
+  outline:none;
+  border-color:#ffd88d;
+  box-shadow:0 0 0 3px rgba(255,216,141,.2);
+}
+.upload-container input::placeholder,
+.upload-container textarea::placeholder{
+  color:rgba(255,255,255,.5);
+}
+
+/* Custom Select */
+.upload-container select{
+  appearance:none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FFD88D'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px;
+  padding-right: 2.5rem;
+}
+.upload-container select option{
+  background:#141824;
+  color:#fff;
+}
+
+.upload-container button{
+  margin-top:1.5rem;
+  padding:0.8rem;
+  border-radius:30px;
+  border:none;
+  background:linear-gradient(90deg,#ffd88d,#ffb347);
+  color:#0c0f18;
+  font-size:1rem;
+  cursor:pointer;
+  transition:.3s;
+}
+.upload-container button:hover{
+  filter:brightness(1.1);
+  transform:translateY(-2px);
+}
+
+/* MEDIA UPLOAD BOX */
+.media-upload {
+  width: 100%;
+  border: 2px dashed rgba(255,255,255,.2);
+  border-radius: 16px;
+  padding: 1rem;
+  background: #141824;
+  text-align: center;
+  cursor: pointer;
+  transition: border .3s;
+  margin-bottom: 1.4rem;
+}
+.media-upload:hover {
+  border-color: #ffd88d;
+}
+.media-upload input[type="file"] {
+  display: none;
+}
+.media-upload .tap-text {
+  font-size: 1rem;
+  color: rgba(255,255,255,.8);
+  margin-bottom: 1rem;
+}
+
+/* PREVIEW GRID */
+.media-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 1rem;
+}
+.preview-item {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
+}
+.preview-item img,
+.preview-item video {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.remove-media {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0,0,0,.7);
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: .3s;
+}
+.remove-media:hover {
+  background: #ff4444;
+  transform: scale(1.1);
+}
+
+/* STARS */
+.stars{
+  display:flex;
+  gap:0.2rem;
+  font-size:1.2rem;
+  cursor:pointer;
+}
+.stars span{
+  color:rgba(255,255,255,0.4);
+  transition:.3s;
+}
+.stars span.selected,
+.stars span:hover,
+.stars span:hover ~ span{
+  color:#ffd88d;
+}
+
+@media(max-width:768px){
+  header{padding:1rem 1.5rem}
+  .upload-container{margin:100px 1rem 80px;padding:1rem}
+  .media-preview{grid-template-columns: repeat(3, 1fr);}
+}
+/* Bottom Nav Bar */
+.nav-bar{
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(25px);
+  border-radius:60px;
+  padding:1rem 2.5rem;
+  border:1px solid rgba(255,255,255,.12);
+  position:fixed;
+  bottom:1rem;left:50%;transform:translateX(-50%);
+  display:flex;gap:3rem;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+  z-index:80;
+}
+.nav-icon{color:rgba(255,255,255,.7);transition:.4s}
+.nav-icon:hover{color:#FFD88D;transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
+.nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+@media(max-width:768px){
+  .nav-bar{gap:2rem;padding:.9rem 1.6rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="brand">
+    <svg width="34" viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+      <path d="M24 10 L28 24 L24 38 L20 24 Z" fill="rgba(255,216,155,0.9)"/>
+      <circle cx="24" cy="24" r="2.6" fill="#fff"/>
+    </svg>
+    <span>Hiden Spots</span>
+  </a>
+</header>
+<!-- Bottom Navigation Bar -->
+<nav class="nav-bar" aria-label="Primary">
+  <a href="Mainhome.html" class="nav-icon" title="Home">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </a>
+  <a href="Home.html" class="nav-icon" title="Search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  </a>
+  <a href="Upload.html" class="nav-icon" title="Create">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </a>
+  <a href="Explore.html" class="nav-icon" title="Destiny List">
+    <svg viewBox="0 0 24 24">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5" fill="none"/>
+      <path d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z" fill="currentColor"/>
+    </svg>
+  </a>
+  <a href="Profile.html" class="nav-icon" title="Profile">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </a>
+</nav>
+<section class="upload-container">
+  <h2>Upload Hidden Gem</h2>
+  <form id="uploadForm">
+
+    <!-- Media Upload Box -->
+    <div class="media-upload" id="mediaBox" onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" accept="image/*,video/*" multiple>
+      <div class="tap-text">Tap to Upload up to 4 Photos or Videos</div>
+      <div class="media-preview" id="mediaPreview"></div>
+    </div>
+
+    <label for="name">Name of Place</label>
+    <input type="text" id="name" placeholder="Enter place name" required>
+
+    <label for="place">Place / Landmark</label>
+    <input type="text" id="place" placeholder="Enter landmark or spot" required>
+
+    <label for="city">City / Town</label>
+<input type="text" id="city" placeholder="e.g., Paris, Tokyo, Manali" required>
+
+<label for="state">State / Province (optional)</label>
+<input type="text" id="state" placeholder="e.g., California, Himachal Pradesh, Ontario">
+
+<label for="country">Country</label>
+<input type="text" id="country" placeholder="e.g., France, Japan, India" value="India" required>
+
+    <label for="emotion">Emotion</label>
+    <select id="emotion" required>
+      <option value="" disabled selected>Select emotion</option>
+      <option value="1">Peaceful</option>
+      <option value="2">Long Drive</option>
+      <option value="3">Romantic</option>
+      <option value="4">Spiritual</option>
+      <option value="5">Lonely</option>
+      <option value="6">Broken</option>
+      <option value="7">Relaxation</option>
+      <option value="8">Energetic</option>
+    </select>
+
+    <label for="category">Category</label>
+    <select id="category" required>
+      <option value="" disabled selected>Select category</option>
+      <option value="1">Adventure</option>
+      <option value="2">Spiritual</option>
+      <option value="3">Historical</option>
+      <option value="4">Horror</option>
+      <option value="5">Solo</option>
+      <option value="6">Family</option>
+      <option value="7">Restaurant</option>
+    </select>
+
+    <label for="story">Personal Story</label>
+    <textarea id="story" placeholder="Share your personal experience" required></textarea>
+
+    <label>Solo Woman Safety Rating</label>
+    <div class="stars" id="safetyStars">
+      <span data-value="1">★</span>
+      <span data-value="2">★</span>
+      <span data-value="3">★</span>
+      <span data-value="4">★</span>
+      <span data-value="5">★</span>
+    </div>
+    <input type="hidden" id="safety" required>
+
+    <label for="besttime">Best Time to Visit</label>
+    <input type="text" id="besttime" placeholder="E.g., March to June" required>
+
+    <label for="tips">Tips</label>
+    <textarea id="tips" placeholder="Add tips for travelers"></textarea>
+
+    <label for="hashtags">Hashtags</label>
+    <input type="text" id="hashtags" placeholder="#hidden #gem">
+
+    <label for="credits">Credits</label>
+    <input type="text" id="credits" placeholder="Photo / Reference credits">
+
+    <button type="submit">Upload Spot</button>
+  </form>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const sb = supabase.createClient(
+  "https://bhktkjegansxplpdtack.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
+);
+
+const form = document.getElementById('uploadForm');
+const fileInput = document.getElementById('fileInput');
+const mediaPreview = document.getElementById('mediaPreview');
+const safetyInput = document.getElementById('safety');
+const stars = document.querySelectorAll('#safetyStars span');
+
+let selectedFiles = [];
+
+// Star rating
+stars.forEach(star => {
+  star.addEventListener('click', () => {
+    const val = parseInt(star.dataset.value);
+    safetyInput.value = val;
+    stars.forEach(s => s.classList.remove('selected'));
+    for (let i = 0; i < val; i++) {
+      stars[i].classList.add('selected');
+    }
+  });
+});
+
+// Preview selected files
+fileInput.addEventListener('change', () => {
+  const newFiles = Array.from(fileInput.files);
+
+  if (selectedFiles.length + newFiles.length > 4) {
+    alert('You can only upload up to 4 files');
+    fileInput.value = '';
+    return;
+  }
+
+  newFiles.forEach(file => {
+    selectedFiles.push(file);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const div = document.createElement('div');
+      div.className = 'preview-item';
+
+      if (file.type.startsWith('video')) {
+        div.innerHTML = `<video src="${e.target.result}" controls></video>`;
+      } else {
+        div.innerHTML = `<img src="${e.target.result}" alt="preview">`;
+      }
+
+      const removeBtn = document.createElement('div');
+      removeBtn.className = 'remove-media';
+      removeBtn.innerHTML = '×';
+      removeBtn.onclick = (ev) => {
+        ev.stopPropagation();
+        selectedFiles = selectedFiles.filter(f => f !== file);
+        div.remove();
+      };
+
+      div.appendChild(removeBtn);
+      mediaPreview.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Clear input so same file can be re-selected
+  fileInput.value = '';
+});
+
+// Form submit
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    alert('Please log in first!');
+    return;
+  }
+
+  if (selectedFiles.length === 0) {
+    alert('Please select at least one photo or video');
+    return;
+  }
+
+  if (!safetyInput.value) {
+    alert('Please select safety rating');
+    return;
+  }
+
+  const fd = new FormData();
+  selectedFiles.forEach(file => {
+    fd.append('files', file);
+  });
+
+  fd.append('name', document.getElementById('name').value.trim());
+  fd.append('place', document.getElementById('place').value.trim());
+  fd.append('city', document.getElementById('city').value.trim());
+fd.append('state', document.getElementById('state').value.trim());
+fd.append('country', document.getElementById('country').value.trim());
+  fd.append('emotion', document.getElementById('emotion').value);
+  fd.append('category', document.getElementById('category').value);
+  fd.append('story', document.getElementById('story').value.trim());
+  fd.append('safety', safetyInput.value);
+  fd.append('besttime', document.getElementById('besttime').value.trim());
+  fd.append('tips', document.getElementById('tips').value.trim());
+  fd.append('hashtags', document.getElementById('hashtags').value.trim());
+  fd.append('credits', document.getElementById('credits').value.trim());
+  fd.append('user_id', session.user.id);
+
+  const username = session.user.user_metadata?.username || session.user.email.split('@')[0];
+  fd.append('username', username);
+
+  try {
+    const res = await fetch('http://127.0.0.1:5000/api/upload', {
+      method: 'POST',
+      body: fd
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      alert('Hidden gem uploaded successfully! 🎉');
+      form.reset();
+      selectedFiles = [];
+      mediaPreview.innerHTML = '';
+      stars.forEach(s => s.classList.remove('selected'));
+      safetyInput.value = '';
+    } else {
+      alert(result.error || 'Upload failed');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Server error. Make sure server.js is running');
+  }
+});
+</script>
+</body>
+</html>

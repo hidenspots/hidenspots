@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>About • HiddenSpot</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#0c0f18;
+  color:#fff;
+  font-family:'Inter',sans-serif;
+  line-height:1.7;
+  overflow-x:hidden;
+}
+
+/* HERO */
+.about-hero{
+  min-height:80vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:4rem 1.5rem;
+  background:
+    linear-gradient(to bottom,rgba(12,15,24,.4),#0c0f18),
+    url('https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600') center/cover;
+}
+.about-hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:3rem;
+  letter-spacing:2px;
+  color:#ffd88d;
+}
+.about-hero p{
+  max-width:720px;
+  margin:1.2rem auto 0;
+  font-size:1.1rem;
+  opacity:.9;
+}
+
+/* SECTIONS */
+.section{
+  max-width:1100px;
+  margin:0 auto;
+  padding:5rem 2rem;
+}
+.section-title{
+  font-family:'Playfair Display',serif;
+  font-size:2.2rem;
+  color:#ffd88d;
+  margin-bottom:1.2rem;
+}
+.section-text{
+  max-width:820px;
+  font-size:1.05rem;
+  opacity:.9;
+}
+
+/* FEATURES */
+.features{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:2rem;
+  margin-top:3rem;
+}
+.feature-card{
+  background:#141824;
+  border-radius:18px;
+  padding:2rem;
+  border:1px solid rgba(255,255,255,.08);
+}
+.feature-card h3{
+  font-family:'Playfair Display',serif;
+  color:#ffd88d;
+  margin-bottom:.6rem;
+}
+.feature-card p{
+  font-size:.95rem;
+  opacity:.85;
+}
+
+/* QUOTE */
+.quote{
+  text-align:center;
+  padding:5rem 2rem;
+  background:linear-gradient(180deg,#0c0f18,#101425);
+}
+.quote blockquote{
+  font-family:'Playfair Display',serif;
+  font-size:1.8rem;
+  max-width:800px;
+  margin:0 auto;
+  color:#ffd88d;
+}
+.quote span{
+  display:block;
+  margin-top:1rem;
+  font-size:.95rem;
+  opacity:.7;
+}
+
+/* FOOTER CTA */
+.about-cta{
+  text-align:center;
+  padding:4rem 2rem 6rem;
+}
+.about-cta h2{
+  font-family:'Playfair Display',serif;
+  font-size:2rem;
+  color:#ffd88d;
+}
+.about-cta p{
+  max-width:700px;
+  margin:1rem auto 2rem;
+  opacity:.9;
+}
+.about-cta a{
+  display:inline-block;
+  padding:.8rem 2.2rem;
+  border-radius:40px;
+  background:linear-gradient(90deg,#ffd88d,#ffb347);
+  color:#0c0f18;
+  text-decoration:none;
+  font-weight:500;
+  transition:.3s;
+}
+.about-cta a:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 30px rgba(255,216,141,.35);
+}
+
+@media(max-width:768px){
+  .about-hero h1{font-size:2.3rem}
+  .section{padding:3.5rem 1.5rem}
+  .quote blockquote{font-size:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<section class="about-hero">
+  <div>
+    <h1>HiddenSpot</h1>
+    <p>Discover places the world forgot to label — where silence speaks, stories breathe, and travel feels personal again.</p>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Why HiddenSpot Exists</h2>
+  <p class="section-text">
+    Modern travel has become predictable. The same locations repeat, the same crowds gather, and discovery feels scripted.
+    HiddenSpot was born to challenge that reality — to uncover rare, untouched, and emotionally powerful places that never asked for attention.
+  </p>
+</section>
+
+<section class="section">
+  <h2 class="section-title">What Makes Us Different</h2>
+
+  <div class="features">
+    <div class="feature-card">
+      <h3>Curated, Not Crowded</h3>
+      <p>Every location shared on HiddenSpot values originality over popularity. No algorithms chasing trends — only meaningful discovery.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>Stories Over Coordinates</h3>
+      <p>We believe places are felt before they are found. Each HiddenSpot carries context, emotion, and memory.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>Respect-First Exploration</h3>
+      <p>Some places deserve protection. We promote mindful sharing, preservation, and local respect over virality.</p>
+    </div>
+  </div>
+</section>
+
+<section class="quote">
+  <blockquote>
+    “Not every place needs a name. Some exist only to be felt.”
+    <span>— HiddenSpot Philosophy</span>
+  </blockquote>
+</section>
+
+<section class="section">
+  <h2 class="section-title">For Explorers, By Explorers</h2>
+  <p class="section-text">
+    HiddenSpot is built for solo wanderers, quiet couples, photographers, locals, and anyone who values moments over monuments.
+    If a place moved you — it belongs here.
+  </p>
+</section>
+
+<section class="about-cta">
+  <h2>Join the Journey</h2>
+  <p>Discover quietly. Share responsibly. Travel deeply. Feel free to reach at 7hiddenspots.official@gmail.com</p>
+  <a href="Home.html">Start Exploring</a>
+</section>
+
+</body>
+</html>

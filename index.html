@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hiden Spots – Cinematic Travel Discovery</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0b0f19; --panel:#121624; --glass:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.12); --gold:#FFD88D; --teal:#19547B;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Playfair Display',serif;
+  background:var(--bg);color:#fff;overflow:hidden
+}
+
+/* Background */
+.image-background{position:fixed;inset:0}
+.background-image{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:0;transition:opacity 1.5s
+}
+.background-image.active{opacity:1}
+.image-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+
+/* Header */
+.header{
+  position:relative;z-index:10;
+  padding:1rem 1.5rem;
+  display:flex;justify-content:space-between;align-items:center
+}
+.logo{display:flex;align-items:center;gap:.8rem;text-decoration:none;color:#fff}
+  .logo svg{width:44px;height:44px;transition:.4s}
+  .logo svg:hover{filter:drop-shadow(0 0 10px rgba(255,216,155,.5))}
+.auth-actions{display:flex;gap:.5rem}
+button{
+  cursor:pointer;border-radius:999px;
+  padding:.5rem 1rem;border:1px solid var(--border);
+  background:var(--glass);color:#fff
+}
+.primary{background:linear-gradient(90deg,var(--gold),var(--teal));color:#000}
+
+/* User menu */
+.user-menu{position:relative}
+.avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--glass);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center
+}
+.menu-pop{
+  position:absolute;right:0;top:120%;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  display:none;min-width:180px;overflow:hidden
+}
+.menu-pop a,.menu-pop button{
+  display:block;width:100%;padding:.7rem .9rem;
+  background:none;border:0;color:#fff;text-align:left
+}
+
+ .center-content{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 2rem;animation:fu 1.2s ease-out .1s both}
+  @keyframes fu{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+.menu-pop a:hover,.menu-pop button:hover{background:rgba(255,255,255,.08)}
+ .explore-text{
+    font-size:clamp(2rem,6vw,6rem);
+    font-weight:300; letter-spacing:4px;
+    line-height:1.1;
+    margin-bottom:1.25rem;
+    color:rgba(255,255,255,.95)
+  }
+  .animated-words{
+    height:clamp(2.5rem,7vw,7rem);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    margin-top:.15rem;
+    margin-bottom:2rem;
+  }
+  .word{
+    position:absolute;
+    font-size:clamp(1.8rem,5vw,5rem);
+    font-weight:400;
+    letter-spacing:1px;
+    white-space:nowrap;
+    background:linear-gradient(135deg,var(--gold),var(--teal));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+    opacity:0; transform:translateY(30px);
+    animation:w 15s infinite;
+  }
+  .word:nth-child(1){animation-delay:0s}
+  .word:nth-child(2){animation-delay:3s}
+  .word:nth-child(3){animation-delay:6s}
+  .word:nth-child(4){animation-delay:9s}
+  .word:nth-child(5){animation-delay:12s}
+  @keyframes w{
+    0%,100%{opacity:0;transform:translateY(30px) scale(.95)}
+    5%,15% {opacity:1;transform:translateY(0) scale(1)}
+    20%,100%{opacity:0;transform:translateY(-30px) scale(.95)}
+  }
+  .tagline{font-size:1.15rem; font-style:italic; opacity:.85; margin-top:1rem;}
+  
+  .bottom-section{padding:0 1.6rem 2rem;display:flex;justify-content:flex-start;align-items:flex-end;animation:fu 1.2s ease-out .2s both}
+  .bottom-left{display:flex;flex-direction:column;gap:1rem}
+  .country-label{font-size:.95rem;text-transform:uppercase;opacity:.85;letter-spacing:1.5px}
+  .stats-grid{display:grid;grid-template-columns:repeat(2,auto);column-gap:3rem;row-gap:.8rem}
+  .stat-item{font-size:.9rem;opacity:.78;display:flex;align-items:center;gap:.5rem}
+ /* Nav bar */
+  .nav-bar{
+    background:rgba(255,255,255,.05);
+    backdrop-filter:blur(25px);
+    border-radius:60px;
+    padding:1rem 2.5rem;
+    border:1px solid rgba(255,255,255,.12);
+    position:absolute;
+    bottom:-4rem;left:50%;transform:translateX(-50%);
+    display:flex;gap:3rem;
+    box-shadow:0 8px 30px rgba(0,0,0,.25)
+  }
+  .nav-icon{color:rgba(255,255,255,.7);transition:.4s}
+  .nav-icon:hover{color:var(--gold);transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
+  .nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+  @media (prefers-reduced-motion: reduce){
+    .word{animation:none;opacity:1;position:static;display:block;margin:.15rem 0}
+    .animated-words{height:auto}
+  }
+  @media (max-width:768px){
+    .header{padding:1rem 1.2rem}
+    .bottom-section{padding:0 1.2rem 1.6rem}
+    .nav-bar{gap:2rem;padding:.9rem 1.6rem}
+    .stats-grid{column-gap:1.5rem}
+    .word{font-size:clamp(1.6rem,5.2vw,3.2rem)}
+  }
+/* Auth modal */
+.backdrop{
+  position:fixed;inset:0;display:none;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(6px);
+  align-items:center;justify-content:center;z-index:50
+}
+.auth{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:1.2rem;
+  width:320px
+}
+.auth input{
+  width:100%;margin:.4rem 0;padding:.6rem;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--border);
+  border-radius:8px;color:#fff
+}
+.error{color:#ff9a9a;font-size:.9rem}
+</style>
+</head>
+
+<body>
+
+<!-- BACKGROUND -->
+<div class="image-background">
+  <div class="background-image active"></div>
+  <div class="background-image"></div>
+  <div class="background-image"></div>
+  <div class="background-image"></div>
+  <div class="background-image"></div>
+  <div class="image-overlay"></div>
+</div>
+
+<header class="header">
+    
+  <a class="logo" href="#home" aria-label="Hiden Spots Home">
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"/>
+        <path d="M24 10 L28 24 L24 38 L20 24 Z" fill="rgba(255,216,155,0.85)"/>
+        <circle cx="24" cy="24" r="2.6" fill="#ffffff"/>
+      </svg>
+      <span style="letter-spacing:6px">Hiden Spots</span>
+    </a>
+
+
+  <div class="auth-actions" id="authActions">
+    <button id="openLogin">Login</button>
+    <button class="primary" id="openSignup">Signup</button>
+  </div>
+
+  <div class="user-menu" id="userMenu" style="display:none">
+    <div class="avatar" id="avatarBtn">U</div>
+    <div class="menu-pop" id="menuPop">
+      <a href="about.html">About</a>
+    
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </div>
+  
+</header>
+<div class="main-container">
+    <main class="center-content">
+<h1 class="explore-text">Explore :</h1>
+    <div class="animated-words" aria-live="polite">
+      <span class="word">Hidden Gems</span>
+      <span class="word">New Destinies</span>
+      <span class="word">Untold Journeys</span>
+      <span class="word">Unknown Horizons</span>
+      <span class="word">And Beyond…</span>
+    </div>
+    <p class="tagline">“Because not all destinations are on the map.”</p>
+    </main>
+     <div class="bottom-section">
+    <div class="bottom-left">
+      <div class="country-label">🇮🇳 India’s First Hidden Places Exploring Site</div>
+      <div class="stats-grid" role="list">
+        <div class="stat-item" role="listitem">🧭 200,000+ Travelers</div>
+        <div class="stat-item" role="listitem">🌄 100+ Hidden Destinies</div>
+        <div class="stat-item" role="listitem">🗺️ 10,000+ Places Discovered</div>
+        <div class="stat-item" role="listitem">🌍 Growing Every Day</div>
+      </div>
+    </div>
+    <nav class="nav-bar" aria-label="Primary">
+    <a href="Mainhome.html" class="nav-icon" title="Home" aria-label="Home">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </a>
+    <a href="Home.html" class="nav-icon" title="Search" aria-label="Search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </a>
+    <a href="Upload.html" class="nav-icon" title="Create" aria-label="Create">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </a>
+    <!-- Destiny List Icon -->
+    <a href="Explore.html" class="nav-icon" title="Destiny List" aria-label="Destiny List">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+        <circle cx="12" cy="9" r="2.5" fill="none"/>
+        <path d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z" fill="currentColor"/>
+      </svg>
+    </a>
+    <a href="Profile.html" class="nav-icon" title="Profile" aria-label="Profile">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </a>
+  </nav>
+</div>
+<!-- AUTH MODAL -->
+<div class="backdrop" id="authModal">
+  <div class="auth">
+    <h3 id="authTitle">Login</h3>
+    <div class="error" id="authError"></div>
+    <input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<!-- Username (only for signup) -->
+<input id="username" placeholder="Username" style="display:none">
+
+<button class="primary" id="submitAuth">Continue</button>
+
+    <button id="switchMode" style="margin-top:.5rem">Switch to Signup</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ================= SUPABASE ================= */
+const sb = supabase.createClient(
+  "https://bhktkjegansxplpdtack.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
+);
+
+/* ================= ELEMENTS ================= */
+const authActions = document.getElementById('authActions');
+const userMenu = document.getElementById('userMenu');
+const avatarBtn = document.getElementById('avatarBtn');
+const menuPop = document.getElementById('menuPop');
+const logoutBtn = document.getElementById('logoutBtn');
+
+const authModal = document.getElementById('authModal');
+const openLogin = document.getElementById('openLogin');
+const openSignup = document.getElementById('openSignup');
+const submitAuth = document.getElementById('submitAuth');
+const switchMode = document.getElementById('switchMode');
+const authTitle = document.getElementById('authTitle');
+const authError = document.getElementById('authError');
+
+const email = document.getElementById('email');
+const password = document.getElementById('password');
+const username = document.getElementById('username');
+
+
+let mode = 'login';
+
+/* ================= UI ================= */
+function updateUI(session){
+  if(session){
+    authActions.style.display='none';
+    userMenu.style.display='block';
+    avatarBtn.textContent=session.user.email[0].toUpperCase();
+  }else{
+    authActions.style.display='flex';
+    userMenu.style.display='none';
+  }
+}
+
+/* ================= AUTH MODAL ================= */
+openLogin.onclick=()=>{mode='login';openAuth()}
+openSignup.onclick=()=>{mode='signup';openAuth()}
+
+function openAuth(){
+  authTitle.textContent = mode === 'login' ? 'Login' : 'Signup';
+  switchMode.textContent = mode === 'login' ? 'Switch to Signup' : 'Switch to Login';
+  authError.textContent = '';
+  authModal.style.display = 'flex';
+
+  // Username field only for signup
+  username.style.display = mode === 'signup' ? 'block' : 'none';
+}
+
+
+switchMode.onclick=()=>{
+  mode=mode==='login'?'signup':'login';
+  openAuth();
+}
+
+/* ================= AUTH ================= */
+submitAuth.onclick = async () => {
+  const e = email.value.trim();
+  const p = password.value.trim();
+  const u = username.value.trim();
+
+  if (!e || !p || (mode === 'signup' && !u)) {
+    authError.textContent = 'All fields are required';
+    return;
+  }
+
+  let res;
+
+  if (mode === 'login') {
+    res = await sb.auth.signInWithPassword({
+      email: e,
+      password: p
+    });
+  } else {
+    res = await sb.auth.signUp({
+      email: e,
+      password: p,
+      options: {
+        data: {
+          username: u,
+          full_name: u
+        }
+      }
+    });
+  }
+
+  if (res.error) {
+    authError.textContent = res.error.message;
+    return;
+  }
+
+  authModal.style.display = 'none';
+};
+
+
+/* ================= MENU UX (FIXED) ================= */
+avatarBtn.onclick=(e)=>{
+  e.stopPropagation();
+  menuPop.style.display=menuPop.style.display==='block'?'none':'block';
+};
+menuPop.onclick=e=>e.stopPropagation();
+document.addEventListener('click',()=>menuPop.style.display='none');
+
+/* ================= LOGOUT (FIXED) ================= */
+logoutBtn.onclick=async(e)=>{
+  e.stopPropagation();
+  await sb.auth.signOut();
+};
+
+/* ================= AUTH LISTENER ================= */
+sb.auth.onAuthStateChange((_e,session)=>{
+  updateUI(session);
+  menuPop.style.display='none';
+});
+
+/* ================= RESTORE SESSION ================= */
+sb.auth.getSession().then(({data})=>updateUI(data.session));
+
+/* ================= SLIDESHOW ================= */
+const imgs=[
+  "https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "https://images.pexels.com/photos/4737484/pexels-photo-4737484.jpeg?auto=compress&cs=tinysrgb&w=1920",
+  "https://images.pexels.com/photos/248771/pexels-photo-248771.jpeg?auto=compress&cs=tinysrgb&w=1920",
+   "https://images.pexels.com/photos/248797/pexels-photo-248797.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop",
+    "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80"
+];
+const slides=document.querySelectorAll('.background-image');
+imgs.forEach((s,i)=>slides[i].style.backgroundImage=`url(${s})`);
+let i=0;
+setInterval(()=>{
+  slides[i].classList.remove('active');
+  i=(i+1)%slides.length;
+  slides[i].classList.add('active');
+},5000);
+</script>
+
+</body>
+</html>

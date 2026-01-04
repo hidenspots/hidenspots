@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spot • Hiden Spots</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0c0f18; --panel:#121624; --glass:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.12); --muted:rgba(255,255,255,.78);
+  --gold:#FFD88D; --amber:#FFB347; --teal:#19547b;
+}
+*{box-sizing:border-box} 
+html,body{height:100%; margin:0} 
+body{
+  background:var(--bg); color:#fff; font-family:'Playfair Display',serif;
+}
+
+/* Header */
+.header{
+  position:sticky; top:0; z-index:40;
+  backdrop-filter:blur(12px);
+  background:linear-gradient(180deg,rgba(12,15,24,.85),rgba(12,15,24,.55));
+  border-bottom:1px solid var(--border);
+  padding:12px 18px;
+  display:flex; align-items:center; gap:14px;
+}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff}
+.brand svg{width:30px;height:30px}
+.brand span{letter-spacing:3px}
+
+/* Main Content */
+.main{
+  max-width:800px;
+  margin:0 auto;
+  padding:20px;
+}
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 12px 26px rgba(0,0,0,.25);
+}
+
+/* HERO MEDIA */
+.hero-media {
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+}
+.hero-media img,
+.hero-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* GALLERY THUMBNAILS */
+.gallery {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 12px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) transparent;
+}
+.gallery::-webkit-scrollbar {
+  height: 6px;
+}
+.gallery::-webkit-scrollbar-track {
+  background: transparent;
+}
+.gallery::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 3px;
+}
+.thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+  border: 2px solid transparent;
+  transition: border .3s;
+}
+.thumb.active {
+  border-color: var(--gold);
+}
+.thumb img,
+.thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Info */
+.info{
+  padding:20px;
+}
+.title{
+  color:var(--gold);
+  font-size:28px;
+  margin:0 0 8px;
+}
+.sub{
+  opacity:.85;
+  font-size:18px;
+  margin:0 0 16px;
+}
+.tags{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:16px 0;
+}
+.tag{
+  padding:6px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--border);
+  font-size:14px;
+  opacity:.9;
+}
+.story{
+  font-size:16px;
+  line-height:1.6;
+  opacity:.95;
+  margin:20px 0;
+}
+.details{
+  margin-top:24px;
+  display:grid;
+  gap:16px;
+  font-size:15px;
+  opacity:.9;
+}
+.detail-item strong{
+  color:var(--gold);
+}
+.user{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:24px;
+  padding-top:20px;
+  border-top:1px solid var(--border);
+  opacity:.9;
+}
+.user .avatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid var(--gold);
+}
+.stars{
+  color:#FFD88D;
+  font-size:18px;
+}
+.stars span{
+  opacity:0.3;
+}
+.stars span.filled{
+  opacity:1;
+}
+.destiny-btn {
+  margin-left: auto;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  cursor: pointer;
+  transition: .3s;
+}
+.destiny-btn:hover {
+  background: var(--gold);
+  color: #000;
+}
+.destiny-btn.saved {
+  background: var(--gold);
+  color: #000;
+}
+/* Bottom Nav Bar */
+.nav-bar{
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(25px);
+  border-radius:60px;
+  padding:1rem 2.5rem;
+  border:1px solid rgba(255,255,255,.12);
+  position:fixed;
+  bottom:1rem;left:50%;transform:translateX(-50%);
+  display:flex;gap:3rem;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+  z-index:80;
+}
+.nav-icon{color:rgba(255,255,255,.7);transition:.4s}
+.nav-icon:hover{color:#FFD88D;transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
+.nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+@media(max-width:768px){
+  .nav-bar{gap:2rem;padding:.9rem 1.6rem}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="brand" aria-label="Hiden Spots">
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+      <path d="M24 10 L28 24 L24 38 L20 24 Z" fill="rgba(255,216,155,0.9)"/>
+      <circle cx="24" cy="24" r="2.6" fill="#ffffff"/>
+    </svg>
+    <span>Hiden Spots</span>
+  </a>
+</div>
+
+<div class="main">
+  <article class="card" id="spotCard">
+    <div class="hero-media" id="heroMedia"></div>
+<div class="gallery" id="gallery"></div>
+    <div class="info">
+      <h1 class="title" id="title"></h1>
+      <p class="sub" id="sub"></p>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div class="tags" id="tags"></div>
+        <button class="destiny-btn" id="destinyBtn">Add to Destiny</button>
+      </div>
+      <div class="story" id="story"></div>
+      <div class="details">
+        <div class="detail-item"><strong>Safety Rating:</strong> <span id="safety"></span></div>
+        <div class="detail-item"><strong>Best Time:</strong> <span id="besttime"></span></div>
+        <div class="detail-item"><strong>Tips:</strong> <span id="tips"></span></div>
+        <div class="detail-item"><strong>Hashtags:</strong> <span id="hashtags"></span></div>
+        <div class="detail-item"><strong>Credits:</strong> <span id="credits"></span></div>
+      </div>
+      <div class="user">
+             <div class="user" style="cursor:pointer;" onclick="goToProfile()">
+        <img class="avatar" id="userAvatar" src="">
+        <span>Posted by <span id="username" style="color:var(--gold);"></span></span>
+      </div>
+      </div>
+    </div>
+  </article>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="nav-bar" aria-label="Primary">
+  <a href="Mainhome.html" class="nav-icon" title="Home">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </a>
+  <a href="Home.html" class="nav-icon" title="Search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  </a>
+  <a href="Upload.html" class="nav-icon" title="Create">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </a>
+  <a href="Explore.html" class="nav-icon" title="Destiny List">
+    <svg viewBox="0 0 24 24">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5" fill="none"/>
+      <path d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z" fill="currentColor"/>
+    </svg>
+  </a>
+  <a href="Profile.html" class="nav-icon" title="Profile">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const sb = supabase.createClient(
+  "https://bhktkjegansxplpdtack.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
+);
+
+const urlParams = new URLSearchParams(window.location.search);
+const spotId = urlParams.get('id');
+
+if (!spotId) {
+  document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
+} else {
+  loadSpot(spotId);
+}
+
+async function loadSpot(id) {
+  const { data: spot, error } = await sb
+    .from('spots')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error || !spot) {
+    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Spot not found</h1>';
+    return;
+  }
+
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family'};
+  const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
+
+  // Build media list
+  let mediaList = [];
+  if (spot.media_urls && Array.isArray(spot.media_urls)) {
+    mediaList = spot.media_urls;
+  } else if (spot.media_url) {
+    mediaList = [{ url: spot.media_url, type: spot.media_type || 'image' }];
+  }
+
+  // Show first media as hero
+  if (mediaList.length > 0) {
+    const first = mediaList[0];
+    const fullUrl = `http://127.0.0.1:5000${first.url}`;
+    const heroEl = document.getElementById('heroMedia');
+    if (first.type === 'video') {
+      heroEl.innerHTML = `<video src="${fullUrl}" controls autoplay loop muted playsinline></video>`;
+    } else {
+      heroEl.innerHTML = `<img src="${fullUrl}" alt="${spot.name}">`;
+    }
+  }
+
+  // Thumbnails gallery
+  if (mediaList.length > 1) {
+    const gallery = document.getElementById('gallery');
+    mediaList.forEach((media, index) => {
+      const fullUrl = `http://127.0.0.1:5000${media.url}`;
+      const thumb = document.createElement('div');
+      thumb.className = 'thumb' + (index === 0 ? ' active' : '');
+      if (media.type === 'video') {
+        thumb.innerHTML = `<video src="${fullUrl}" muted playsinline></video>`;
+      } else {
+        thumb.innerHTML = `<img src="${fullUrl}" alt="thumb">`;
+      }
+      thumb.onclick = () => {
+        const heroEl = document.getElementById('heroMedia');
+        if (media.type === 'video') {
+          heroEl.innerHTML = `<video src="${fullUrl}" controls autoplay loop muted playsinline></video>`;
+        } else {
+          heroEl.innerHTML = `<img src="${fullUrl}" alt="${spot.name}">`;
+        }
+        document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+      };
+      gallery.appendChild(thumb);
+    });
+  }
+
+  document.getElementById('title').textContent = spot.name;
+  document.getElementById('sub').textContent = `${spot.place}, ${spot.city}${spot.state ? ', ' + spot.state : ''}, ${spot.country}`;
+
+  document.getElementById('tags').innerHTML = `
+    <span class="tag">${categoryNames[spot.category_id] || 'Other'}</span>
+    <span class="tag">${emotionNames[spot.emotion_id] || ''}</span>
+  `;
+
+  document.getElementById('story').textContent = spot.story || 'No story shared.';
+
+  // Safety stars
+  const rating = spot.safety_rating || 0;
+  const filledStars = '<span class="stars">' + 
+    '★'.repeat(rating).split('').map(() => '<span class="filled">★</span>').join('') + 
+    '☆'.repeat(5 - rating) + '</span>';
+  document.getElementById('safety').innerHTML = filledStars;
+
+  document.getElementById('besttime').textContent = spot.best_time || '-';
+  document.getElementById('tips').textContent = spot.tips || '-';
+  document.getElementById('hashtags').textContent = spot.hashtags || '-';
+  document.getElementById('credits').textContent = spot.credits || '-';
+
+  document.getElementById('username').textContent = '@' + (spot.username || 'traveller');
+
+  // Avatar
+  let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(spot.username || 'User')}&background=FFD88D&color=0c0f18&size=120`;
+  try {
+    const res = await fetch(`http://127.0.0.1:5000/api/get-avatar?username=${encodeURIComponent(spot.username)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.avatar_url) avatarUrl = data.avatar_url;
+    }
+  } catch {}
+  document.getElementById('userAvatar').src = avatarUrl;
+
+  // Destiny button
+  setupDestinyButton(spot.id);
+}
+
+function goToProfile() {
+  const username = document.getElementById('username').textContent.replace('@', '');
+  if (username) {
+    window.location.href = `Profile.html?user=${username}`;
+  }
+}
+
+async function setupDestinyButton(spotId) {
+  const { data: { user } } = await sb.auth.getUser();
+  const btn = document.getElementById('destinyBtn');
+
+  if (!user) {
+    btn.textContent = 'Login to Save';
+    btn.disabled = true;
+    return;
+  }
+
+  const { data: existing } = await sb
+    .from('destiny_saves')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('spot_id', spotId)
+    .maybeSingle();
+
+  const isSaved = !!existing;
+  btn.textContent = isSaved ? 'Saved ❤️' : 'Add to Destiny';
+  if (isSaved) btn.classList.add('saved');
+
+  btn.onclick = async () => {
+    if (isSaved) {
+      await sb.from('destiny_saves').delete().eq('id', existing.id);
+      btn.textContent = 'Add to Destiny';
+      btn.classList.remove('saved');
+    } else {
+      await sb.from('destiny_saves').insert({ user_id: user.id, spot_id: spotId });
+      btn.textContent = 'Saved ❤️';
+      btn.classList.add('saved');
+    }
+  };
+}
+</script>
+</body>
+</html>

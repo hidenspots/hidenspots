@@ -447,14 +447,15 @@ fd.append('country', document.getElementById('country').value.trim());
   const username = session.user.user_metadata?.username || session.user.email.split('@')[0];
   fd.append('username', username);
 
-    try {
-    // Upload files directly to Cloudflare R2 (public bucket)
+      try {
+    const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
+
     const mediaUrls = [];
     for (const file of selectedFiles) {
       const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const r2Url = `https://pub-8595c1e0c04e4e18b6b2c9e1d73b6c39.r2.dev/${filename}`;
+      const uploadUrl = `${WORKER_URL}/upload/${filename}`;
 
-      const uploadRes = await fetch(r2Url, {
+      const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
         headers: {
@@ -463,16 +464,18 @@ fd.append('country', document.getElementById('country').value.trim());
       });
 
       if (!uploadRes.ok) {
-        throw new Error(`Failed to upload ${file.name}`);
+        const err = await uploadRes.text();
+        throw new Error(`Upload failed: ${err}`);
       }
 
+      const publicUrl = `${WORKER_URL}/file/${filename}`;
       mediaUrls.push({
-        url: r2Url,
+        url: publicUrl,
         type: file.type.startsWith('video') ? 'video' : 'image'
       });
     }
 
-    // Save spot to Supabase (direct from browser)
+    // Save to Supabase
     const { error } = await sb.from('spots').insert([{
       user_id: session.user.id,
       username: session.user.user_metadata?.username || session.user.email.split('@')[0],
@@ -495,10 +498,9 @@ fd.append('country', document.getElementById('country').value.trim());
     }]);
 
     if (error) {
-      console.error('Supabase error:', error);
-      alert('Failed to save spot: ' + error.message);
+      alert('Save failed: ' + error.message);
     } else {
-      alert('Hidden gem uploaded successfully! 🎉');
+      alert('Uploaded successfully! 🎉');
       form.reset();
       selectedFiles = [];
       mediaPreview.innerHTML = '';
@@ -506,11 +508,12 @@ fd.append('country', document.getElementById('country').value.trim());
       safetyInput.value = '';
     }
   } catch (err) {
-    console.error('Upload error:', err);
-    alert('Upload failed. Check console for details.');
+    console.error(err);
+    alert('Upload failed: ' + err.message);
   }
 });
 </script>
 </body>
 
 </html>
+

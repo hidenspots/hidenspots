@@ -159,20 +159,31 @@ const sb = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
 
+const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
+
 const slideEls = document.querySelectorAll('.hero-slide');
 const themeEl = document.getElementById('heroTheme');
 const titleEl = document.getElementById('heroTitle');
 const subEl = document.getElementById('heroSub');
 const ctaBtn = document.getElementById('heroCta');
-
 let heroSpots = [];
 let heroIdx = 0;
 
-// Load 4 random spots for hero slideshow - SUPPORTS MULTIPLE MEDIA
+let currentUser = null;
+
+// Avatar helper - R2 first, fallback to UI-Avatars
+function getAvatarUrl(username) {
+  if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=80';
+  const r2Avatar = `${WORKER_URL}/file/avatars/${username}-avatar.jpg`;
+  const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=FFD88D&color=0c0f18&size=80`;
+  return r2Avatar + `?fallback=${encodeURIComponent(fallback)}`; // simple fallback via onerror in img tag
+}
+
+// Load 4 random spots for hero slideshow
 async function loadHeroSlides() {
   const { data: spots } = await sb
     .from('spots')
-    .select('id, name, place, city, story, media_url, media_urls, category_id')
+    .select('id, name, place, city, story, media_urls, media_url, category_id')
     .order('created_at', { ascending: false })
     .limit(12);
 
@@ -181,23 +192,14 @@ async function loadHeroSlides() {
   heroSpots = spots.sort(() => 0.5 - Math.random()).slice(0, 4);
 
   heroSpots.forEach((spot, i) => {
-    let mediaList = [];
-    if (spot.media_urls && Array.isArray(spot.media_urls)) {
-      mediaList = spot.media_urls;
-    } else if (spot.media_url) {
-      mediaList = [{ url: spot.media_url, type: 'image' }];
-    }
-
-    const randomMedia = mediaList[Math.floor(Math.random() * mediaList.length)] || { url: '/placeholder.jpg', type: 'image' };
-
-    const fullUrl = `http://127.0.0.1:5000${randomMedia.url}`;
-    slideEls[i].style.backgroundImage = `url('${fullUrl}')`;
+    const firstMedia = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/1200x800/141824/FFD88D?text=No+Image';
+    slideEls[i].style.backgroundImage = `url('${firstMedia}')`;
   });
 
   renderHero(0);
 }
 
-// Render current slide
+// Render current hero slide
 function renderHero(i) {
   const spot = heroSpots[i];
   if (!spot) return;
@@ -205,78 +207,63 @@ function renderHero(i) {
   slideEls.forEach(s => s.classList.remove('active'));
   slideEls[i].classList.add('active');
 
-  themeEl.textContent = spot.category_id === 1 ? 'Adventure' : 'Hidden Gem';
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
+  themeEl.textContent = categoryNames[spot.category_id] || 'Hidden Gem';
   titleEl.textContent = spot.name;
   subEl.textContent = spot.story?.slice(0, 120) + '...' || 'Discover this hidden place...';
-
-  ctaBtn.onclick = () => {
-    window.location.href = `spot.html?id=${spot.id}`;
-  };
+  ctaBtn.onclick = () => window.location.href = `spot.html?id=${spot.id}`;
 }
 
-// Auto change every 5.2 seconds
+// Auto change hero every 5.2 seconds
 setInterval(() => {
   heroIdx = (heroIdx + 1) % heroSpots.length;
   renderHero(heroIdx);
 }, 5200);
 
-// Start hero
-loadHeroSlides();
-
-let currentUser = null;
-
-// Get current user
+// Init
 async function init() {
   const { data: { user } } = await sb.auth.getUser();
   currentUser = user;
-  loadSpots();
+  await loadHeroSlides();
+  await loadSpots();
 }
 
-// Load real spots from Supabase
+// Load all spots for the main grid
 async function loadSpots() {
   const { data: spots, error } = await sb
     .from('spots')
-    .select('id, name, place, city, story, media_url, username, category_id, emotion_id, lat, lng')
+    .select('id, name, place, city, story, media_urls, media_url, username, category_id, emotion_id')
     .order('created_at', { ascending: false });
 
-  if (error || !spots) {
-    document.getElementById('grid').innerHTML = '<p style="text-align:center;padding:50px;">No spots yet.</p>';
+  if (error || !spots || spots.length === 0) {
+    document.getElementById('grid').innerHTML = '<p style="text-align:center;padding:50px;opacity:0.7;">No hidden spots yet.</p>';
     return;
   }
 
-  // Get saved spot IDs if user is logged in
+  // Get saved spots for heart icon
   let savedSpotIds = [];
   if (currentUser) {
-    const { data: saves, error: savesError } = await sb
+    const { data: saves } = await sb
       .from('destiny_saves')
       .select('spot_id')
       .eq('user_id', currentUser.id);
-
-    if (savesError) {
-      console.error('Error loading saves:', savesError);
-    } else {
-      savedSpotIds = saves.map(s => s.spot_id);
-    }
+    if (saves) savedSpotIds = saves.map(s => s.spot_id);
   }
 
-  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family'};
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
   const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
 
   const html = spots.map(spot => {
-    // Use real lat/lng if available, else random
-    const lat = spot.lat || (20 + Math.random() * 10);
-    const lng = spot.lng || (70 + Math.random() * 15);
-
-    const mediaUrl = spot.media_url ? `http://127.0.0.1:5000${spot.media_url}` : '/placeholder.jpg';
-    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(spot.username || 'User')}&background=FFD88D&color=0c0f18&size=80`;
-
+    const firstImage = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/300x220/141824/FFD88D?text=No+Image';
+    const avatarUrl = getAvatarUrl(spot.username);
     const isSaved = savedSpotIds.includes(spot.id);
     const heartIcon = isSaved ? '❤️' : '♡';
 
     return `
     <article class="card">
       <div class="card-media">
-        <img src="${mediaUrl}" alt="${spot.name}">
+        <img src="${firstImage}" alt="${spot.name}"
+             onerror="this.src='https://via.placeholder.com/300x220/141824/FFD88D?text=No+Image'">
         <span class="card-badge">${spot.city} • ${categoryNames[spot.category_id] || 'Other'}</span>
       </div>
       <div class="card-info">
@@ -285,7 +272,8 @@ async function loadSpots() {
       </div>
       <div class="card-meta">
         <div class="meta-left">
-          <img class="avatar" src="${avatarUrl}" alt="">
+          <img class="avatar" src="${avatarUrl}" alt=""
+               onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(spot.username || 'User')}&background=FFD88D&color=0c0f18&size=80'">
           <span class="username" onclick="goToProfile('${spot.username}')">@${spot.username || 'traveller'}</span>
         </div>
         <div class="meta-right">
@@ -303,30 +291,26 @@ async function loadSpots() {
   document.getElementById('grid').innerHTML = html;
 }
 
-// Navigate to user profile on username click
+// Navigate to profile
 function goToProfile(username) {
-  if (username) {
-    window.location.href = `Profile.html?user=${username}`;
-  }
+  if (username) window.location.href = `Profile.html?user=${username}`;
 }
 
-// Toggle Follow (backend)
+// Follow toggle (placeholder — you can implement later)
 async function toggleFollow(username, button) {
   if (!currentUser) {
     alert('Login required');
     return;
   }
-  // Your follow logic here
   button.textContent = button.textContent === 'Follow' ? 'Following' : 'Follow';
 }
 
-// Toggle Destiny (save to wishlist)
+// Destiny save toggle
 async function toggleDestiny(spotId, button) {
   if (!currentUser) {
     alert('Login required');
     return;
   }
-
   const { data: existing } = await sb
     .from('destiny_saves')
     .select('id')
@@ -346,4 +330,5 @@ async function toggleDestiny(spotId, button) {
 init();
 </script>
 </body>
+
 </html>

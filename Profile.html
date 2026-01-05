@@ -264,74 +264,58 @@ const sb = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
 
+const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
+
 async function loadProfile() {
   const urlParams = new URLSearchParams(window.location.search);
   const searchedUsername = urlParams.get('user');
 
   const { data: { user: currentUser }, error: authError } = await sb.auth.getUser();
-
   if (authError || !currentUser) {
     alert('Please log in');
     window.location.href = 'index.html';
     return;
   }
 
-  let targetUsername;
-  let targetUserId;
-  let isOwnProfile = false;
+  let targetUsername = searchedUsername || 
+    (currentUser.user_metadata?.username || currentUser.email.split('@')[0]);
+
+  let targetUserId = currentUser.id;
+  let isOwnProfile = true;
 
   if (searchedUsername) {
-    targetUsername = searchedUsername;
-  } else {
-    targetUsername = currentUser.user_metadata?.username || currentUser.email.split('@')[0];
-    targetUserId = currentUser.id;
-    isOwnProfile = true;
-  }
-
-  if (!targetUserId) {
-    const { data: spots } = await sb
+    // Find user_id by username
+    const { data: userSpots } = await sb
       .from('spots')
       .select('user_id')
-      .eq('username', targetUsername)
+      .eq('username', searchedUsername)
       .limit(1);
 
-    if (!spots || spots.length === 0) {
+    if (!userSpots || userSpots.length === 0) {
       alert('User not found or no posts yet');
       return;
     }
-    targetUserId = spots[0].user_id;
+    targetUserId = userSpots[0].user_id;
     isOwnProfile = targetUserId === currentUser.id;
   }
 
-  // Avatar
-  let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(targetUsername)}&background=FFD88D&color=0c0f18&size=256&bold=true`; // fallback
-
-// Try to load from R2
-const r2AvatarUrl = `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/file/avatars/${targetUsername}-avatar.jpg`;
-const testImg = new Image();
-testImg.onload = () => {
-  avatarUrl = r2AvatarUrl;
-  document.getElementById('avatar').src = avatarUrl + '?t=' + Date.now();
-};
-testImg.src = r2AvatarUrl; // triggers onload if exists
-
-document.getElementById('avatar').src = avatarUrl;
-  try {
-    const res = await fetch(`http://127.0.0.1:5000/api/get-avatar?username=${encodeURIComponent(targetUsername)}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.avatar_url) avatarUrl = data.avatar_url;
-    }
-  } catch (err) {}
-
-  // Full name
-  const fullName = isOwnProfile
+  // Set profile info
+  const fullName = isOwnProfile 
     ? (currentUser.user_metadata?.full_name || targetUsername)
     : targetUsername;
 
-  document.getElementById('avatar').src = avatarUrl;
   document.getElementById('name').innerText = fullName;
   document.getElementById('email').innerText = `@${targetUsername}`;
+
+  // Avatar: Try R2 first, fallback to UI-Avatars
+  const r2AvatarUrl = `${WORKER_URL}/file/avatars/${targetUsername}-avatar.jpg`;
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(targetUsername)}&background=FFD88D&color=0c0f18&size=256&bold=true`;
+
+  const avatarImg = document.getElementById('avatar');
+  avatarImg.src = r2AvatarUrl;
+  avatarImg.onerror = () => {
+    avatarImg.src = fallbackAvatar;
+  };
 
   // Posts count
   const { count: postsCount } = await sb
@@ -340,166 +324,98 @@ document.getElementById('avatar').src = avatarUrl;
     .eq('user_id', targetUserId);
   document.getElementById('postsCount').innerText = postsCount || 0;
 
-  // Followers & Following counts
-  const countsRes = await fetch(`http://127.0.0.1:5000/api/follow-counts?user_id=${targetUserId}`);
-  const counts = await countsRes.json();
-  document.getElementById('followersCount').innerText = counts.followers || 0;
-  document.getElementById('followingCount').innerText = counts.following || 0;
+  // Followers & Following (temporarily 0 — follow system later)
+  document.getElementById('followersCount').innerText = 0;
+  document.getElementById('followingCount').innerText = 0;
 
-  // Load spots + last spot for background
-// Load spots
-const { data: spots } = await sb
-  .from('spots')
-  .select('id, name, place, city, media_urls, media_url, user_id, created_at')
-  .eq('user_id', targetUserId)
-  .order('created_at', { ascending: false });
+  // Load spots
+  const { data: spots } = await sb
+    .from('spots')
+    .select('id, name, place, city, media_urls, media_url, user_id, created_at')
+    .eq('user_id', targetUserId)
+    .order('created_at', { ascending: false });
 
-// Set profile cover to last uploaded spot's first media
-let coverUrl = 'https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600'; // default
-if (spots && spots.length > 0) {
-  const lastSpot = spots[0];
-  const firstMedia = lastSpot.media_urls?.[0]?.url || lastSpot.media_url;
-  if (firstMedia) {
-    coverUrl = firstMedia;
+  // Profile cover from latest post
+  let coverUrl = 'https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600';
+  if (spots && spots.length > 0) {
+    const firstMedia = spots[0].media_urls?.[0]?.url || spots[0].media_url;
+    if (firstMedia) coverUrl = firstMedia;
   }
-}
-document.getElementById('profileCover').style.backgroundImage = `url('${coverUrl}')`;
+  document.getElementById('profileCover').style.backgroundImage = `url('${coverUrl}')`;
 
-// Render posts grid
-const grid = document.getElementById('profileGrid');
-if (spots && spots.length > 0) {
-  grid.innerHTML = spots.map(p => {
-    const isOwnPost = p.user_id === currentUser.id;
-    const deleteBtn = isOwnPost ? `<div class="delete-btn" onclick="deleteSpot('${p.id}', this)">🗑️</div>` : '';
+  // Render grid
+  const grid = document.getElementById('profileGrid');
+  if (spots && spots.length > 0) {
+    grid.innerHTML = spots.map(p => {
+      const isOwnPost = p.user_id === currentUser.id;
+      const deleteBtn = isOwnPost ? `<div class="delete-btn" onclick="deleteSpot('${p.id}', this)">🗑️</div>` : '';
+      const firstImage = p.media_urls?.[0]?.url || p.media_url || 'https://via.placeholder.com/300x190/141824/FFD88D?text=No+Image';
 
-    // Use first image from media_urls array (R2), fallback to media_url or placeholder
-    const firstImage = p.media_urls?.[0]?.url || p.media_url || 'https://via.placeholder.com/300x190/141824/FFD88D?text=No+Image';
+      return `
+        <div class="card">
+          <div style="position:relative;">
+            <img src="${firstImage}" alt="${p.name}" style="width:100%;height:190px;object-fit:cover;"
+                 onerror="this.src='https://via.placeholder.com/300x190/141824/FFD88D?text=No+Image'">
+            ${deleteBtn}
+          </div>
+          <div class="card-body">
+            <div class="card-title">${p.name || 'Untitled'}</div>
+            <div class="card-sub">${p.place || ''}, ${p.city || ''}</div>
+            <div class="story"><a href="spot.html?id=${p.id}">Read more</a></div>
+          </div>
+        </div>`;
+    }).join('');
+  } else {
+    grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;opacity:0.7;margin:3rem;">No hidden spots yet</p>`;
+  }
 
-    return `
-      <div class="card">
-        <div style="position:relative;">
-          <img src="${firstImage}" alt="${p.name}" style="width:100%;height:190px;object-fit:cover;" 
-               onerror="this.src='https://via.placeholder.com/300x190/141824/FFD88D?text=No+Image'">
-          ${deleteBtn}
-        </div>
-        <div class="card-body">
-          <div class="card-title">${p.name || 'Untitled Spot'}</div>
-          <div class="card-sub">${p.place || ''}, ${p.city || ''}</div>
-          <div class="story"><a href="spot.html?id=${p.id}">Read more</a></div>
-        </div>
-      </div>`;
-  }).join('');
-} else {
-  grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;opacity:0.7;margin:3rem;">No hidden spots yet</p>`;
-}
-
-  // Follow button and avatar upload (unchanged)
-  const followBtn = document.getElementById('followBtn');
-  const avatarImg = document.getElementById('avatar');
+  // Avatar upload (only for own profile)
   const dpInput = document.getElementById('dpInput');
-
   if (isOwnProfile) {
-    followBtn.style.display = 'none';
-
     avatarImg.style.cursor = 'pointer';
     avatarImg.onclick = () => dpInput.click();
-      dpInput.onchange = async () => {
-    const file = dpInput.files[0];
-    if (!file) return;
+    dpInput.onchange = async () => {
+      const file = dpInput.files[0];
+      if (!file) return;
 
-    const username = currentUser.user_metadata?.username || currentUser.email.split('@')[0];
-    const filename = `${username}-avatar.jpg`; // you can use .png if you want
+      const filename = `${targetUsername}-avatar.jpg`;
+      const uploadUrl = `${WORKER_URL}/avatar/${filename}`;
 
-    const uploadUrl = `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/avatar/${filename}`;
-
-    const uploadRes = await fetch(uploadUrl, {
-      method: 'PUT',
-      body: file,
-      headers: {
-        'Content-Type': file.type || 'image/jpeg'
-      }
-    });
-
-    if (!uploadRes.ok) {
-      alert('Avatar upload failed');
-      return;
-    }
-
-    const avatarUrl = `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/file/avatars/${filename}`;
-    avatarImg.src = avatarUrl + '?t=' + Date.now(); // cache bust
-    alert('Profile picture updated! 🎉');
-  };
-  } else {
-    followBtn.style.display = 'block';
-
-    const { data: existing } = await sb
-      .from('follows')
-      .select('id')
-      .eq('follower_id', currentUser.id)
-      .eq('following_id', targetUserId)
-      .maybeSingle();
-
-    const isFollowing = !!existing;
-    followBtn.textContent = isFollowing ? 'Following' : 'Follow';
-    followBtn.classList.toggle('following', isFollowing);
-
-    followBtn.onclick = async () => {
-      const res = await fetch('http://127.0.0.1:5000/api/toggle-follow', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ follower_id: currentUser.id, following_id: targetUserId })
+      const res = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type || 'image/jpeg' }
       });
-      const result = await res.json();
-      if (res.ok) {
-        followBtn.textContent = result.action === 'followed' ? 'Following' : 'Follow';
-        followBtn.classList.toggle('following', result.action === 'followed');
 
-        const newCounts = await fetch(`http://127.0.0.1:5000/api/follow-counts?user_id=${targetUserId}`);
-        const newData = await newCounts.json();
-        document.getElementById('followersCount').innerText = newData.followers || 0;
+      if (res.ok) {
+        avatarImg.src = `${WORKER_URL}/file/avatars/${filename}?t=${Date.now()}`;
+        alert('Profile picture updated! 🎉');
+      } else {
+        alert('Avatar upload failed');
       }
     };
-
-    avatarImg.style.cursor = 'default';
-    avatarImg.onclick = null;
   }
 
-  // Tabs
+  // Tabs (visual only for now)
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
-      document.querySelector('.tab.active').classList.remove('active');
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
     });
   });
 }
 
-async function deleteSpot(spotId, buttonElement) {
-  if (!confirm('Are you sure you want to delete this spot? This cannot be undone.')) {
-    return;
-  }
+async function deleteSpot(spotId, element) {
+  if (!confirm('Delete this spot permanently?')) return;
 
-  try {
-    const { error } = await sb
-      .from('spots')
-      .delete()
-      .eq('id', spotId);
-
-    if (error) throw error;
-
-    const card = buttonElement.closest('.card');
-    card.style.transition = 'opacity 0.5s, transform 0.5s';
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-    setTimeout(() => card.remove(), 500);
-
-    alert('Spot deleted successfully!');
-
-    // Update posts count
-    const currentCount = parseInt(document.getElementById('postsCount').innerText);
-    document.getElementById('postsCount').innerText = currentCount - 1;
-  } catch (err) {
-    console.error('Delete error:', err);
-    alert('Failed to delete spot');
+  const { error } = await sb.from('spots').delete().eq('id', spotId);
+  if (error) {
+    alert('Delete failed');
+  } else {
+    element.closest('.card').remove();
+    const count = parseInt(document.getElementById('postsCount').innerText);
+    document.getElementById('postsCount').innerText = count - 1;
+    alert('Spot deleted');
   }
 }
 
@@ -508,4 +424,5 @@ loadProfile();
 </body>
 
 </html>
+
 

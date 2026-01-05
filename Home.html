@@ -68,16 +68,24 @@
 .sitem:hover,.sitem.active{background:rgba(255,255,255,.06)}
 .sitem small{opacity:.7}
 .nav-bar{
-    background:rgba(255,255,255,.05);
-    backdrop-filter:blur(25px);
-    border-radius:60px;
-    padding:1rem 2.5rem;
-    border:1px solid rgba(255,255,255,.12);
-   position: fixed;
-    bottom:1rem;left:50%;transform:translateX(-50%);
-    display:flex;gap:3rem;
-    box-shadow:0 8px 30px rgba(0,0,0,.25)
-  }
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: env(safe-area-inset-bottom, 0px);
+  margin-bottom: 12px;
+
+  background: rgba(255,255,255,.06);
+  backdrop-filter: blur(25px);
+  border-radius: 60px;
+  padding: 14px 26px;
+  border: 1px solid rgba(255,255,255,.14);
+
+  display: flex;
+  gap: 2.2rem;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  z-index: 999;
+}
   .nav-icon{color:rgba(255,255,255,.7);transition:.4s}
   .nav-icon:hover{color:var(--gold);transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
   .nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
@@ -660,4 +668,5 @@ async function toggleFollow(username, button) {
 
 </script>
 </body>
+
 </html>

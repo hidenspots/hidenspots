@@ -323,24 +323,35 @@
 <!-- Filters drawer — same -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const sb = supabase.createClient(
   "https://bhktkjegansxplpdtack.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
 
+const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
+
 let allSpots = [];
-let userMap = new Map(); // username → {avatar, spotCount}
+let userMap = new Map();
 let leafletMap, leafletMarkers = [];
 
 const q = document.getElementById('q');
 const list = document.getElementById('list');
 
+/* ---------- Avatar Helper ---------- */
+function getAvatarUrl(username) {
+  if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=120';
+  const r2Avatar = `${WORKER_URL}/file/avatars/${username}-avatar.jpg`;
+  const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=FFD88D&color=0c0f18&size=120`;
+  return r2Avatar;
+}
+
 /* ---------- Load Data ---------- */
 async function loadData() {
   const { data: spots, error } = await sb
     .from('spots')
-   .select('id, name, place, city, story, media_url, media_urls, username, emotion_id, category_id, user_id, created_at, lat, lng')
+    .select('id, name, place, city, story, media_url, media_urls, username, emotion_id, category_id, user_id, created_at, lat, lng')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -348,20 +359,22 @@ async function loadData() {
     return;
   }
 
-  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family', 7: 'Restaurant'};
-  const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
+  const categoryNames = {
+    1: 'Adventure', 2: 'Spiritual', 3: 'Historical', 4: 'Horror', 
+    5: 'Solo', 6: 'Family', 7: 'Restaurant'
+  };
+  const emotionNames = {
+    1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',
+    5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'
+  };
 
   allSpots = spots.map(spot => {
-    // Build media list
     let mediaList = [];
-
     if (spot.media_urls && Array.isArray(spot.media_urls)) {
       mediaList = spot.media_urls;
     } else if (spot.media_url) {
       mediaList = [{ url: spot.media_url, type: 'image' }];
     }
-
-    // Pick random media for variety
     const chosen = mediaList[Math.floor(Math.random() * mediaList.length)] || { url: '/placeholder.jpg', type: 'image' };
 
     return {
@@ -372,72 +385,40 @@ async function loadData() {
       area: spot.city,
       cat: categoryNames[spot.category_id] || 'Other',
       emotion: emotionNames[spot.emotion_id] || '',
-     lat: spot.lat ? parseFloat(spot.lat) : null,
-lng: spot.lng ? parseFloat(spot.lng) : null,
-      img: `http://127.0.0.1:5000${chosen.url}`,
+      lat: spot.lat ? parseFloat(spot.lat) : null,
+      lng: spot.lng ? parseFloat(spot.lng) : null,
+      img: chosen.url, // R2 Worker URL
       user: `@${spot.username || 'traveller'}`,
       username: spot.username || 'traveller',
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(spot.username || 'User')}&background=FFD88D&color=0c0f18&size=120`,
+      avatar: getAvatarUrl(spot.username),
       badge: `${spot.city} • ${categoryNames[spot.category_id] || ''}`,
       story: spot.story || 'A beautiful hidden gem shared by the community…'
     };
   });
 
-  // Build user map
+  // Build user map for profile search
   userMap.clear();
   spots.forEach(spot => {
     const u = spot.username || 'unknown';
     if (!userMap.has(u)) {
       userMap.set(u, {
         username: u,
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(u)}&background=FFD88D&color=0c0f18&size=120`,
+        avatar: getAvatarUrl(u),
         spotCount: 0
       });
     }
     userMap.get(u).spotCount++;
   });
-    // Add real followers/following without blocking search
-  const uniqueUsers = [...new Set(spots.map(s => ({ username: s.username, user_id: s.user_id })))];
-  uniqueUsers.forEach(item => {
-    if (item.user_id && userMap.has(item.username)) {
-      fetch(`http://127.0.0.1:5000/api/follow-counts?user_id=${item.user_id}`)
-        .then(res => res.ok ? res.json() : { followers: 0, following: 0 })
-        .then(data => {
-          const user = userMap.get(item.username);
-          if (user) {
-            user.followers = data.followers || 0;
-            user.following = data.following || 0;
-            // If search is showing this user, update the card
-            if (q.value.trim().toLowerCase().includes(item.username.toLowerCase())) {
-              runSearch();
-            }
-          }
-        })
-        .catch(() => {});
-    }
-  });
+
   runSearch();
 }
 
 /* ---------- Profile Card ---------- */
 async function profileCardHTML(u) {
-  let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}&background=FFD88D&color=0c0f18&size=120`;
-
-  try {
-    const res = await fetch(`http://127.0.0.1:5000/api/get-avatar?username=${encodeURIComponent(u.username)}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.avatar_url) {
-        avatarUrl = data.avatar_url;
-      }
-    }
-  } catch (err) {
-    console.warn('Could not fetch avatar for search card');
-  }
-
   return `
   <article class="card profile" data-username="${u.username}">
-    <img class="avatar" src="${avatarUrl}" alt="@${u.username}">
+    <img class="avatar" src="${u.avatar}" alt="@${u.username}"
+         onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}&background=FFD88D&color=0c0f18&size=120'">
     <div class="info">
       <h3 class="title">@${u.username}</h3>
       <p class="bio">Explorer • ${u.spotCount} hidden spots shared</p>
@@ -447,16 +428,15 @@ async function profileCardHTML(u) {
           <span class="label">posts</span>
         </div>
         <div class="stat-item">
-          <span class="number">${u.followers || 0}</span>
+          <span class="number">0</span>
           <span class="label">followers</span>
         </div>
         <div class="stat-item">
-         <span class="number">${u.following || 0}</span>
+          <span class="number">0</span>
           <span class="label">following</span>
         </div>
       </div>
     </div>
-    
   </article>`;
 }
 
@@ -465,7 +445,8 @@ function detailedCardHTML(p) {
   return `
   <article class="card detailed">
     <div class="media">
-      <img src="${p.img}" alt="${p.title}">
+      <img src="${p.img}" alt="${p.title}"
+           onerror="this.src='https://via.placeholder.com/400x300/141824/FFD88D?text=No+Image'">
       <span class="badge">${p.badge}</span>
     </div>
     <div class="info">
@@ -474,32 +455,18 @@ function detailedCardHTML(p) {
     </div>
     <div class="meta">
       <div class="mleft">
-                <img class="avatar" src="${p.avatar}" alt="" data-username="${p.username}">
+        <img class="avatar" src="${p.avatar}" alt=""
+             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.username)}&background=FFD88D&color=0c0f18&size=120'">
         <span class="username" data-username="${p.username}">${p.user}</span>
       </div>
       <div class="mright">
-              <div class="mright">
         <span class="tag">${p.cat}</span>
         <span class="tag">${p.emotion}</span>
-      </div>
       </div>
     </div>
     <div class="story">
       <p>${p.story}</p>
       <a href="spot.html?id=${p.id}">Read more</a>
-    </div>
-  </article>`;
-}
-
-function compactCardHTML(p) {
-  return `
-  <article class="card compact">
-    <div class="media">
-      <img src="${p.img}" alt="${p.title}">
-      <span class="badge">${p.badge}</span>
-    </div>
-    <div class="info">
-      <h3 class="title">${p.title}</h3>
     </div>
   </article>`;
 }
@@ -522,57 +489,54 @@ async function renderResults(results) {
   list.innerHTML = html;
 }
 
-/* ---------- Click Profile Card → Go to Profile ---------- */
+/* ---------- Click to Profile ---------- */
 list.addEventListener('click', (e) => {
+  // Profile card click
   const profileCard = e.target.closest('.card.profile');
   if (profileCard) {
     const username = profileCard.dataset.username;
     if (username) {
-      window.location.href = `profile.html?user=${username}`;
+      window.location.href = `Profile.html?user=${username}`;
     }
   }
-    // Click on avatar or username in spot card
+
+  // Username or avatar in spot card click
   const userEl = e.target.closest('.avatar, .username');
   if (userEl && userEl.dataset.username) {
-    window.location.href = `profile.html?user=${userEl.dataset.username}`;
-    return;
+    window.location.href = `Profile.html?user=${userEl.dataset.username}`;
   }
 });
 
-/* ---------- Search Logic (Only Profile for Username Search) ---------- */
-/* ---------- Search Logic — Profile search without @ ---------- */
+/* ---------- Search Logic ---------- */
 async function runSearch() {
-  const term = q.value.trim();
-  const termLower = term.toLowerCase();
+  const term = q.value.trim().toLowerCase();
   const activeFilter = document.querySelector('.chip.active')?.dataset.filter || 'all';
 
   let results = allSpots;
 
-  // Apply filter
-  if (activeFilter === 'new') {
-    results = [...allSpots].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  } else if (activeFilter === 'nearby') {
-    results = [...allSpots].sort(() => 0.5 - Math.random()); // mock nearby
-  } else if (activeFilter !== 'all') {
-    results = allSpots.filter(spot => spot.cat === activeFilter);
-  } else if (activeFilter === 'Restaurant') {
-  results = allSpots.filter(spot => spot.cat === 'Restaurant');
-}
+  // Filter by category
+  if (activeFilter !== 'all') {
+    if (activeFilter === 'new') {
+      results = [...allSpots].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    } else if (activeFilter === 'nearby') {
+      results = [...allSpots].sort(() => 0.5 - Math.random());
+    } else {
+      results = allSpots.filter(spot => spot.cat === activeFilter);
+    }
+  }
 
-
-  // Apply search term
+  // Search in spots
   if (term) {
     results = results.filter(spot => {
       const text = `${spot.title} ${spot.sub} ${spot.place} ${spot.city} ${spot.cat} ${spot.user}`.toLowerCase();
-      return text.includes(termLower);
+      return text.includes(term);
     });
   }
 
-  // Profile search (your original logic)
+  // Profile search (username)
   if (term.length >= 2 && !term.includes(' ')) {
     const matchedUsers = Array.from(userMap.values())
-      .filter(u => u.username.toLowerCase().includes(termLower));
-
+      .filter(u => u.username.toLowerCase().includes(term));
     const profileResults = matchedUsers.map(u => ({ type: 'profile', ...u }));
     results = profileResults.concat(results);
   }
@@ -588,7 +552,7 @@ async function runSearch() {
 function initLeaflet() {
   leafletMap = L.map('realMap').setView([20.5937, 78.9629], 5);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap'
+    attribution: '&copy; OpenStreetMap contributors'
   }).addTo(leafletMap);
 }
 
@@ -600,10 +564,10 @@ function clearMarkers() {
 function plotMarkers(arr) {
   clearMarkers();
   arr.forEach(p => {
-    if (p.lat && p.lng) {
-      L.marker([p.lat, p.lng])
-        .addTo(leafletMap)
-        .bindPopup(`<strong>${p.title}</strong><br>${p.sub}<br>By ${p.user}`);
+    if (p.lat !== null && p.lng !== null) {
+      const marker = L.marker([p.lat, p.lng]).addTo(leafletMap);
+      marker.bindPopup(`<strong>${p.title}</strong><br>${p.sub}<br>By ${p.user}`);
+      leafletMarkers.push(marker);
     }
   });
 }
@@ -614,7 +578,7 @@ function fitMap(arr) {
     const bounds = L.latLngBounds(valid.map(p => [p.lat, p.lng]));
     leafletMap.fitBounds(bounds.pad(0.5));
   } else {
-    leafletMap.setView([20, 0], 2); // world view
+    leafletMap.setView([20, 0], 2);
   }
 }
 
@@ -626,14 +590,7 @@ function fitMap(arr) {
 
 /* Events */
 q.addEventListener('input', runSearch);
-document.querySelectorAll('.chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    if (chip.id === 'clearAll') return;
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    runSearch();
-  });
-});
+
 document.querySelectorAll('.chip').forEach(chip => {
   chip.addEventListener('click', () => {
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -641,32 +598,8 @@ document.querySelectorAll('.chip').forEach(chip => {
     runSearch();
   });
 });
-
-async function toggleFollow(username, button) {
-  const user = userMap.get(username);
-  if (!user || !user.user_id) return;
-
-  const { data: { user: currentUser } } = await sb.auth.getUser();
-  if (!currentUser) return;
-
-  const res = await fetch('http://127.0.0.1:5000/api/toggle-follow', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ follower_id: currentUser.id, following_id: user.user_id })
-  });
-
-  const result = await res.json();
-  if (res.ok) {
-    button.textContent = result.action === 'followed' ? 'Following' : 'Follow';
-    // Update counts
-    const newRes = await fetch(`http://127.0.0.1:5000/api/follow-counts?user_id=${user.user_id}`);
-    const newData = await newRes.json();
-    user.followers = newData.followers || 0;
-    runSearch(); // Refresh to show updated count
-  }
-}
-
 </script>
 </body>
 
 </html>
+

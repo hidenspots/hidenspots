@@ -279,6 +279,8 @@ const sb = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
 
+const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
+
 const urlParams = new URLSearchParams(window.location.search);
 const spotId = urlParams.get('id');
 
@@ -300,47 +302,46 @@ async function loadSpot(id) {
     return;
   }
 
-  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family'};
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
   const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
 
-  // Build media list
+  // Build media list from R2 Worker URLs
   let mediaList = [];
   if (spot.media_urls && Array.isArray(spot.media_urls)) {
     mediaList = spot.media_urls;
   } else if (spot.media_url) {
-    mediaList = [{ url: spot.media_url, type: spot.media_type || 'image' }];
+    mediaList = [{ url: spot.media_url, type: 'image' }];
   }
 
-  // Show first media as hero
+  // Hero media (first image/video)
   if (mediaList.length > 0) {
     const first = mediaList[0];
-    const fullUrl = `http://127.0.0.1:5000${first.url}`;
     const heroEl = document.getElementById('heroMedia');
     if (first.type === 'video') {
-      heroEl.innerHTML = `<video src="${fullUrl}" controls autoplay loop muted playsinline></video>`;
+      heroEl.innerHTML = `<video src="${first.url}" controls autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
     } else {
-      heroEl.innerHTML = `<img src="${fullUrl}" alt="${spot.name}">`;
+      heroEl.innerHTML = `<img src="${first.url}" alt="${spot.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/800x400/141824/FFD88D?text=No+Image'">`;
     }
   }
 
-  // Thumbnails gallery
+  // Gallery thumbnails
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = ''; // clear
   if (mediaList.length > 1) {
-    const gallery = document.getElementById('gallery');
     mediaList.forEach((media, index) => {
-      const fullUrl = `http://127.0.0.1:5000${media.url}`;
       const thumb = document.createElement('div');
       thumb.className = 'thumb' + (index === 0 ? ' active' : '');
       if (media.type === 'video') {
-        thumb.innerHTML = `<video src="${fullUrl}" muted playsinline></video>`;
+        thumb.innerHTML = `<video src="${media.url}" muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
       } else {
-        thumb.innerHTML = `<img src="${fullUrl}" alt="thumb">`;
+        thumb.innerHTML = `<img src="${media.url}" alt="thumb" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/80/141824/FFD88D?text=No+Image'">`;
       }
       thumb.onclick = () => {
         const heroEl = document.getElementById('heroMedia');
         if (media.type === 'video') {
-          heroEl.innerHTML = `<video src="${fullUrl}" controls autoplay loop muted playsinline></video>`;
+          heroEl.innerHTML = `<video src="${media.url}" controls autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
         } else {
-          heroEl.innerHTML = `<img src="${fullUrl}" alt="${spot.name}">`;
+          heroEl.innerHTML = `<img src="${media.url}" alt="${spot.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/800x400/141824/FFD88D?text=No+Image'">`;
         }
         document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
         thumb.classList.add('active');
@@ -349,6 +350,7 @@ async function loadSpot(id) {
     });
   }
 
+  // Content
   document.getElementById('title').textContent = spot.name;
   document.getElementById('sub').textContent = `${spot.place}, ${spot.city}${spot.state ? ', ' + spot.state : ''}, ${spot.country}`;
 
@@ -361,38 +363,32 @@ async function loadSpot(id) {
 
   // Safety stars
   const rating = spot.safety_rating || 0;
-  const filledStars = '<span class="stars">' + 
-    '★'.repeat(rating).split('').map(() => '<span class="filled">★</span>').join('') + 
-    '☆'.repeat(5 - rating) + '</span>';
-  document.getElementById('safety').innerHTML = filledStars;
+  const starsHtml = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  document.getElementById('safety').innerHTML = `<span class="stars">${starsHtml.replace(/★/g, '<span class="filled">★</span>')}</span>`;
 
   document.getElementById('besttime').textContent = spot.best_time || '-';
   document.getElementById('tips').textContent = spot.tips || '-';
   document.getElementById('hashtags').textContent = spot.hashtags || '-';
   document.getElementById('credits').textContent = spot.credits || '-';
 
-  document.getElementById('username').textContent = '@' + (spot.username || 'traveller');
+  // Username
+  const username = spot.username || 'traveller';
+  document.getElementById('username').textContent = `@${username}`;
 
-  // Avatar
-  let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(spot.username || 'User')}&background=FFD88D&color=0c0f18&size=120`;
-  try {
-    const res = await fetch(`http://127.0.0.1:5000/api/get-avatar?username=${encodeURIComponent(spot.username)}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.avatar_url) avatarUrl = data.avatar_url;
-    }
-  } catch {}
-  document.getElementById('userAvatar').src = avatarUrl;
+  // Avatar from R2 Worker
+  const avatarUrl = `${WORKER_URL}/file/avatars/${username}-avatar.jpg`;
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=FFD88D&color=0c0f18&size=120`;
+  const avatarImg = document.getElementById('userAvatar');
+  avatarImg.src = avatarUrl;
+  avatarImg.onerror = () => { avatarImg.src = fallbackAvatar; };
+
+  // Click username/avatar to go to profile
+  document.querySelector('.user').onclick = () => {
+    window.location.href = `Profile.html?user=${username}`;
+  };
 
   // Destiny button
   setupDestinyButton(spot.id);
-}
-
-function goToProfile() {
-  const username = document.getElementById('username').textContent.replace('@', '');
-  if (username) {
-    window.location.href = `Profile.html?user=${username}`;
-  }
 }
 
 async function setupDestinyButton(spotId) {
@@ -430,4 +426,5 @@ async function setupDestinyButton(spotId) {
 }
 </script>
 </body>
+
 </html>

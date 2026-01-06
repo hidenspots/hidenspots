@@ -375,32 +375,55 @@ async function loadProfile() {
   }
 
     // Follow button
+    // Follow button - FULLY WORKING with real-time update
   const followBtn = document.getElementById('followBtn');
   if (isOwnProfile) {
     followBtn.style.display = 'none';
   } else {
     followBtn.style.display = 'block';
 
-    // Remove any previous click listeners to avoid duplicates
-    followBtn.onclick = null;
+    // Remove any old listeners by cloning the button
+    const newBtn = followBtn.cloneNode(true);
+    followBtn.parentNode.replaceChild(newBtn, followBtn);
 
-    // Check current follow status
-    const { data: existing, error: checkError } = await sb
-      .from('follows')
-      .select('id')
-      .eq('follower_id', currentUser.id)
-      .eq('following_id', targetUserId)
-      .maybeSingle();
+    // Refresh follow status and count
+    async function refreshFollowStatus() {
+      // Check if current user is following target
+      const { data: existing } = await sb
+        .from('follows')
+        .select('id')
+        .eq('follower_id', currentUser.id)
+        .eq('following_id', targetUserId)
+        .maybeSingle();
 
-    const isFollowing = !!existing;
+      const isFollowing = !!existing;
 
-    followBtn.textContent = isFollowing ? 'Following' : 'Follow';
-    followBtn.classList.toggle('following', isFollowing);
+      newBtn.textContent = isFollowing ? 'Following' : 'Follow';
+      newBtn.classList.toggle('following', isFollowing);
 
-    // Single click handler
-    followBtn.onclick = async () => {
+      // Update follower count
+      const { count: followersCount } = await sb
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('following_id', targetUserId);
+
+      document.getElementById('followersCount').innerText = followersCount || 0;
+    }
+
+    // Initial load
+    await refreshFollowStatus();
+
+    // Click handler
+    newBtn.onclick = async () => {
       try {
-        if (isFollowing) {
+        const { data: existing } = await sb
+          .from('follows')
+          .select('id')
+          .eq('follower_id', currentUser.id)
+          .eq('following_id', targetUserId)
+          .maybeSingle();
+
+        if (existing) {
           // Unfollow
           const { error } = await sb
             .from('follows')
@@ -408,9 +431,6 @@ async function loadProfile() {
             .eq('id', existing.id);
 
           if (error) throw error;
-
-          followBtn.textContent = 'Follow';
-          followBtn.classList.remove('following');
         } else {
           // Follow
           const { error } = await sb
@@ -418,22 +438,14 @@ async function loadProfile() {
             .insert({ follower_id: currentUser.id, following_id: targetUserId });
 
           if (error) throw error;
-
-          followBtn.textContent = 'Following';
-          followBtn.classList.add('following');
         }
 
-        // Update follower count instantly (no refresh needed)
-        const { count: newFollowersCount } = await sb
-          .from('follows')
-          .select('*', { count: 'exact', head: true })
-          .eq('following_id', targetUserId);
-
-        document.getElementById('followersCount').innerText = newFollowersCount || 0;
+        // Refresh everything after action
+        await refreshFollowStatus();
 
       } catch (err) {
         console.error(err);
-        alert('Follow action failed');
+        alert('Follow action failed. Try again.');
       }
     };
   }
@@ -485,6 +497,7 @@ loadProfile();
 </body>
 
 </html>
+
 
 
 

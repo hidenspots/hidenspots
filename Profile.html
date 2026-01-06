@@ -264,7 +264,7 @@ const sb = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
 
-const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
+const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
 async function loadProfile() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -284,7 +284,6 @@ async function loadProfile() {
   let isOwnProfile = true;
 
   if (searchedUsername) {
-    // Find user_id by username
     const { data: userSpots } = await sb
       .from('spots')
       .select('user_id')
@@ -299,7 +298,6 @@ async function loadProfile() {
     isOwnProfile = targetUserId === currentUser.id;
   }
 
-  // Set profile info
   const fullName = isOwnProfile 
     ? (currentUser.user_metadata?.full_name || targetUsername)
     : targetUsername;
@@ -307,15 +305,12 @@ async function loadProfile() {
   document.getElementById('name').innerText = fullName;
   document.getElementById('email').innerText = `@${targetUsername}`;
 
-  // Avatar: Try R2 first, fallback to UI-Avatars
+  // Avatar
   const r2AvatarUrl = `${WORKER_URL}/file/avatars/${targetUsername}-avatar.jpg`;
   const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(targetUsername)}&background=FFD88D&color=0c0f18&size=256&bold=true`;
-
   const avatarImg = document.getElementById('avatar');
   avatarImg.src = r2AvatarUrl;
-  avatarImg.onerror = () => {
-    avatarImg.src = fallbackAvatar;
-  };
+  avatarImg.onerror = () => { avatarImg.src = fallbackAvatar; };
 
   // Posts count
   const { count: postsCount } = await sb
@@ -324,7 +319,7 @@ async function loadProfile() {
     .eq('user_id', targetUserId);
   document.getElementById('postsCount').innerText = postsCount || 0;
 
-  // Followers & Following (temporarily 0 — follow system later)
+  // Followers/Following (placeholder)
   document.getElementById('followersCount').innerText = 0;
   document.getElementById('followingCount').innerText = 0;
 
@@ -335,7 +330,7 @@ async function loadProfile() {
     .eq('user_id', targetUserId)
     .order('created_at', { ascending: false });
 
-  // Profile cover from latest post
+  // Cover from latest post
   let coverUrl = 'https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600';
   if (spots && spots.length > 0) {
     const firstMedia = spots[0].media_urls?.[0]?.url || spots[0].media_url;
@@ -369,7 +364,20 @@ async function loadProfile() {
     grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;opacity:0.7;margin:3rem;">No hidden spots yet</p>`;
   }
 
-  // Avatar upload (only for own profile)
+  // Follow button
+  const followBtn = document.getElementById('followBtn');
+  if (isOwnProfile) {
+    followBtn.style.display = 'none'; // hide on own profile
+  } else {
+    followBtn.style.display = 'block'; // show on others
+    followBtn.textContent = 'Follow';
+    followBtn.onclick = () => {
+      alert('Follow feature coming soon!');
+      // You can add real follow logic later
+    };
+  }
+
+  // Avatar upload (own profile only)
   const dpInput = document.getElementById('dpInput');
   if (isOwnProfile) {
     avatarImg.style.cursor = 'pointer';
@@ -396,7 +404,7 @@ async function loadProfile() {
     };
   }
 
-  // Tabs (visual only for now)
+  // Tabs
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -424,5 +432,6 @@ loadProfile();
 </body>
 
 </html>
+
 
 

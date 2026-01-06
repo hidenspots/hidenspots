@@ -330,10 +330,10 @@ const sb = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
 
-const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
+const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
 let allSpots = [];
-let userMap = new Map();
+let userMap = new Map(); // username → {username, avatar, spotCount, followers, following}
 let leafletMap, leafletMarkers = [];
 
 const q = document.getElementById('q');
@@ -359,14 +359,8 @@ async function loadData() {
     return;
   }
 
-  const categoryNames = {
-    1: 'Adventure', 2: 'Spiritual', 3: 'Historical', 4: 'Horror', 
-    5: 'Solo', 6: 'Family', 7: 'Restaurant'
-  };
-  const emotionNames = {
-    1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',
-    5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'
-  };
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
+  const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
 
   allSpots = spots.map(spot => {
     let mediaList = [];
@@ -387,7 +381,7 @@ async function loadData() {
       emotion: emotionNames[spot.emotion_id] || '',
       lat: spot.lat ? parseFloat(spot.lat) : null,
       lng: spot.lng ? parseFloat(spot.lng) : null,
-      img: chosen.url, // R2 Worker URL
+      img: chosen.url,
       user: `@${spot.username || 'traveller'}`,
       username: spot.username || 'traveller',
       avatar: getAvatarUrl(spot.username),
@@ -396,19 +390,32 @@ async function loadData() {
     };
   });
 
-  // Build user map for profile search
+  // Build user map with follower/following counts
   userMap.clear();
-  spots.forEach(spot => {
-    const u = spot.username || 'unknown';
-    if (!userMap.has(u)) {
-      userMap.set(u, {
-        username: u,
-        avatar: getAvatarUrl(u),
-        spotCount: 0
-      });
-    }
-    userMap.get(u).spotCount++;
-  });
+  const usernames = [...new Set(spots.map(s => s.username || 'unknown'))];
+
+  for (const username of usernames) {
+    const userSpots = spots.filter(s => s.username === username);
+    const userId = userSpots.length > 0 ? userSpots[0].user_id : null;
+
+    const followers = userId ? await sb
+      .from('follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('following_id', userId) : { count: 0 };
+
+    const following = userId ? await sb
+      .from('follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('follower_id', userId) : { count: 0 };
+
+    userMap.set(username, {
+      username,
+      avatar: getAvatarUrl(username),
+      spotCount: userSpots.length,
+      followers: followers.count || 0,
+      following: following.count || 0
+    });
+  }
 
   runSearch();
 }
@@ -428,11 +435,11 @@ async function profileCardHTML(u) {
           <span class="label">posts</span>
         </div>
         <div class="stat-item">
-          <span class="number">0</span>
+          <span class="number">${u.followers}</span>
           <span class="label">followers</span>
         </div>
         <div class="stat-item">
-          <span class="number">0</span>
+          <span class="number">${u.following}</span>
           <span class="label">following</span>
         </div>
       </div>
@@ -491,16 +498,12 @@ async function renderResults(results) {
 
 /* ---------- Click to Profile ---------- */
 list.addEventListener('click', (e) => {
-  // Profile card click
   const profileCard = e.target.closest('.card.profile');
   if (profileCard) {
     const username = profileCard.dataset.username;
-    if (username) {
-      window.location.href = `Profile.html?user=${username}`;
-    }
+    if (username) window.location.href = `Profile.html?user=${username}`;
   }
 
-  // Username or avatar in spot card click
   const userEl = e.target.closest('.avatar, .username');
   if (userEl && userEl.dataset.username) {
     window.location.href = `Profile.html?user=${userEl.dataset.username}`;
@@ -514,10 +517,9 @@ async function runSearch() {
 
   let results = allSpots;
 
-  // Filter by category
   if (activeFilter !== 'all') {
     if (activeFilter === 'new') {
-      results = [...allSpots].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      results = [...allSpots].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
     } else if (activeFilter === 'nearby') {
       results = [...allSpots].sort(() => 0.5 - Math.random());
     } else {
@@ -525,7 +527,6 @@ async function runSearch() {
     }
   }
 
-  // Search in spots
   if (term) {
     results = results.filter(spot => {
       const text = `${spot.title} ${spot.sub} ${spot.place} ${spot.city} ${spot.cat} ${spot.user}`.toLowerCase();
@@ -533,7 +534,7 @@ async function runSearch() {
     });
   }
 
-  // Profile search (username)
+  // Profile search
   if (term.length >= 2 && !term.includes(' ')) {
     const matchedUsers = Array.from(userMap.values())
       .filter(u => u.username.toLowerCase().includes(term));
@@ -602,4 +603,5 @@ document.querySelectorAll('.chip').forEach(chip => {
 </body>
 
 </html>
+
 

@@ -374,15 +374,18 @@ async function loadProfile() {
     grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;opacity:0.7;margin:3rem;">No hidden spots yet</p>`;
   }
 
-  // Follow button
+    // Follow button
   const followBtn = document.getElementById('followBtn');
   if (isOwnProfile) {
     followBtn.style.display = 'none';
   } else {
     followBtn.style.display = 'block';
 
-    // Check if already following
-    const { data: existing } = await sb
+    // Remove any previous click listeners to avoid duplicates
+    followBtn.onclick = null;
+
+    // Check current follow status
+    const { data: existing, error: checkError } = await sb
       .from('follows')
       .select('id')
       .eq('follower_id', currentUser.id)
@@ -390,17 +393,47 @@ async function loadProfile() {
       .maybeSingle();
 
     const isFollowing = !!existing;
-    followBtn.textContent = isFollowing ? 'Following' : 'Follow';
 
+    followBtn.textContent = isFollowing ? 'Following' : 'Follow';
+    followBtn.classList.toggle('following', isFollowing);
+
+    // Single click handler
     followBtn.onclick = async () => {
-      if (isFollowing) {
-        await sb.from('follows').delete().eq('id', existing.id);
-        followBtn.textContent = 'Follow';
-        document.getElementById('followersCount').innerText = parseInt(document.getElementById('followersCount').innerText) - 1;
-      } else {
-        await sb.from('follows').insert({ follower_id: currentUser.id, following_id: targetUserId });
-        followBtn.textContent = 'Following';
-        document.getElementById('followersCount').innerText = parseInt(document.getElementById('followersCount').innerText) + 1;
+      try {
+        if (isFollowing) {
+          // Unfollow
+          const { error } = await sb
+            .from('follows')
+            .delete()
+            .eq('id', existing.id);
+
+          if (error) throw error;
+
+          followBtn.textContent = 'Follow';
+          followBtn.classList.remove('following');
+        } else {
+          // Follow
+          const { error } = await sb
+            .from('follows')
+            .insert({ follower_id: currentUser.id, following_id: targetUserId });
+
+          if (error) throw error;
+
+          followBtn.textContent = 'Following';
+          followBtn.classList.add('following');
+        }
+
+        // Update follower count instantly (no refresh needed)
+        const { count: newFollowersCount } = await sb
+          .from('follows')
+          .select('*', { count: 'exact', head: true })
+          .eq('following_id', targetUserId);
+
+        document.getElementById('followersCount').innerText = newFollowersCount || 0;
+
+      } catch (err) {
+        console.error(err);
+        alert('Follow action failed');
       }
     };
   }
@@ -452,6 +485,7 @@ loadProfile();
 </body>
 
 </html>
+
 
 
 

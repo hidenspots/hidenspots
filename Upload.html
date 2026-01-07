@@ -395,6 +395,28 @@ fileInput.addEventListener('change', () => {
   fileInput.value = '';
 });
 
+// Geocode address to lat/lng using OpenStreetMap Nominatim (free, no key)
+async function geocodeAddress(name, place, city, state, country) {
+  const queryParts = [name, place, city, state, country].filter(part => part && part.trim() !== '');
+  const query = queryParts.join(', ');
+
+  if (!query) return { lat: null, lng: null };
+
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+    const data = await response.json();
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      };
+    }
+  } catch (err) {
+    console.log("Geocoding failed:", err);
+  }
+  return { lat: null, lng: null };
+}
+
 // Form submit
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -415,21 +437,15 @@ form.addEventListener('submit', async (e) => {
 
   const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
-  // Get location
-  let lat = null;
-  let lng = null;
-  if ("geolocation" in navigator) {
-    try {
-      const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
-      });
-      lat = position.coords.latitude;
-      lng = position.coords.longitude;
-    } catch (err) {
-      console.log("Location denied or unavailable:", err);
-      // Optional: alert('Location access denied. Spot will be uploaded without map pin.');
-    }
-  }
+  // Get address fields
+  const name = document.getElementById('name').value.trim();
+  const place = document.getElementById('place').value.trim();
+  const city = document.getElementById('city').value.trim();
+  const state = document.getElementById('state').value.trim();
+  const country = document.getElementById('country').value.trim();
+
+  // Geocode automatically
+  const { lat, lng } = await geocodeAddress(name, place, city, state, country);
 
   try {
     const mediaUrls = [];
@@ -457,15 +473,15 @@ form.addEventListener('submit', async (e) => {
       });
     }
 
-    // Save to Supabase with lat/lng
+    // Save to Supabase with auto-geocoded lat/lng
     const { error } = await sb.from('spots').insert([{
       user_id: session.user.id,
       username: session.user.user_metadata?.username || session.user.email.split('@')[0],
-      name: document.getElementById('name').value.trim(),
-      place: document.getElementById('place').value.trim(),
-      city: document.getElementById('city').value.trim(),
-      state: document.getElementById('state').value.trim() || null,
-      country: document.getElementById('country').value.trim(),
+      name: name,
+      place: place,
+      city: city,
+      state: state || null,
+      country: country,
       emotion_id: parseInt(document.getElementById('emotion').value),
       category_id: parseInt(document.getElementById('category').value),
       story: document.getElementById('story').value.trim(),
@@ -499,6 +515,7 @@ form.addEventListener('submit', async (e) => {
 </body>
 
 </html>
+
 
 
 

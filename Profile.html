@@ -270,35 +270,36 @@ async function loadProfile() {
   const urlParams = new URLSearchParams(window.location.search);
   const searchedUsername = urlParams.get('user');
 
-  const { data: { user: currentUser }, error: authError } = await sb.auth.getUser();
-  if (authError || !currentUser) {
-    alert('Please log in');
-    window.location.href = 'index.html';
-    return;
-  }
+  const { data: { user: currentUser } } = await sb.auth.getUser(); // No redirect if not logged in
 
   let targetUsername = searchedUsername || 
-    (currentUser.user_metadata?.username || currentUser.email.split('@')[0]);
+    (currentUser?.user_metadata?.username || currentUser?.email?.split('@')[0] || 'traveller');
 
-  let targetUserId = currentUser.id;
-  let isOwnProfile = true;
+  let targetUserId = currentUser?.id || null;
+  let isOwnProfile = false;
 
   if (searchedUsername) {
     const { data: userSpots } = await sb
       .from('spots')
-      .select('user_id')
+      .select('user_id, username')
       .eq('username', searchedUsername)
       .limit(1);
 
     if (!userSpots || userSpots.length === 0) {
-      alert('User not found or no posts yet');
+      document.getElementById('name').innerText = `@${searchedUsername}`;
+      document.getElementById('email').innerText = 'User not found';
+      document.getElementById('profileGrid').innerHTML = '<p style="text-align:center;opacity:0.7;margin:3rem;">No posts yet</p>';
       return;
     }
+
     targetUserId = userSpots[0].user_id;
-    isOwnProfile = targetUserId === currentUser.id;
+    targetUsername = userSpots[0].username || searchedUsername;
+    isOwnProfile = currentUser && targetUserId === currentUser.id;
+  } else if (currentUser) {
+    isOwnProfile = true;
   }
 
-  const fullName = isOwnProfile 
+  const fullName = currentUser && isOwnProfile 
     ? (currentUser.user_metadata?.full_name || targetUsername)
     : targetUsername;
 
@@ -352,7 +353,7 @@ async function loadProfile() {
   const grid = document.getElementById('profileGrid');
   if (spots && spots.length > 0) {
     grid.innerHTML = spots.map(p => {
-      const isOwnPost = p.user_id === currentUser.id;
+      const isOwnPost = currentUser && p.user_id === currentUser.id;
       const deleteBtn = isOwnPost ? `<div class="delete-btn" onclick="deleteSpot('${p.id}', this)">🗑️</div>` : '';
       const firstImage = p.media_urls?.[0]?.url || p.media_url || 'https://via.placeholder.com/300x190/141824/FFD88D?text=No+Image';
 
@@ -374,21 +375,19 @@ async function loadProfile() {
     grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;opacity:0.7;margin:3rem;">No hidden spots yet</p>`;
   }
 
-    // Follow button
-    // Follow button - FULLY WORKING with real-time update
+  // Follow button — always visible if not own profile
   const followBtn = document.getElementById('followBtn');
   if (isOwnProfile) {
     followBtn.style.display = 'none';
   } else {
     followBtn.style.display = 'block';
 
-    // Remove any old listeners by cloning the button
+    // Clone to avoid duplicate listeners
     const newBtn = followBtn.cloneNode(true);
     followBtn.parentNode.replaceChild(newBtn, followBtn);
 
-    // Refresh follow status and count
-    async function refreshFollowStatus() {
-      // Check if current user is following target
+    // Initial state
+    if (currentUser) {
       const { data: existing } = await sb
         .from('follows')
         .select('id')
@@ -397,62 +396,53 @@ async function loadProfile() {
         .maybeSingle();
 
       const isFollowing = !!existing;
-
       newBtn.textContent = isFollowing ? 'Following' : 'Follow';
       newBtn.classList.toggle('following', isFollowing);
+    } else {
+      newBtn.textContent = 'Follow';
+      newBtn.classList.remove('following');
+    }
+
+    // Click action
+    newBtn.onclick = async () => {
+      if (!currentUser) {
+        alert('Please log in to follow this user');
+        window.location.href = 'index.html'; // or your login page
+        return;
+      }
+
+      const { data: existing } = await sb
+        .from('follows')
+        .select('id')
+        .eq('follower_id', currentUser.id)
+        .eq('following_id', targetUserId)
+        .maybeSingle();
+
+      if (existing) {
+        // Unfollow
+        await sb.from('follows').delete().eq('id', existing.id);
+        newBtn.textContent = 'Follow';
+        newBtn.classList.remove('following');
+      } else {
+        // Follow
+        await sb.from('follows').insert({ follower_id: currentUser.id, following_id: targetUserId });
+        newBtn.textContent = 'Following';
+        newBtn.classList.add('following');
+      }
 
       // Update follower count
-      const { count: followersCount } = await sb
+      const { count: newCount } = await sb
         .from('follows')
         .select('*', { count: 'exact', head: true })
         .eq('following_id', targetUserId);
 
-      document.getElementById('followersCount').innerText = followersCount || 0;
-    }
-
-    // Initial load
-    await refreshFollowStatus();
-
-    // Click handler
-    newBtn.onclick = async () => {
-      try {
-        const { data: existing } = await sb
-          .from('follows')
-          .select('id')
-          .eq('follower_id', currentUser.id)
-          .eq('following_id', targetUserId)
-          .maybeSingle();
-
-        if (existing) {
-          // Unfollow
-          const { error } = await sb
-            .from('follows')
-            .delete()
-            .eq('id', existing.id);
-
-          if (error) throw error;
-        } else {
-          // Follow
-          const { error } = await sb
-            .from('follows')
-            .insert({ follower_id: currentUser.id, following_id: targetUserId });
-
-          if (error) throw error;
-        }
-
-        // Refresh everything after action
-        await refreshFollowStatus();
-
-      } catch (err) {
-        console.error(err);
-        alert('Follow action failed. Try again.');
-      }
+      document.getElementById('followersCount').innerText = newCount || 0;
     };
   }
 
-  // Avatar upload (own profile)
+  // Avatar upload — only own profile
   const dpInput = document.getElementById('dpInput');
-  if (isOwnProfile) {
+  if (currentUser && isOwnProfile) {
     avatarImg.style.cursor = 'pointer';
     avatarImg.onclick = () => dpInput.click();
     dpInput.onchange = async () => {
@@ -476,6 +466,14 @@ async function loadProfile() {
       }
     };
   }
+
+  // Tabs (visual only)
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
 }
 
 async function deleteSpot(spotId, element) {
@@ -497,6 +495,7 @@ loadProfile();
 </body>
 
 </html>
+
 
 
 

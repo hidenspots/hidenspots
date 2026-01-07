@@ -333,7 +333,7 @@ const sb = supabase.createClient(
 const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
 let allSpots = [];
-let userMap = new Map(); // username → {username, avatar, spotCount, followers, following}
+let userMap = new Map();
 let leafletMap, leafletMarkers = [];
 
 const q = document.getElementById('q');
@@ -390,7 +390,7 @@ async function loadData() {
     };
   });
 
-  // Build user map with follower/following counts
+  // Build user map with counts
   userMap.clear();
   const usernames = [...new Set(spots.map(s => s.username || 'unknown'))];
 
@@ -398,12 +398,12 @@ async function loadData() {
     const userSpots = spots.filter(s => s.username === username);
     const userId = userSpots.length > 0 ? userSpots[0].user_id : null;
 
-    const followers = userId ? await sb
+    const { count: followers } = userId ? await sb
       .from('follows')
       .select('*', { count: 'exact', head: true })
       .eq('following_id', userId) : { count: 0 };
 
-    const following = userId ? await sb
+    const { count: following } = userId ? await sb
       .from('follows')
       .select('*', { count: 'exact', head: true })
       .eq('follower_id', userId) : { count: 0 };
@@ -412,8 +412,8 @@ async function loadData() {
       username,
       avatar: getAvatarUrl(username),
       spotCount: userSpots.length,
-      followers: followers.count || 0,
-      following: following.count || 0
+      followers: followers || 0,
+      following: following || 0
     });
   }
 
@@ -534,7 +534,6 @@ async function runSearch() {
     });
   }
 
-  // Profile search
   if (term.length >= 2 && !term.includes(' ')) {
     const matchedUsers = Array.from(userMap.values())
       .filter(u => u.username.toLowerCase().includes(term));
@@ -546,12 +545,12 @@ async function runSearch() {
 
   const spotResults = results.filter(r => r.type !== 'profile');
   plotMarkers(spotResults);
-  fitMap(spotResults);
 }
 
-/* ---------- Map ---------- */
+/* ---------- Map - FIXED ---------- */
 function initLeaflet() {
-  leafletMap = L.map('realMap').setView([20.5937, 78.9629], 5);
+  leafletMap = L.map('realMap').setView([20.5937, 78.9629], 5); // India center
+
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(leafletMap);
@@ -564,22 +563,30 @@ function clearMarkers() {
 
 function plotMarkers(arr) {
   clearMarkers();
-  arr.forEach(p => {
-    if (p.lat !== null && p.lng !== null) {
-      const marker = L.marker([p.lat, p.lng]).addTo(leafletMap);
-      marker.bindPopup(`<strong>${p.title}</strong><br>${p.sub}<br>By ${p.user}`);
-      leafletMarkers.push(marker);
-    }
-  });
-}
 
-function fitMap(arr) {
-  const valid = arr.filter(p => p.lat !== null && p.lng !== null);
-  if (valid.length > 0) {
-    const bounds = L.latLngBounds(valid.map(p => [p.lat, p.lng]));
-    leafletMap.fitBounds(bounds.pad(0.5));
+  const validSpots = arr.filter(p => p.lat !== null && p.lng !== null && !isNaN(p.lat) && !isNaN(p.lng));
+
+  validSpots.forEach(p => {
+    const marker = L.marker([p.lat, p.lng])
+      .addTo(leafletMap)
+      .bindPopup(`
+        <strong>${p.title}</strong><br>
+        ${p.sub}<br>
+        By ${p.user}<br>
+        <a href="spot.html?id=${p.id}" style="color:#FFD88D;text-decoration:underline;">View spot →</a>
+      `);
+    leafletMarkers.push(marker);
+  });
+
+  // Fit map to pins if available
+  if (validSpots.length > 1) {
+    const bounds = L.latLngBounds(validSpots.map(p => [p.lat, p.lng]));
+    leafletMap.fitBounds(bounds.pad(0.3));
+  } else if (validSpots.length === 1) {
+    leafletMap.setView([validSpots[0].lat, validSpots[0].lng], 12);
   } else {
-    leafletMap.setView([20, 0], 2);
+    // No pins → show India
+    leafletMap.setView([20.5937, 78.9629], 5);
   }
 }
 
@@ -603,5 +610,6 @@ document.querySelectorAll('.chip').forEach(chip => {
 </body>
 
 </html>
+
 
 

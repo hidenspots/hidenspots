@@ -346,7 +346,6 @@ const fileInput = document.getElementById('fileInput');
 const mediaPreview = document.getElementById('mediaPreview');
 const safetyInput = document.getElementById('safety');
 const stars = document.querySelectorAll('#safetyStars span');
-
 let selectedFiles = [];
 
 // Star rating
@@ -364,27 +363,22 @@ stars.forEach(star => {
 // Preview selected files
 fileInput.addEventListener('change', () => {
   const newFiles = Array.from(fileInput.files);
-
   if (selectedFiles.length + newFiles.length > 4) {
     alert('You can only upload up to 4 files');
     fileInput.value = '';
     return;
   }
-
   newFiles.forEach(file => {
     selectedFiles.push(file);
-
     const reader = new FileReader();
     reader.onload = (e) => {
       const div = document.createElement('div');
       div.className = 'preview-item';
-
       if (file.type.startsWith('video')) {
         div.innerHTML = `<video src="${e.target.result}" controls></video>`;
       } else {
         div.innerHTML = `<img src="${e.target.result}" alt="preview">`;
       }
-
       const removeBtn = document.createElement('div');
       removeBtn.className = 'remove-media';
       removeBtn.innerHTML = '×';
@@ -393,14 +387,11 @@ fileInput.addEventListener('change', () => {
         selectedFiles = selectedFiles.filter(f => f !== file);
         div.remove();
       };
-
       div.appendChild(removeBtn);
       mediaPreview.appendChild(div);
     };
     reader.readAsDataURL(file);
   });
-
-  // Clear input so same file can be re-selected
   fileInput.value = '';
 });
 
@@ -422,7 +413,23 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
-  const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
+  const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
+
+  // Get location
+  let lat = null;
+  let lng = null;
+  if ("geolocation" in navigator) {
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+      });
+      lat = position.coords.latitude;
+      lng = position.coords.longitude;
+    } catch (err) {
+      console.log("Location denied or unavailable:", err);
+      // Optional: alert('Location access denied. Spot will be uploaded without map pin.');
+    }
+  }
 
   try {
     const mediaUrls = [];
@@ -450,7 +457,7 @@ form.addEventListener('submit', async (e) => {
       });
     }
 
-    // Save to Supabase
+    // Save to Supabase with lat/lng
     const { error } = await sb.from('spots').insert([{
       user_id: session.user.id,
       username: session.user.user_metadata?.username || session.user.email.split('@')[0],
@@ -468,7 +475,9 @@ form.addEventListener('submit', async (e) => {
       hashtags: document.getElementById('hashtags').value.trim(),
       credits: document.getElementById('credits').value.trim(),
       media_urls: mediaUrls,
-      media_url: mediaUrls[0]?.url || null
+      media_url: mediaUrls[0]?.url || null,
+      lat: lat,
+      lng: lng
     }]);
 
     if (error) {
@@ -490,5 +499,6 @@ form.addEventListener('submit', async (e) => {
 </body>
 
 </html>
+
 
 

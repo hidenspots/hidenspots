@@ -395,19 +395,30 @@ fileInput.addEventListener('change', () => {
   fileInput.value = '';
 });
 
-// Geocode address to lat/lng using OpenStreetMap Nominatim (global)
+// Improved geocoding with required headers
 async function geocodeAddress(name, place, city, state, country) {
-  const queryParts = [name, place, city, state, country].filter(part => part && part.trim() !== '');
+  // Prioritize city + country for better results
+  const queryParts = [];
+  if (city) queryParts.push(city);
+  if (state) queryParts.push(state);
+  if (country) queryParts.push(country);
+  if (place) queryParts.push(place);
+  if (name) queryParts.push(name);
+
   const query = queryParts.join(', ');
 
   if (!query) return { lat: null, lng: null };
 
   try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1`, {
       headers: {
-        'User-Agent': 'HidenSpotsApp/1.0 (contact@hidenspots.com)' // Replace with your real email/contact
+        'User-Agent': 'HidenSpots/1.0 (+https://hidenspots.com)',
+        'Referer': 'https://hidenspots.com'
       }
     });
+
+    if (!response.ok) return { lat: null, lng: null };
+
     const data = await response.json();
     if (data && data.length > 0) {
       return {
@@ -416,7 +427,7 @@ async function geocodeAddress(name, place, city, state, country) {
       };
     }
   } catch (err) {
-    console.log("Geocoding failed:", err);
+    console.log("Geocoding error:", err);
   }
   return { lat: null, lng: null };
 }
@@ -441,15 +452,17 @@ form.addEventListener('submit', async (e) => {
 
   const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
-  // Get address fields
+  // Address fields
   const name = document.getElementById('name').value.trim();
   const place = document.getElementById('place').value.trim();
   const city = document.getElementById('city').value.trim();
   const state = document.getElementById('state').value.trim();
   const country = document.getElementById('country').value.trim();
 
-  // Geocode automatically (global)
+  // Auto geocode
   const { lat, lng } = await geocodeAddress(name, place, city, state, country);
+
+  console.log('Geocoded lat/lng:', lat, lng); // Check in browser console
 
   try {
     const mediaUrls = [];
@@ -477,7 +490,7 @@ form.addEventListener('submit', async (e) => {
       });
     }
 
-    // Save to Supabase with auto-geocoded lat/lng
+    // Save with lat/lng
     const { error } = await sb.from('spots').insert([{
       user_id: session.user.id,
       username: session.user.user_metadata?.username || session.user.email.split('@')[0],
@@ -519,6 +532,7 @@ form.addEventListener('submit', async (e) => {
 </body>
 
 </html>
+
 
 
 

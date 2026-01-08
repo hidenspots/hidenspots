@@ -395,7 +395,7 @@ fileInput.addEventListener('change', () => {
   fileInput.value = '';
 });
 
-// Geocode address to lat/lng using OpenStreetMap Nominatim (free, no key)
+// Geocode address to lat/lng using OpenStreetMap Nominatim (global)
 async function geocodeAddress(name, place, city, state, country) {
   const queryParts = [name, place, city, state, country].filter(part => part && part.trim() !== '');
   const query = queryParts.join(', ');
@@ -403,7 +403,11 @@ async function geocodeAddress(name, place, city, state, country) {
   if (!query) return { lat: null, lng: null };
 
   try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
+      headers: {
+        'User-Agent': 'HidenSpotsApp/1.0 (contact@hidenspots.com)' // Replace with your real email/contact
+      }
+    });
     const data = await response.json();
     if (data && data.length > 0) {
       return {
@@ -444,7 +448,7 @@ form.addEventListener('submit', async (e) => {
   const state = document.getElementById('state').value.trim();
   const country = document.getElementById('country').value.trim();
 
-  // Geocode automatically
+  // Geocode automatically (global)
   const { lat, lng } = await geocodeAddress(name, place, city, state, country);
 
   try {
@@ -515,6 +519,7 @@ form.addEventListener('submit', async (e) => {
 </body>
 
 </html>
+
 
 
 

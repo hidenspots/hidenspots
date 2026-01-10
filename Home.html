@@ -81,22 +81,21 @@
   left: 50%;
   transform: translateX(-50%);
   bottom: 0;
-  padding-bottom: calc(14px + env(safe-area-inset-bottom));
-  margin-bottom: 0;
 
-
+  padding: 14px 26px calc(14px + env(safe-area-inset-bottom));
   background: rgba(255,255,255,.06);
   backdrop-filter: blur(25px);
-  border-radius: 60px;
-  padding: 14px 26px;
+
+  border-radius: 60px 60px 0 0;
   border: 1px solid rgba(255,255,255,.14);
 
   display: flex;
   gap: 2.2rem;
 
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
-  z-index: 999;
+  box-shadow: 0 -6px 25px rgba(0,0,0,.45);
+  z-index: 9999;
 }
+
   .nav-icon{color:rgba(255,255,255,.7);transition:.4s}
   .nav-icon:hover{color:var(--gold);transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
   .nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
@@ -124,8 +123,9 @@
 /* Left: results list */
 .list{
   overflow:auto;
-  padding:14px 18px 220px;
+  padding:14px 18px calc(140px + env(safe-area-inset-bottom));
 }
+
 
 
 /* Result cards */
@@ -625,6 +625,7 @@ document.querySelectorAll('.chip').forEach(chip => {
 </body>
 
 </html>
+
 
 
 

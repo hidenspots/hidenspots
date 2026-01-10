@@ -80,8 +80,10 @@
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: env(safe-area-inset-bottom, 0px);
-  margin-bottom: 12px;
+  bottom: 0;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  margin-bottom: 0;
+
 
   background: rgba(255,255,255,.06);
   backdrop-filter: blur(25px);
@@ -122,7 +124,7 @@
 /* Left: results list */
 .list{
   overflow:auto;
-  padding:14px 18px 160px;
+  padding:14px 18px 220px;
 }
 
 
@@ -623,6 +625,7 @@ document.querySelectorAll('.chip').forEach(chip => {
 </body>
 
 </html>
+
 
 
 

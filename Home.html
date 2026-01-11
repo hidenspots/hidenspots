@@ -23,9 +23,13 @@
 
 html, body {
   height: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Optional: prevents any unwanted scroll on landing */
+  background: #0c0f18;
+  color: #fff;
+  overflow-x: hidden;
+  overflow-y: auto;                   /* Allow scroll if needed, but landing is short */
 }
 
 .app-container {
@@ -118,26 +122,31 @@ html, body {
 .sitem:hover,.sitem.active{background:rgba(255,255,255,.06)}
 .sitem small{opacity:.7}
 .nav-bar {
-  position: fixed;                /* Fixed to viewport — always at bottom regardless of page length */
-  bottom: 0;
+  position: fixed;
+  bottom: 0;                          /* Stick directly to bottom */
   left: 0;
   right: 0;
-  width: 90%;                     /* Pill shape, not full-width */
-  max-width: 380px;               /* Keeps it compact and centered */
-  margin: 0 auto;                 /* Centers horizontally without transform */
-  z-index: 1000;
-  padding: 14px 26px;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom)); /* Handles iPhone bottom bar/notch */
-  background: rgba(255,255,255,.06);
+  width: 90%;
+  max-width: 400px;                   /* Consistent pill size */
+  margin: 0 auto;                     /* Center without transform (more reliable) */
+  z-index: 80;
+  padding: 1rem 2.5rem;
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); /* Critical for iPhone/Android bottom bar */
+  background: rgba(255,255,255,.05);
   backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
   border-radius: 60px 60px 0 0;
-  border: 1px solid rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.12);
   border-bottom: none;
   display: flex;
+  gap: 3rem;
   justify-content: space-around;
   align-items: center;
-  box-shadow: 0 -8px 30px rgba(0,0,0,.4);
+  box-shadow: 0 8px 30px rgba(0,0,0,.25);
+}
+
+/* Make sure content doesn't get hidden under nav */
+body {
+  padding-bottom: 100px;              /* Clearance for nav height + safe area */
 }
   .nav-icon{color:rgba(255,255,255,.7);transition:.4s}
   .nav-icon:hover{color:var(--gold);transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
@@ -692,6 +701,7 @@ window.addEventListener('scroll', () => {
 </body>
 
 </html>
+
 
 
 

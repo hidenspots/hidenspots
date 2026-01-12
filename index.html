@@ -24,8 +24,11 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{
   font-family:'Playfair Display',serif;
-  background:var(--bg);color:#fff;overflow:hidden
+  background:var(--bg);
+  color:#fff;
+  overflow-x:hidden;
 }
+
 
 /* Background */
 .image-background{position:fixed;inset:0}
@@ -121,18 +124,23 @@ button{
   .stat-item{font-size:.9rem;opacity:.78;display:flex;align-items:center;gap:.5rem}
  /* Nav bar */
   .nav-bar{
-    background:rgba(255,255,255,.05);
-    backdrop-filter:blur(25px);
-    border-radius:60px;
-    padding:1rem 2.5rem;
-    border:1px solid rgba(255,255,255,.12);
-    position:absolute;
-    bottom: calc(2rem + env(safe-area-inset-bottom));
-    
-    left:50%;transform:translateX(-50%);
-    display:flex;gap:3rem;
-    box-shadow:0 8px 30px rgba(0,0,0,.25)
-  }
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(25px);
+  border-radius:60px;
+  padding:1rem 2.5rem;
+  border:1px solid rgba(255,255,255,.12);
+
+  position:fixed;
+  left:50%;
+  bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+
+  display:flex;
+  gap:3rem;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+  z-index:30;
+}
+  
   .nav-icon{color:rgba(255,255,255,.7);transition:.4s}
   .nav-icon:hover{color:var(--gold);transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
   .nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
@@ -223,28 +231,29 @@ button{
     </div>
     <p class="tagline">“Because not all destinations are on the map.”</p>
     </main>
-     <div class="bottom-section">
-    <div class="bottom-left">
-      <div class="country-label">🇮🇳 India’s First Hidden Places Exploring Site</div>
-      <div class="stats-grid" role="list">
-        <div class="stat-item" role="listitem">🧭 200,000+ Travelers</div>
-        <div class="stat-item" role="listitem">🌄 100+ Hidden Destinies</div>
-        <div class="stat-item" role="listitem">🗺️ 10,000+ Places Discovered</div>
-        <div class="stat-item" role="listitem">🌍 Growing Every Day</div>
+       <div class="bottom-section">
+      <div class="bottom-left">
+        <div class="country-label">🇮🇳 India’s First Hidden Places Exploring Site</div>
+        <div class="stats-grid" role="list">
+          <div class="stat-item" role="listitem">🧭 200,000+ Travelers</div>
+          <div class="stat-item" role="listitem">🌄 100+ Hidden Destinies</div>
+          <div class="stat-item" role="listitem">🗺️ 10,000+ Places Discovered</div>
+          <div class="stat-item" role="listitem">🌍 Growing Every Day</div>
+        </div>
       </div>
-    </div>
-    <nav class="nav-bar" aria-label="Primary">
-    <a href="Mainhome.html" class="nav-icon" title="Home" aria-label="Home">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    </a>
-    <a href="Home.html" class="nav-icon" title="Search" aria-label="Search">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    </a>
-    <a href="Upload.html" class="nav-icon" title="Create" aria-label="Create">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    </a>
-    <!-- Destiny List Icon -->
-    <a href="Explore.html" class="nav-icon" title="Destiny List" aria-label="Destiny List">
+       </div>
+      <nav class="nav-bar" aria-label="Primary">
+      <a href="Mainhome.html" class="nav-icon" title="Home" aria-label="Home">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
+      <a href="Home.html" class="nav-icon" title="Search" aria-label="Search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </a>
+      <a href="Upload.html" class="nav-icon" title="Create" aria-label="Create">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </a>
+      <!-- Destiny List Icon -->
+      <a href="Explore.html" class="nav-icon" title="Destiny List" aria-label="Destiny List">
       <svg viewBox="0 0 24 24">
         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
         <circle cx="12" cy="9" r="2.5" fill="none"/>
@@ -255,7 +264,7 @@ button{
       <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     </a>
   </nav>
-</div>
+
 <!-- AUTH MODAL -->
 <div class="backdrop" id="authModal">
   <div class="auth">
@@ -418,5 +427,6 @@ setInterval(()=>{
 
 </body>
 </html>
+
 
 

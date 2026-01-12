@@ -127,7 +127,9 @@ button{
     padding:1rem 2.5rem;
     border:1px solid rgba(255,255,255,.12);
     position:absolute;
-    bottom:-4rem;left:50%;transform:translateX(-50%);
+    bottom: calc(2rem + env(safe-area-inset-bottom));
+    
+    left:50%;transform:translateX(-50%);
     display:flex;gap:3rem;
     box-shadow:0 8px 30px rgba(0,0,0,.25)
   }
@@ -416,4 +418,5 @@ setInterval(()=>{
 
 </body>
 </html>
+
 

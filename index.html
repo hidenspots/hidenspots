@@ -424,9 +424,19 @@ setInterval(()=>{
   slides[i].classList.add('active');
 },5000);
 </script>
-
+<script>
+// When user scrolls near the bottom, smoothly scroll to Search.html
+window.addEventListener('scroll', function() {
+  // Trigger when user is close to bottom (adjust 500 if needed)
+  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+    // Smoothly navigate to Search.html (same tab, no reload feel)
+    window.location.href = 'Search.html#top';  // #top optional anchor
+  }
+});
+</script>
 </body>
 </html>
+
 
 
 

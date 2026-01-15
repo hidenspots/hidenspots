@@ -479,7 +479,9 @@
   
 @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
   
-</style></head><body><!-- Header, search bar, chips, layout — all same --><div class="header">  <a href="index.html" class="brand" aria-label="Hiden Spots"><svg viewBox="0 0 48 48" aria-hidden="true">
+</style></head><body>
+  <div id="top"></div>
+  <!-- Header, search bar, chips, layout — all same --><div class="header">  <a href="index.html" class="brand" aria-label="Hiden Spots"><svg viewBox="0 0 48 48" aria-hidden="true">
 
   <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
 
@@ -1117,4 +1119,12 @@ document.querySelectorAll('.chip').forEach(chip => {
   
 });
   
-</script></body></html>
+</script>
+<script>
+  // If coming from index.html scroll, start at top smoothly
+  if (window.location.hash === '#top') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body></html>
+

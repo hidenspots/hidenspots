@@ -209,7 +209,7 @@
     }
 
     /* ────────────────────────────────────────────────
-       NEW: Full-screen swipe section below current spot
+       NEW: Full-screen swipe area below current spot
     ──────────────────────────────────────────────── */
     .swipe-section {
       padding: 3rem 1rem 6rem;
@@ -231,7 +231,7 @@
       background: var(--panel);
       border-radius: 16px;
       overflow: hidden;
-      transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transition: all 0.5s ease;
       opacity: 0;
       transform: scale(0.92) translateY(30px);
       pointer-events: none;
@@ -353,7 +353,7 @@
     </div>
   </article>
 
-  <!-- Full-screen swipe section for next/previous spots (below current spot) -->
+  <!-- Full-screen swipe section (below current spot card) -->
   <section class="swipe-section">
     <div class="swipe-container">
       <button class="swipe-arrow prev" id="prevBtn">←</button>
@@ -395,7 +395,7 @@ const sb = supabase.createClient(
 const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 let spot = null; // Global current spot
 let relatedSpots = []; // All similar spots
-let currentIndex = 0; // Current swipe card index
+let currentIndex = 0; // Current displayed swipe card
 
 const urlParams = new URLSearchParams(window.location.search);
 const spotId = urlParams.get('id');
@@ -503,24 +503,24 @@ function initSwipe() {
     if (!isDragging) return;
     isDragging = false;
 
-    if (Math.abs(direction) > 80) { // Minimum swipe distance
+    if (Math.abs(direction) > 80) {
       if (direction > 0) changeSpot(-1); // left swipe → previous
       else changeSpot(1); // right swipe → next
     }
   };
 
-  // Mouse
+  // Mouse events
   container.addEventListener('mousedown', handleStart);
   container.addEventListener('mousemove', handleMove);
   container.addEventListener('mouseup', handleEnd);
   container.addEventListener('mouseleave', handleEnd);
 
-  // Touch
+  // Touch events
   container.addEventListener('touchstart', handleStart, { passive: false });
   container.addEventListener('touchmove', handleMove, { passive: false });
   container.addEventListener('touchend', handleEnd);
 
-  // Arrows
+  // Arrow buttons
   document.getElementById('prevBtn').onclick = () => changeSpot(-1);
   document.getElementById('nextBtn').onclick = () => changeSpot(1);
 }

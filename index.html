@@ -281,7 +281,7 @@ button{
     <button id="switchMode" style="margin-top:.5rem">Switch to Signup</button>
   </div>
 </div>
-
+<div id="scroll-trigger" style="height: 1px; position: absolute; bottom: 0; width: 100%;"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ================= SUPABASE ================= */
@@ -425,20 +425,23 @@ setInterval(()=>{
 },5000);
 </script>
 <script>
-let hasNavigated = false;
-
-window.addEventListener('scroll', function() {
-  if (hasNavigated) return;
-
-  // Trigger near bottom (adjust 500 if needed)
-  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-    hasNavigated = true;
+// Use Intersection Observer to detect when bottom is visible
+const trigger = document.getElementById('scroll-trigger');
+const observer = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    // Bottom is visible → go to Search.html
     window.location.href = 'Search.html';
+    observer.disconnect(); // Stop watching
   }
-}, { passive: false });
+}, {
+  rootMargin: '0px 0px 300px 0px' // Trigger 300px before bottom
+});
+
+observer.observe(trigger);
 </script>
 </body>
 </html>
+
 
 
 

@@ -23,6 +23,7 @@
     html,body{height:100%; margin:0}
     body{
       background:var(--bg); color:#fff; font-family:'Playfair Display',serif;
+      overflow:hidden; /* Prevent page scroll when swiping */
     }
     /* Header */
     .header{
@@ -36,25 +37,45 @@
     .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff}
     .brand svg{width:30px;height:30px}
     .brand span{letter-spacing:3px}
-    /* Main Content */
+    /* Main Spot Card */
     .main{
-      max-width:800px;
-      margin:0 auto;
-      padding:20px;
-    }
-    .card{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:16px;
+      height:100vh;
+      position:relative;
       overflow:hidden;
-      box-shadow:0 12px 26px rgba(0,0,0,.25);
     }
-    /* HERO MEDIA */
+    .spot-card{
+      position:absolute;
+      inset:0;
+      background:var(--panel);
+      border-radius:0;
+      overflow:hidden;
+      box-shadow:0 0 40px rgba(0,0,0,0.6);
+      transition:transform 0.6s ease, opacity 0.6s ease;
+      opacity:0;
+      transform:scale(0.9) translateY(50px);
+      pointer-events:none;
+    }
+    .spot-card.active{
+      opacity:1;
+      transform:scale(1) translateY(0);
+      pointer-events:auto;
+      z-index:10;
+    }
+    .spot-card.next{
+      transform:scale(0.95) translateY(30px);
+      opacity:0.7;
+      z-index:5;
+    }
+    .spot-card.prev{
+      transform:scale(0.95) translateY(-30px);
+      opacity:0.7;
+      z-index:5;
+    }
+    /* Hero Media */
     .hero-media {
       width: 100%;
-      height: 400px;
+      height: 70vh;
       overflow: hidden;
-      border-radius: 16px 16px 0 0;
     }
     .hero-media img,
     .hero-media video {
@@ -62,131 +83,68 @@
       height: 100%;
       object-fit: cover;
     }
-    /* GALLERY THUMBNAILS */
-    .gallery {
-      display: flex;
-      overflow-x: auto;
-      gap: 8px;
-      padding: 12px 0;
-      scrollbar-width: thin;
-      scrollbar-color: var(--gold) transparent;
-    }
-    .gallery::-webkit-scrollbar {
-      height: 6px;
-    }
-    .gallery::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .gallery::-webkit-scrollbar-thumb {
-      background: var(--gold);
-      border-radius: 3px;
-    }
-    .thumb {
-      width: 80px;
-      height: 80px;
-      border-radius: 12px;
-      overflow: hidden;
-      cursor: pointer;
-      flex-shrink: 0;
-      border: 2px solid transparent;
-      transition: border .3s;
-    }
-    .thumb.active {
-      border-color: var(--gold);
-    }
-    .thumb img,
-    .thumb video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    /* Info */
-    .info{
-      padding:20px;
+    /* Info Overlay */
+    .info-overlay{
+      position:absolute;
+      bottom:0;
+      left:0;
+      right:0;
+      background:linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      padding:2rem 1.5rem 4rem;
+      color:#fff;
     }
     .title{
       color:var(--gold);
-      font-size:28px;
-      margin:0 0 8px;
+      font-size:2.2rem;
+      margin:0 0 0.5rem;
     }
     .sub{
-      opacity:.85;
-      font-size:18px;
-      margin:0 0 16px;
-    }
-    .tags{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin:16px 0;
-    }
-    .tag{
-      padding:6px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,.08);
-      border:1px solid var(--border);
-      font-size:14px;
-      opacity:.9;
+      font-size:1.2rem;
+      opacity:0.9;
+      margin:0 0 1rem;
     }
     .story{
-      font-size:16px;
-      line-height:1.6;
-      opacity:.95;
-      margin:20px 0;
+      font-size:1.1rem;
+      line-height:1.5;
+      opacity:0.95;
+      max-height:120px;
+      overflow:hidden;
     }
-    .details{
-      margin-top:24px;
-      display:grid;
-      gap:16px;
-      font-size:15px;
-      opacity:.9;
-    }
-    .detail-item strong{
-      color:var(--gold);
-    }
-    .user{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      margin-top:24px;
-      padding-top:20px;
-      border-top:1px solid var(--border);
-      opacity:.9;
-    }
-    .user .avatar{
-      width:40px;
-      height:40px;
-      border-radius:50%;
-      object-fit:cover;
-      border:2px solid var(--gold);
-    }
-    .stars{
-      color:#FFD88D;
-      font-size:18px;
-    }
-    .stars span{
-      opacity:0.3;
-    }
-    .stars span.filled{
-      opacity:1;
-    }
-    .destiny-btn {
-      margin-left: auto;
-      padding: 8px 18px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.1);
-      border: 1px solid var(--border);
-      font-size: 14px;
+    /* Swipe Buttons */
+    .swipe-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.6);
+      color: #FFD88D;
+      border: none;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      font-size: 2rem;
       cursor: pointer;
-      transition: .3s;
+      z-index: 20;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .destiny-btn:hover {
-      background: var(--gold);
-      color: #000;
+    .swipe-btn:hover {
+      background: rgba(255,216,141,0.4);
+      transform: translateY(-50%) scale(1.1);
     }
-    .destiny-btn.saved {
-      background: var(--gold);
-      color: #000;
+    .swipe-btn.prev {
+      left: 20px;
+    }
+    .swipe-btn.next {
+      right: 20px;
+    }
+    @media (max-width: 768px) {
+      .swipe-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.8rem;
+      }
     }
     /* Bottom Nav Bar */
     .nav-bar{
@@ -207,98 +165,6 @@
     @media(max-width:768px){
       .nav-bar{gap:2rem;padding:.9rem 1.6rem}
     }
-
-    /* Suggestions Section */
-    .suggestions-section {
-      padding: 3rem 1rem;
-      background: #141824;
-    }
-    .suggestions-container {
-      position: relative;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    .suggestions-wrapper {
-      position: relative;
-      overflow: hidden;
-    }
-    .suggestions-track {
-      display: flex;
-      gap: 1.5rem;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scroll-snap-type: x mandatory;
-      padding: 0 1rem;
-      scroll-behavior: smooth;
-    }
-    .suggestion-card {
-      flex: 0 0 280px;
-      background: #121624;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-      cursor: pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
-      scroll-snap-align: start;
-    }
-    .suggestion-card:hover {
-      transform: scale(1.05);
-      box-shadow: 0 12px 32px rgba(255,216,141,0.3);
-    }
-    .suggestion-card img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-    }
-    .suggestion-card .info {
-      padding: 1rem;
-    }
-    .suggestion-card h3 {
-      margin: 0;
-      font-size: 1.2rem;
-      color: #FFD88D;
-    }
-    .suggestion-card p {
-      margin: 0.5rem 0 0;
-      opacity: 0.8;
-      font-size: 0.95rem;
-    }
-    /* Arrows */
-    .swipe-arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0,0,0,0.6);
-      color: #FFD88D;
-      border: none;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      font-size: 1.8rem;
-      cursor: pointer;
-      z-index: 10;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .swipe-arrow:hover {
-      background: rgba(255,216,141,0.4);
-      transform: translateY(-50%) scale(1.1);
-    }
-    .swipe-arrow.prev {
-      left: 10px;
-    }
-    .swipe-arrow.next {
-      right: 10px;
-    }
-    @media (max-width: 768px) {
-      .swipe-arrow {
-        width: 44px;
-        height: 44px;
-        font-size: 1.5rem;
-      }
-    }
   </style>
 </head>
 <body>
@@ -312,46 +178,9 @@
     <span>Hiden Spots</span>
   </a>
 </div>
-<div class="main">
-  <article class="card" id="spotCard">
-    <div class="hero-media" id="heroMedia"></div>
-    <div class="gallery" id="gallery"></div>
-    <div class="info">
-      <h1 class="title" id="title"></h1>
-      <p class="sub" id="sub"></p>
-      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-        <div class="tags" id="tags"></div>
-        <button class="destiny-btn" id="destinyBtn">Add to Destiny</button>
-      </div>
-      <div class="story" id="story"></div>
-      <div class="details">
-        <div class="detail-item"><strong>Solo Woman Safety Rating:</strong> <span id="safety"></span></div>
-        <div class="detail-item"><strong>Best Time:</strong> <span id="besttime"></span></div>
-        <div class="detail-item"><strong>Tips:</strong> <span id="tips"></span></div>
-        <div class="detail-item"><strong>Hashtags:</strong> <span id="hashtags"></span></div>
-        <div class="detail-item"><strong>Credits:</strong> <span id="credits"></span></div>
-      </div>
-      <div class="user" style="cursor:pointer;" onclick="goToProfile()">
-        <img class="avatar" id="userAvatar" src="">
-        <span>Posted by <span id="username" style="color:var(--gold);"></span></span>
-      </div>
-    </div>
-  </article>
 
-  <!-- Swipeable Suggestions -->
-  <section class="suggestions-section">
-    <h2 style="text-align:center; color:#FFD88D; font-size:2rem; margin-bottom:2rem;">More Hidden Spots Like This</h2>
-    <div class="suggestions-container">
-      <button class="swipe-arrow prev" id="prevBtn">←</button>
-      <div class="suggestions-wrapper">
-        <div class="suggestions-track" id="suggestionsTrack"></div>
-      </div>
-      <button class="swipe-arrow next" id="nextBtn">→</button>
-    </div>
-    <div style="text-align:center; margin-top:1.5rem; opacity:0.7; font-size:0.95rem;">
-      Swipe left/right or use arrows
-    </div>
-  </section>
+<div class="main" id="main">
+  <!-- Cards will be inserted here dynamically -->
 </div>
 
 <!-- Bottom Navigation Bar -->
@@ -384,10 +213,13 @@ const sb = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
 const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
-let spot = null; // ← Global spot variable (fixes "spot is not defined")
-
 const urlParams = new URLSearchParams(window.location.search);
 const spotId = urlParams.get('id');
+
+let spot = null; // Global current spot
+let relatedSpots = []; // All similar spots
+let currentIndex = 0; // Current displayed spot index
+
 if (!spotId) {
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
 } else {
@@ -406,226 +238,128 @@ async function loadSpot(id) {
     return;
   }
 
-  spot = data; // ← Store globally so loadRelatedSpots can use it
+  spot = data;
+  currentIndex = 0;
 
-  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
-  const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
+  // Load related spots (same category/emotion/city)
+  await loadRelatedSpots();
 
-  let mediaList = [];
-  if (spot.media_urls && Array.isArray(spot.media_urls)) {
-    mediaList = spot.media_urls;
-  } else if (spot.media_url) {
-    mediaList = [{ url: spot.media_url, type: 'image' }];
-  }
-
-  if (mediaList.length > 0) {
-    const first = mediaList[0];
-    const heroEl = document.getElementById('heroMedia');
-    if (first.type === 'video') {
-      heroEl.innerHTML = `<video src="${first.url}" controls autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
-    } else {
-      heroEl.innerHTML = `<img src="${first.url}" alt="${spot.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/800x400/141824/FFD88D?text=No+Image'">`;
-    }
-  }
-
-  const gallery = document.getElementById('gallery');
-  gallery.innerHTML = '';
-  if (mediaList.length > 1) {
-    mediaList.forEach((media, index) => {
-      const thumb = document.createElement('div');
-      thumb.className = 'thumb' + (index === 0 ? ' active' : '');
-      if (media.type === 'video') {
-        thumb.innerHTML = `<video src="${media.url}" muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
-      } else {
-        thumb.innerHTML = `<img src="${media.url}" alt="thumb" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/80/141824/FFD88D?text=No+Image'">`;
-      }
-      thumb.onclick = () => {
-        const heroEl = document.getElementById('heroMedia');
-        if (media.type === 'video') {
-          heroEl.innerHTML = `<video src="${media.url}" controls autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
-        } else {
-          heroEl.innerHTML = `<img src="${media.url}" alt="${spot.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/800x400/141824/FFD88D?text=No+Image'">`;
-        }
-        document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-        thumb.classList.add('active');
-      };
-      gallery.appendChild(thumb);
-    });
-  }
-
-  document.getElementById('title').textContent = spot.name;
-  document.getElementById('sub').textContent = `${spot.place}, ${spot.city}${spot.state ? ', ' + spot.state : ''}, ${spot.country}`;
-  document.getElementById('tags').innerHTML = `
-    <span class="tag">${categoryNames[spot.category_id] || 'Other'}</span>
-    <span class="tag">${emotionNames[spot.emotion_id] || ''}</span>
-  `;
-  document.getElementById('story').textContent = spot.story || 'No story shared.';
-  const rating = spot.safety_rating || 0;
-  const starsHtml = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-  document.getElementById('safety').innerHTML = `<span class="stars">${starsHtml.replace(/★/g, '<span class="filled">★</span>')}</span>`;
-  document.getElementById('besttime').textContent = spot.best_time || '-';
-  document.getElementById('tips').textContent = spot.tips || '-';
-  document.getElementById('hashtags').textContent = spot.hashtags || '-';
-  document.getElementById('credits').textContent = spot.credits || '-';
-
-  const username = spot.username || 'traveller';
-  document.getElementById('username').textContent = `@${username}`;
-
-  const avatarUrl = `${WORKER_URL}/file/avatars/${username}-avatar.jpg`;
-  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=FFD88D&color=0c0f18&size=120`;
-  const avatarImg = document.getElementById('userAvatar');
-  avatarImg.src = avatarUrl;
-  avatarImg.onerror = function() {
-    this.src = fallbackAvatar;
-    this.onerror = null;
-  };
-
-  document.querySelector('.user').onclick = () => {
-    window.location.href = `Profile.html?user=${username}`;
-  };
-
-  setupDestinyButton(spot.id);
-
-  // Load suggestions after main content
-  loadRelatedSpots();
+  // Show first card
+  renderCards();
 }
 
-async function setupDestinyButton(spotId) {
-  const { data: { user } } = await sb.auth.getUser();
-  const btn = document.getElementById('destinyBtn');
-  if (!user) {
-    btn.textContent = 'Login to Save';
-    btn.disabled = true;
-    return;
-  }
-  const { data: existing } = await sb
-    .from('destiny_saves')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('spot_id', spotId)
-    .maybeSingle();
-  const isSaved = !!existing;
-  btn.textContent = isSaved ? 'Saved ❤️' : 'Add to Destiny';
-  if (isSaved) btn.classList.add('saved');
-  btn.onclick = async () => {
-    if (isSaved) {
-      await sb.from('destiny_saves').delete().eq('id', existing.id);
-      btn.textContent = 'Add to Destiny';
-      btn.classList.remove('saved');
-    } else {
-      await sb.from('destiny_saves').insert({ user_id: user.id, spot_id: spotId });
-      btn.textContent = 'Saved ❤️';
-      btn.classList.add('saved');
-    }
-  };
-}
-
-// ────────────────────────────────────────────────
-// Unlimited related spots + working swipe + arrows
-// ────────────────────────────────────────────────
 async function loadRelatedSpots() {
   if (!spot || !spot.category_id || !spot.emotion_id || !spot.city) return;
 
-  const track = document.getElementById('suggestionsTrack');
-  if (!track) return;
-
-  track.innerHTML = '<p style="text-align:center; width:100%; padding:2rem; opacity:0.7;">Loading similar spots...</p>';
-
-  const { data: related, error } = await sb
+  const { data, error } = await sb
     .from('spots')
-    .select('id, name, place, city, media_url, media_urls')
+    .select('id, name, place, city, media_url, media_urls, story, category_id, emotion_id')
     .neq('id', spot.id)
     .or(`category_id.eq.${spot.category_id},emotion_id.eq.${spot.emotion_id},city.eq.${spot.city}`);
 
-  if (error || !related || related.length === 0) {
-    track.innerHTML = '<p style="text-align:center; width:100%; padding:2rem; opacity:0.7;">No similar spots found yet</p>';
+  if (error || !data) {
+    console.error('Failed to load related spots', error);
     return;
   }
 
-  track.innerHTML = '';
+  // Include current spot as first card
+  relatedSpots = [spot, ...data];
+}
 
-  related.forEach(r => {
-    const firstMedia = r.media_urls?.[0]?.url || r.media_url || 'https://via.placeholder.com/300x200/141824/FFD88D?text=No+Image';
+function renderCards() {
+  const main = document.getElementById('main');
+  main.innerHTML = ''; // Clear previous cards
 
+  relatedSpots.forEach((s, index) => {
     const card = document.createElement('div');
-    card.className = 'suggestion-card';
+    card.className = 'spot-card';
+    if (index === currentIndex) card.classList.add('active');
+    else if (index === currentIndex + 1) card.classList.add('next');
+    else if (index === currentIndex - 1) card.classList.add('prev');
+
+    const firstMedia = s.media_urls?.[0]?.url || s.media_url || 'https://via.placeholder.com/800x1200/141824/FFD88D?text=No+Image';
+
     card.innerHTML = `
-      <img src="${firstMedia}" alt="${r.name}" onerror="this.src='https://via.placeholder.com/300x200/141824/FFD88D?text=No+Image'">
-      <div style="padding:1rem;">
-        <h3 style="margin:0;font-size:1.2rem;color:#FFD88D;">${r.name}</h3>
-        <p style="margin:0.5rem 0 0;opacity:0.8;font-size:0.95rem;">${r.place || ''}, ${r.city}</p>
+      <div class="hero-media">
+        <img src="${firstMedia}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/800x1200/141824/FFD88D?text=No+Image'">
+      </div>
+      <div class="info-overlay">
+        <h1 class="title">${s.name}</h1>
+        <p class="sub">${s.place || ''}, ${s.city}</p>
+        <p class="story">${s.story?.substring(0, 150) || 'No story'}...</p>
       </div>
     `;
 
     card.onclick = () => {
-      window.location.href = `spot.html?id=${r.id}`;
+      // Optional: tap to view full details
+      window.location.href = `spot.html?id=${s.id}`;
     };
 
-    track.appendChild(card);
+    main.appendChild(card);
   });
 
-  // ────────────────────────────────────────────────
-  // WORKING SWIPE + ARROW BUTTONS
-  // ────────────────────────────────────────────────
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const scrollAmount = track.clientWidth * 0.8; // scroll ~80% of visible area
+  // Attach swipe & buttons after cards are rendered
+  initSwipe();
+}
 
-  prevBtn.addEventListener('click', () => {
-    track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-  });
-
-  nextBtn.addEventListener('click', () => {
-    track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-  });
-
-  // Mouse drag
+function initSwipe() {
+  const main = document.getElementById('main');
   let isDragging = false;
   let startX;
-  let scrollLeft;
+  let direction = 0; // 1 = right swipe (next), -1 = left swipe (prev)
 
-  track.addEventListener('mousedown', (e) => {
+  main.addEventListener('mousedown', (e) => {
     isDragging = true;
-    startX = e.pageX - track.offsetLeft;
-    scrollLeft = track.scrollLeft;
-    track.style.cursor = 'grabbing';
+    startX = e.pageX;
   });
 
-  track.addEventListener('mouseleave', () => {
-    isDragging = false;
-    track.style.cursor = 'grab';
-  });
-
-  track.addEventListener('mouseup', () => {
-    isDragging = false;
-    track.style.cursor = 'grab';
-  });
-
-  track.addEventListener('mousemove', (e) => {
+  main.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - track.offsetLeft;
-    const walk = (x - startX) * 2;
-    track.scrollLeft = scrollLeft - walk;
+    const diff = e.pageX - startX;
+    direction = diff > 0 ? -1 : 1; // right swipe = negative diff
   });
 
-  // Touch swipe (mobile)
-  track.addEventListener('touchstart', (e) => {
+  main.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    if (Math.abs(direction) > 50) { // minimum swipe distance
+      changeSpot(direction);
+    }
+  });
+
+  // Touch events
+  main.addEventListener('touchstart', (e) => {
     isDragging = true;
-    startX = e.touches[0].pageX - track.offsetLeft;
-    scrollLeft = track.scrollLeft;
+    startX = e.touches[0].pageX;
   }, { passive: false });
 
-  track.addEventListener('touchend', () => {
-    isDragging = false;
-  }, { passive: false });
-
-  track.addEventListener('touchmove', (e) => {
+  main.addEventListener('touchmove', (e) => {
     if (!isDragging) return;
-    const x = e.touches[0].pageX - track.offsetLeft;
-    const walk = (x - startX) * 2;
-    track.scrollLeft = scrollLeft - walk;
+    const diff = e.touches[0].pageX - startX;
+    direction = diff > 0 ? -1 : 1;
   }, { passive: false });
+
+  main.addEventListener('touchend', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    if (Math.abs(direction) > 50) {
+      changeSpot(direction);
+    }
+  }, { passive: false });
+
+  // Arrow buttons
+  document.getElementById('prevBtn').onclick = () => changeSpot(-1);
+  document.getElementById('nextBtn').onclick = () => changeSpot(1);
+}
+
+function changeSpot(dir) {
+  const newIndex = currentIndex + dir;
+  if (newIndex < 0 || newIndex >= relatedSpots.length) return; // no loop for simplicity
+
+  currentIndex = newIndex;
+
+  // Re-render cards with new active/next/prev
+  renderCards();
 }
 </script>
 </body>

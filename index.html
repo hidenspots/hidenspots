@@ -424,58 +424,57 @@ setInterval(()=>{
   slides[i].classList.add('active');
 },5000);
 </script>
-<!-- Invisible trigger at the very bottom of your content -->
-<div id="scroll-trigger" style="height: 200px; width: 100%;"></div>
+<!-- Trigger element - place it at the very end of your content, before </body> -->
+<div id="scroll-trigger" style="height: 300px; width: 100%;"></div>
 
 <script>
-// Cross-browser smooth scroll function (works on Android Chrome too)
-function smoothScrollTo(targetY) {
-  const startY = window.scrollY;
-  const distance = targetY - startY;
-  const duration = 800; // ms (adjust for faster/slower)
-  let startTime = null;
+// Only start observing after user has scrolled at least 50% of the page
+let hasStartedObserving = false;
+let hasNavigated = false;
 
-  function step(currentTime) {
-    if (!startTime) startTime = currentTime;
-    const timeElapsed = currentTime - startTime;
-    const progress = Math.min(timeElapsed / duration, 1);
-    const ease = progress * (2 - progress); // ease-in-out
+function startObserver() {
+  if (hasStartedObserving || hasNavigated) return;
+  hasStartedObserving = true;
 
-    window.scrollTo(0, startY + distance * ease);
+  console.log('Observer started - waiting for bottom trigger');
 
-    if (timeElapsed < duration) {
-      requestAnimationFrame(step);
+  const trigger = document.getElementById('scroll-trigger');
+  if (!trigger) {
+    console.log('Trigger element not found!');
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !hasNavigated) {
+      console.log('Trigger visible - navigating to Search.html');
+      hasNavigated = true;
+      observer.disconnect();
+      window.location.href = 'Search.html';
     }
-  }
+  }, {
+    rootMargin: '0px 0px 800px 0px' // Trigger when 800px before bottom (adjust higher if needed)
+  });
 
-  requestAnimationFrame(step);
-}
-
-// Use Intersection Observer to detect when bottom is near
-const trigger = document.getElementById('scroll-trigger');
-const observer = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting) {
-    // Bottom is visible → smoothly scroll to Search.html top
-    observer.disconnect(); // Stop observing
-
-    // Navigate to Search.html and scroll to top smoothly after load
-    window.location.href = 'Search.html';
-
-    // Optional: If you want to try smooth scroll after navigation (limited support)
-    // window.addEventListener('load', () => {
-    //   smoothScrollTo(0);
-    // });
-  }
-}, {
-  rootMargin: '0px 0px 600px 0px' // Trigger 600px before actual bottom
-});
-
-if (trigger) {
   observer.observe(trigger);
 }
+
+// Check scroll position to start observer only after some scrolling
+window.addEventListener('scroll', () => {
+  if (!hasStartedObserving) {
+    const scrolled = window.scrollY;
+    const pageHeight = document.body.scrollHeight - window.innerHeight;
+    if (scrolled > pageHeight * 0.5) { // Start after 50% scroll
+      startObserver();
+    }
+  }
+}, { passive: true });
+
+// Start immediately on load in case page is already long
+setTimeout(startObserver, 1000); // Slight delay to avoid instant trigger
 </script>
 </body>
 </html>
+
 
 
 

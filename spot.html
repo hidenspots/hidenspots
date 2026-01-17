@@ -23,7 +23,6 @@
     html,body{height:100%; margin:0}
     body{
       background:var(--bg); color:#fff; font-family:'Playfair Display',serif;
-      overflow:hidden; /* Prevent page scroll when swiping */
     }
     /* Header */
     .header{
@@ -37,45 +36,25 @@
     .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff}
     .brand svg{width:30px;height:30px}
     .brand span{letter-spacing:3px}
-    /* Main Spot Card */
+    /* Main Content */
     .main{
-      height:100vh;
-      position:relative;
-      overflow:hidden;
+      max-width:800px;
+      margin:0 auto;
+      padding:20px;
     }
-    .spot-card{
-      position:absolute;
-      inset:0;
+    .card{
       background:var(--panel);
-      border-radius:0;
+      border:1px solid var(--border);
+      border-radius:16px;
       overflow:hidden;
-      box-shadow:0 0 40px rgba(0,0,0,0.6);
-      transition:transform 0.6s ease, opacity 0.6s ease;
-      opacity:0;
-      transform:scale(0.9) translateY(50px);
-      pointer-events:none;
+      box-shadow:0 12px 26px rgba(0,0,0,.25);
     }
-    .spot-card.active{
-      opacity:1;
-      transform:scale(1) translateY(0);
-      pointer-events:auto;
-      z-index:10;
-    }
-    .spot-card.next{
-      transform:scale(0.95) translateY(30px);
-      opacity:0.7;
-      z-index:5;
-    }
-    .spot-card.prev{
-      transform:scale(0.95) translateY(-30px);
-      opacity:0.7;
-      z-index:5;
-    }
-    /* Hero Media */
+    /* HERO MEDIA */
     .hero-media {
       width: 100%;
-      height: 70vh;
+      height: 400px;
       overflow: hidden;
+      border-radius: 16px 16px 0 0;
     }
     .hero-media img,
     .hero-media video {
@@ -83,68 +62,131 @@
       height: 100%;
       object-fit: cover;
     }
-    /* Info Overlay */
-    .info-overlay{
-      position:absolute;
-      bottom:0;
-      left:0;
-      right:0;
-      background:linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-      padding:2rem 1.5rem 4rem;
-      color:#fff;
+    /* GALLERY THUMBNAILS */
+    .gallery {
+      display: flex;
+      overflow-x: auto;
+      gap: 8px;
+      padding: 12px 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold) transparent;
+    }
+    .gallery::-webkit-scrollbar {
+      height: 6px;
+    }
+    .gallery::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .gallery::-webkit-scrollbar-thumb {
+      background: var(--gold);
+      border-radius: 3px;
+    }
+    .thumb {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      flex-shrink: 0;
+      border: 2px solid transparent;
+      transition: border .3s;
+    }
+    .thumb.active {
+      border-color: var(--gold);
+    }
+    .thumb img,
+    .thumb video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    /* Info */
+    .info{
+      padding:20px;
     }
     .title{
       color:var(--gold);
-      font-size:2.2rem;
-      margin:0 0 0.5rem;
+      font-size:28px;
+      margin:0 0 8px;
     }
     .sub{
-      font-size:1.2rem;
-      opacity:0.9;
-      margin:0 0 1rem;
+      opacity:.85;
+      font-size:18px;
+      margin:0 0 16px;
+    }
+    .tags{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:16px 0;
+    }
+    .tag{
+      padding:6px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      border:1px solid var(--border);
+      font-size:14px;
+      opacity:.9;
     }
     .story{
-      font-size:1.1rem;
-      line-height:1.5;
-      opacity:0.95;
-      max-height:120px;
-      overflow:hidden;
+      font-size:16px;
+      line-height:1.6;
+      opacity:.95;
+      margin:20px 0;
     }
-    /* Swipe Buttons */
-    .swipe-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0,0,0,0.6);
-      color: #FFD88D;
-      border: none;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      font-size: 2rem;
+    .details{
+      margin-top:24px;
+      display:grid;
+      gap:16px;
+      font-size:15px;
+      opacity:.9;
+    }
+    .detail-item strong{
+      color:var(--gold);
+    }
+    .user{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-top:24px;
+      padding-top:20px;
+      border-top:1px solid var(--border);
+      opacity:.9;
+    }
+    .user .avatar{
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      object-fit:cover;
+      border:2px solid var(--gold);
+    }
+    .stars{
+      color:#FFD88D;
+      font-size:18px;
+    }
+    .stars span{
+      opacity:0.3;
+    }
+    .stars span.filled{
+      opacity:1;
+    }
+    .destiny-btn {
+      margin-left: auto;
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.1);
+      border: 1px solid var(--border);
+      font-size: 14px;
       cursor: pointer;
-      z-index: 20;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      transition: .3s;
     }
-    .swipe-btn:hover {
-      background: rgba(255,216,141,0.4);
-      transform: translateY(-50%) scale(1.1);
+    .destiny-btn:hover {
+      background: var(--gold);
+      color: #000;
     }
-    .swipe-btn.prev {
-      left: 20px;
-    }
-    .swipe-btn.next {
-      right: 20px;
-    }
-    @media (max-width: 768px) {
-      .swipe-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 1.8rem;
-      }
+    .destiny-btn.saved {
+      background: var(--gold);
+      color: #000;
     }
     /* Bottom Nav Bar */
     .nav-bar{
@@ -165,6 +207,111 @@
     @media(max-width:768px){
       .nav-bar{gap:2rem;padding:.9rem 1.6rem}
     }
+
+    /* ────────────────────────────────────────────────
+       NEW: Full-screen swipe section (Tinder style)
+    ──────────────────────────────────────────────── */
+    .swipe-section {
+      padding: 2rem 1rem;
+      background: #141824;
+      min-height: 100vh;
+    }
+    .swipe-container {
+      position: relative;
+      max-width: 100%;
+      height: 70vh;
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .swipe-card {
+      position: absolute;
+      inset: 0;
+      background: var(--panel);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.6s ease;
+      opacity: 0;
+      transform: scale(0.9) translateY(40px);
+      pointer-events: none;
+    }
+    .swipe-card.active {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+      z-index: 10;
+    }
+    .swipe-card.next, .swipe-card.prev {
+      opacity: 0.6;
+      transform: scale(0.92) translateY(20px);
+      z-index: 5;
+    }
+    .swipe-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .swipe-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      padding: 2rem 1.5rem 4rem;
+      color: #fff;
+    }
+    .swipe-title {
+      color: var(--gold);
+      font-size: 2.2rem;
+      margin: 0 0 0.5rem;
+    }
+    .swipe-sub {
+      font-size: 1.3rem;
+      opacity: 0.9;
+      margin: 0 0 1rem;
+    }
+    .swipe-story {
+      font-size: 1.1rem;
+      line-height: 1.5;
+      max-height: 120px;
+      overflow: hidden;
+    }
+    .swipe-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.6);
+      color: #FFD88D;
+      border: none;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      font-size: 2.2rem;
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .swipe-arrow:hover {
+      background: rgba(255,216,141,0.5);
+      transform: translateY(-50%) scale(1.1);
+    }
+    .swipe-arrow.prev {
+      left: 20px;
+    }
+    .swipe-arrow.next {
+      right: 20px;
+    }
+    @media (max-width: 768px) {
+      .swipe-arrow {
+        width: 50px;
+        height: 50px;
+        font-size: 1.8rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -178,9 +325,40 @@
     <span>Hiden Spots</span>
   </a>
 </div>
+<div class="main">
+  <article class="card" id="spotCard">
+    <div class="hero-media" id="heroMedia"></div>
+    <div class="gallery" id="gallery"></div>
+    <div class="info">
+      <h1 class="title" id="title"></h1>
+      <p class="sub" id="sub"></p>
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div class="tags" id="tags"></div>
+        <button class="destiny-btn" id="destinyBtn">Add to Destiny</button>
+      </div>
+      <div class="story" id="story"></div>
+      <div class="details">
+        <div class="detail-item"><strong>Solo Woman Safety Rating:</strong> <span id="safety"></span></div>
+        <div class="detail-item"><strong>Best Time:</strong> <span id="besttime"></span></div>
+        <div class="detail-item"><strong>Tips:</strong> <span id="tips"></span></div>
+        <div class="detail-item"><strong>Hashtags:</strong> <span id="hashtags"></span></div>
+        <div class="detail-item"><strong>Credits:</strong> <span id="credits"></span></div>
+      </div>
+      <div class="user" style="cursor:pointer;" onclick="goToProfile()">
+        <img class="avatar" id="userAvatar" src="">
+        <span>Posted by <span id="username" style="color:var(--gold);"></span></span>
+      </div>
+    </div>
+  </article>
 
-<div class="main" id="main">
-  <!-- Cards will be inserted here dynamically -->
+  <!-- Full-screen swipe section for next/previous spots -->
+  <section class="swipe-section" id="swipeSection">
+    <div class="swipe-container">
+      <button class="swipe-arrow prev" id="prevBtn">←</button>
+      <div id="swipeCards"></div>
+      <button class="swipe-arrow next" id="nextBtn">→</button>
+    </div>
+  </section>
 </div>
 
 <!-- Bottom Navigation Bar -->
@@ -213,13 +391,12 @@ const sb = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
 const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
-const urlParams = new URLSearchParams(window.location.search);
-const spotId = urlParams.get('id');
-
 let spot = null; // Global current spot
 let relatedSpots = []; // All similar spots
-let currentIndex = 0; // Current displayed spot index
+let currentIndex = 0; // Index of current displayed card
 
+const urlParams = new URLSearchParams(window.location.search);
+const spotId = urlParams.get('id');
 if (!spotId) {
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
 } else {
@@ -241,11 +418,11 @@ async function loadSpot(id) {
   spot = data;
   currentIndex = 0;
 
-  // Load related spots (same category/emotion/city)
+  // Load similar spots
   await loadRelatedSpots();
 
-  // Show first card
-  renderCards();
+  // Render initial cards
+  renderSwipeCards();
 }
 
 async function loadRelatedSpots() {
@@ -253,7 +430,7 @@ async function loadRelatedSpots() {
 
   const { data, error } = await sb
     .from('spots')
-    .select('id, name, place, city, media_url, media_urls, story, category_id, emotion_id')
+    .select('id, name, place, city, media_url, media_urls, story')
     .neq('id', spot.id)
     .or(`category_id.eq.${spot.category_id},emotion_id.eq.${spot.emotion_id},city.eq.${spot.city}`);
 
@@ -262,13 +439,15 @@ async function loadRelatedSpots() {
     return;
   }
 
-  // Include current spot as first card
+  // Put current spot first, then others
   relatedSpots = [spot, ...data];
 }
 
-function renderCards() {
-  const main = document.getElementById('main');
-  main.innerHTML = ''; // Clear previous cards
+function renderSwipeCards() {
+  const container = document.getElementById('swipeCards');
+  if (!container) return;
+
+  container.innerHTML = '';
 
   relatedSpots.forEach((s, index) => {
     const card = document.createElement('div');
@@ -283,69 +462,60 @@ function renderCards() {
       <div class="hero-media">
         <img src="${firstMedia}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/800x1200/141824/FFD88D?text=No+Image'">
       </div>
-      <div class="info-overlay">
-        <h1 class="title">${s.name}</h1>
-        <p class="sub">${s.place || ''}, ${s.city}</p>
-        <p class="story">${s.story?.substring(0, 150) || 'No story'}...</p>
+      <div class="swipe-info">
+        <h1 class="swipe-title">${s.name}</h1>
+        <p class="swipe-sub">${s.place || ''}, ${s.city}</p>
+        <p class="swipe-story">${s.story?.substring(0, 120) || 'No story'}...</p>
       </div>
     `;
 
     card.onclick = () => {
-      // Optional: tap to view full details
       window.location.href = `spot.html?id=${s.id}`;
     };
 
-    main.appendChild(card);
+    container.appendChild(card);
   });
 
-  // Attach swipe & buttons after cards are rendered
   initSwipe();
 }
 
 function initSwipe() {
-  const main = document.getElementById('main');
+  const container = document.getElementById('swipeCards');
   let isDragging = false;
-  let startX;
-  let direction = 0; // 1 = right swipe (next), -1 = left swipe (prev)
+  let startX = 0;
+  let direction = 0;
 
-  main.addEventListener('mousedown', (e) => {
+  const handleStart = (e) => {
     isDragging = true;
-    startX = e.pageX;
-  });
+    startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+  };
 
-  main.addEventListener('mousemove', (e) => {
+  const handleMove = (e) => {
     if (!isDragging) return;
-    const diff = e.pageX - startX;
-    direction = diff > 0 ? -1 : 1; // right swipe = negative diff
-  });
+    const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+    direction = x - startX;
+  };
 
-  main.addEventListener('mouseup', () => {
+  const handleEnd = () => {
     if (!isDragging) return;
     isDragging = false;
-    if (Math.abs(direction) > 50) { // minimum swipe distance
-      changeSpot(direction);
+
+    if (Math.abs(direction) > 80) { // minimum swipe distance
+      if (direction > 0) changeSpot(-1); // left swipe = previous
+      else changeSpot(1); // right swipe = next
     }
-  });
+  };
+
+  // Mouse events
+  container.addEventListener('mousedown', handleStart);
+  container.addEventListener('mousemove', handleMove);
+  container.addEventListener('mouseup', handleEnd);
+  container.addEventListener('mouseleave', handleEnd);
 
   // Touch events
-  main.addEventListener('touchstart', (e) => {
-    isDragging = true;
-    startX = e.touches[0].pageX;
-  }, { passive: false });
-
-  main.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-    const diff = e.touches[0].pageX - startX;
-    direction = diff > 0 ? -1 : 1;
-  }, { passive: false });
-
-  main.addEventListener('touchend', () => {
-    if (!isDragging) return;
-    isDragging = false;
-    if (Math.abs(direction) > 50) {
-      changeSpot(direction);
-    }
-  }, { passive: false });
+  container.addEventListener('touchstart', handleStart, { passive: false });
+  container.addEventListener('touchmove', handleMove, { passive: false });
+  container.addEventListener('touchend', handleEnd);
 
   // Arrow buttons
   document.getElementById('prevBtn').onclick = () => changeSpot(-1);
@@ -354,12 +524,10 @@ function initSwipe() {
 
 function changeSpot(dir) {
   const newIndex = currentIndex + dir;
-  if (newIndex < 0 || newIndex >= relatedSpots.length) return; // no loop for simplicity
+  if (newIndex < 0 || newIndex >= relatedSpots.length) return;
 
   currentIndex = newIndex;
-
-  // Re-render cards with new active/next/prev
-  renderCards();
+  renderSwipeCards(); // Re-render with new active/next/prev classes
 }
 </script>
 </body>

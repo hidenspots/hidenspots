@@ -2,269 +2,223 @@
 <html lang="en">
 <head>
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWS0BB3H70"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-DWS0BB3H70');
-  </script>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Spot • Hiden Spots</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0c0f18; --panel:#121624; --glass:rgba(255,255,255,.06);
-      --border:rgba(255,255,255,.12); --muted:rgba(255,255,255,.78);
-      --gold:#FFD88D; --amber:#FFB347; --teal:#19547b;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0}
-    body{
-      background:var(--bg); color:#fff; font-family:'Playfair Display',serif;
-    }
-    /* Header */
-    .header{
-      position:sticky; top:0; z-index:40;
-      backdrop-filter:blur(12px);
-      background:linear-gradient(180deg,rgba(12,15,24,.85),rgba(12,15,24,.55));
-      border-bottom:1px solid var(--border);
-      padding:12px 18px;
-      display:flex; align-items:center; gap:14px;
-    }
-    .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff}
-    .brand svg{width:30px;height:30px}
-    .brand span{letter-spacing:3px}
-    /* Main Content */
-    .main{
-      max-width:800px;
-      margin:0 auto;
-      padding:20px;
-      height: calc(100vh - 80px); /* Adjust for header + nav */
-      position: relative;
-    }
-    .card{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:16px;
-      overflow:hidden;
-      box-shadow:0 12px 26px rgba(0,0,0,.25);
-      height: 100%;
-      position: absolute;
-      inset: 0;
-      transition: all 0.5s ease;
-      opacity: 0;
-      transform: scale(0.95) translateY(20px);
-    }
-    .card.active {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-      z-index: 10;
-    }
-    .card.next, .card.prev {
-      opacity: 0.7;
-      transform: scale(0.98) translateY(10px);
-      z-index: 5;
-    }
-    /* HERO MEDIA */
-    .hero-media {
-      width: 100%;
-      height: 55vh;
-      overflow: hidden;
-    }
-    .hero-media img,
-    .hero-media video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    /* GALLERY THUMBNAILS */
-    .gallery {
-      display: flex;
-      overflow-x: auto;
-      gap: 8px;
-      padding: 12px 0;
-      scrollbar-width: thin;
-      scrollbar-color: var(--gold) transparent;
-    }
-    .gallery::-webkit-scrollbar {
-      height: 6px;
-    }
-    .gallery::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .gallery::-webkit-scrollbar-thumb {
-      background: var(--gold);
-      border-radius: 3px;
-    }
-    .thumb {
-      width: 80px;
-      height: 80px;
-      border-radius: 12px;
-      overflow: hidden;
-      cursor: pointer;
-      flex-shrink: 0;
-      border: 2px solid transparent;
-      transition: border .3s;
-    }
-    .thumb.active {
-      border-color: var(--gold);
-    }
-    .thumb img,
-    .thumb video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    /* Info */
-    .info{
-      padding:20px;
-    }
-    .title{
-      color:var(--gold);
-      font-size:28px;
-      margin:0 0 8px;
-    }
-    .sub{
-      opacity:.85;
-      font-size:18px;
-      margin:0 0 16px;
-    }
-    .tags{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin:16px 0;
-    }
-    .tag{
-      padding:6px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,.08);
-      border:1px solid var(--border);
-      font-size:14px;
-      opacity:.9;
-    }
-    .story{
-      font-size:16px;
-      line-height:1.6;
-      opacity:.95;
-      margin:20px 0;
-      max-height:120px;
-      overflow:hidden;
-    }
-    .details{
-      margin-top:24px;
-      display:grid;
-      gap:16px;
-      font-size:15px;
-      opacity:.9;
-    }
-    .detail-item strong{
-      color:var(--gold);
-    }
-    .user{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      margin-top:24px;
-      padding-top:20px;
-      border-top:1px solid var(--border);
-      opacity:.9;
-    }
-    .user .avatar{
-      width:40px;
-      height:40px;
-      border-radius:50%;
-      object-fit:cover;
-      border:2px solid var(--gold);
-    }
-    .stars{
-      color:#FFD88D;
-      font-size:18px;
-    }
-    .stars span{
-      opacity:0.3;
-    }
-    .stars span.filled{
-      opacity:1;
-    }
-    .destiny-btn {
-      margin-left: auto;
-      padding: 8px 18px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.1);
-      border: 1px solid var(--border);
-      font-size: 14px;
-      cursor: pointer;
-      transition: .3s;
-    }
-    .destiny-btn:hover {
-      background: var(--gold);
-      color: #000;
-    }
-    .destiny-btn.saved {
-      background: var(--gold);
-      color: #000;
-    }
-    /* Bottom Nav Bar */
-    .nav-bar{
-      background:rgba(255,255,255,.05);
-      backdrop-filter:blur(25px);
-      border-radius:60px;
-      padding:1rem 2.5rem;
-      border:1px solid rgba(255,255,255,.12);
-      position:fixed;
-      bottom:1rem;left:50%;transform:translateX(-50%);
-      display:flex;gap:3rem;
-      box-shadow:0 8px 30px rgba(0,0,0,.25);
-      z-index:80;
-    }
-    .nav-icon{color:rgba(255,255,255,.7);transition:.4s}
-    .nav-icon:hover{color:#FFD88D;transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
-    .nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
-    @media(max-width:768px){
-      .nav-bar{gap:2rem;padding:.9rem 1.6rem}
-    }
-    /* Swipe Arrows */
-    .swipe-arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0,0,0,0.6);
-      color: #FFD88D;
-      border: none;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      font-size: 2.2rem;
-      cursor: pointer;
-      z-index: 100;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .swipe-arrow:hover {
-      background: rgba(255,216,141,0.5);
-      transform: translateY(-50%) scale(1.1);
-    }
-    .swipe-arrow.prev {
-      left: 20px;
-    }
-    .swipe-arrow.next {
-      right: 20px;
-    }
-    @media (max-width: 768px) {
-      .swipe-arrow {
-        width: 50px;
-        height: 50px;
-        font-size: 1.8rem;
-      }
-    }
-  </style>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DWS0BB3H70"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DWS0BB3H70');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spot • Hiden Spots</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0c0f18; --panel:#121624; --glass:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.12); --muted:rgba(255,255,255,.78);
+  --gold:#FFD88D; --amber:#FFB347; --teal:#19547b;
+}
+*{box-sizing:border-box} 
+html,body{height:100%; margin:0} 
+body{
+  background:var(--bg); color:#fff; font-family:'Playfair Display',serif;
+}
+
+/* Header */
+.header{
+  position:sticky; top:0; z-index:40;
+  backdrop-filter:blur(12px);
+  background:linear-gradient(180deg,rgba(12,15,24,.85),rgba(12,15,24,.55));
+  border-bottom:1px solid var(--border);
+  padding:12px 18px;
+  display:flex; align-items:center; gap:14px;
+}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff}
+.brand svg{width:30px;height:30px}
+.brand span{letter-spacing:3px}
+
+/* Main Content */
+.main{
+  max-width:800px;
+  margin:0 auto;
+  padding:20px;
+}
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 12px 26px rgba(0,0,0,.25);
+}
+
+/* HERO MEDIA */
+.hero-media {
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+}
+.hero-media img,
+.hero-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* GALLERY THUMBNAILS */
+.gallery {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 12px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) transparent;
+}
+.gallery::-webkit-scrollbar {
+  height: 6px;
+}
+.gallery::-webkit-scrollbar-track {
+  background: transparent;
+}
+.gallery::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 3px;
+}
+.thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+  border: 2px solid transparent;
+  transition: border .3s;
+}
+.thumb.active {
+  border-color: var(--gold);
+}
+.thumb img,
+.thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Info */
+.info{
+  padding:20px;
+}
+.title{
+  color:var(--gold);
+  font-size:28px;
+  margin:0 0 8px;
+}
+.sub{
+  opacity:.85;
+  font-size:18px;
+  margin:0 0 16px;
+}
+.tags{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:16px 0;
+}
+.tag{
+  padding:6px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--border);
+  font-size:14px;
+  opacity:.9;
+}
+.story{
+  font-size:16px;
+  line-height:1.6;
+  opacity:.95;
+  margin:20px 0;
+}
+.details{
+  margin-top:24px;
+  display:grid;
+  gap:16px;
+  font-size:15px;
+  opacity:.9;
+}
+.detail-item strong{
+  color:var(--gold);
+}
+.user{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:24px;
+  padding-top:20px;
+  border-top:1px solid var(--border);
+  opacity:.9;
+}
+.user .avatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid var(--gold);
+}
+.stars{
+  color:#FFD88D;
+  font-size:18px;
+}
+.stars span{
+  opacity:0.3;
+}
+.stars span.filled{
+  opacity:1;
+}
+.destiny-btn {
+  margin-left: auto;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  cursor: pointer;
+  transition: .3s;
+}
+.destiny-btn:hover {
+  background: var(--gold);
+  color: #000;
+}
+.destiny-btn.saved {
+  background: var(--gold);
+  color: #000;
+}
+/* Bottom Nav Bar */
+.nav-bar{
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(25px);
+  border-radius:60px;
+  padding:1rem 2.5rem;
+  border:1px solid rgba(255,255,255,.12);
+  position:fixed;
+  bottom:1rem;left:50%;transform:translateX(-50%);
+  display:flex;gap:3rem;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+  z-index:80;
+}
+.nav-icon{color:rgba(255,255,255,.7);transition:.4s}
+.nav-icon:hover{color:#FFD88D;transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
+.nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+@media(max-width:768px){
+  .nav-bar{gap:2rem;padding:.9rem 1.6rem}
+}
+</style>
 </head>
 <body>
+
 <div class="header">
   <a href="index.html" class="brand" aria-label="Hiden Spots">
     <svg viewBox="0 0 48 48" aria-hidden="true">
@@ -277,9 +231,33 @@
 </div>
 
 <div class="main">
-  <div id="spotCardsContainer"></div>
+  <article class="card" id="spotCard">
+    <div class="hero-media" id="heroMedia"></div>
+<div class="gallery" id="gallery"></div>
+    <div class="info">
+      <h1 class="title" id="title"></h1>
+      <p class="sub" id="sub"></p>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div class="tags" id="tags"></div>
+        <button class="destiny-btn" id="destinyBtn">Add to Destiny</button>
+      </div>
+      <div class="story" id="story"></div>
+      <div class="details">
+        <div class="detail-item"><strong>Solo Woman Safety Rating:</strong> <span id="safety"></span></div>
+        <div class="detail-item"><strong>Best Time:</strong> <span id="besttime"></span></div>
+        <div class="detail-item"><strong>Tips:</strong> <span id="tips"></span></div>
+        <div class="detail-item"><strong>Hashtags:</strong> <span id="hashtags"></span></div>
+        <div class="detail-item"><strong>Credits:</strong> <span id="credits"></span></div>
+      </div>
+      <div class="user">
+             <div class="user" style="cursor:pointer;" onclick="goToProfile()">
+        <img class="avatar" id="userAvatar" src="">
+        <span>Posted by <span id="username" style="color:var(--gold);"></span></span>
+      </div>
+      </div>
+    </div>
+  </article>
 </div>
-
 <!-- Bottom Navigation Bar -->
 <nav class="nav-bar" aria-label="Primary">
   <a href="Mainhome.html" class="nav-icon" title="Home">
@@ -309,15 +287,12 @@ const sb = supabase.createClient(
   "https://bhktkjegansxplpdtack.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
-const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
-  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
-const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
-let spot = null;
-let relatedSpots = [];
-let currentIndex = 0;
+
+const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
 
 const urlParams = new URLSearchParams(window.location.search);
 const spotId = urlParams.get('id');
+
 if (!spotId) {
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
 } else {
@@ -325,163 +300,141 @@ if (!spotId) {
 }
 
 async function loadSpot(id) {
-  const { data, error } = await sb
+  const { data: spot, error } = await sb
     .from('spots')
     .select('*')
     .eq('id', id)
     .single();
 
-  if (error || !data) {
+  if (error || !spot) {
     document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Spot not found</h1>';
     return;
   }
 
-  spot = data;
-  currentIndex = 0;
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
+  const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
 
-  await loadRelatedSpots();
+  // Build media list from R2 Worker URLs
+  let mediaList = [];
+  if (spot.media_urls && Array.isArray(spot.media_urls)) {
+    mediaList = spot.media_urls;
+  } else if (spot.media_url) {
+    mediaList = [{ url: spot.media_url, type: 'image' }];
+  }
 
-  renderCards();
+  // Hero media (first image/video)
+  if (mediaList.length > 0) {
+    const first = mediaList[0];
+    const heroEl = document.getElementById('heroMedia');
+    if (first.type === 'video') {
+      heroEl.innerHTML = `<video src="${first.url}" controls autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
+    } else {
+      heroEl.innerHTML = `<img src="${first.url}" alt="${spot.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/800x400/141824/FFD88D?text=No+Image'">`;
+    }
+  }
+
+  // Gallery thumbnails
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = ''; // clear
+  if (mediaList.length > 1) {
+    mediaList.forEach((media, index) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'thumb' + (index === 0 ? ' active' : '');
+      if (media.type === 'video') {
+        thumb.innerHTML = `<video src="${media.url}" muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
+      } else {
+        thumb.innerHTML = `<img src="${media.url}" alt="thumb" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/80/141824/FFD88D?text=No+Image'">`;
+      }
+      thumb.onclick = () => {
+        const heroEl = document.getElementById('heroMedia');
+        if (media.type === 'video') {
+          heroEl.innerHTML = `<video src="${media.url}" controls autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
+        } else {
+          heroEl.innerHTML = `<img src="${media.url}" alt="${spot.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/800x400/141824/FFD88D?text=No+Image'">`;
+        }
+        document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+      };
+      gallery.appendChild(thumb);
+    });
+  }
+
+  // Content
+  document.getElementById('title').textContent = spot.name;
+  document.getElementById('sub').textContent = `${spot.place}, ${spot.city}${spot.state ? ', ' + spot.state : ''}, ${spot.country}`;
+
+  document.getElementById('tags').innerHTML = `
+    <span class="tag">${categoryNames[spot.category_id] || 'Other'}</span>
+    <span class="tag">${emotionNames[spot.emotion_id] || ''}</span>
+  `;
+
+  document.getElementById('story').textContent = spot.story || 'No story shared.';
+
+  // Safety stars
+  const rating = spot.safety_rating || 0;
+  const starsHtml = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  document.getElementById('safety').innerHTML = `<span class="stars">${starsHtml.replace(/★/g, '<span class="filled">★</span>')}</span>`;
+
+  document.getElementById('besttime').textContent = spot.best_time || '-';
+  document.getElementById('tips').textContent = spot.tips || '-';
+  document.getElementById('hashtags').textContent = spot.hashtags || '-';
+  document.getElementById('credits').textContent = spot.credits || '-';
+
+  // Username
+  const username = spot.username || 'traveller';
+  document.getElementById('username').textContent = `@${username}`;
+
+  // Avatar from R2 Worker
+  const avatarUrl = `${WORKER_URL}/file/avatars/${username}-avatar.jpg`;
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=FFD88D&color=0c0f18&size=120`;
+  const avatarImg = document.getElementById('userAvatar');
+  avatarImg.src = avatarUrl;
+  avatarImg.onerror = () => { avatarImg.src = fallbackAvatar; };
+
+  // Click username/avatar to go to profile
+  document.querySelector('.user').onclick = () => {
+    window.location.href = `Profile.html?user=${username}`;
+  };
+
+  // Destiny button
+  setupDestinyButton(spot.id);
 }
 
-async function loadRelatedSpots() {
-  if (!spot || !spot.category_id || !spot.emotion_id || !spot.city) return;
+async function setupDestinyButton(spotId) {
+  const { data: { user } } = await sb.auth.getUser();
+  const btn = document.getElementById('destinyBtn');
 
-  const { data, error } = await sb
-    .from('spots')
-    .select('id, name, place, city, media_url, media_urls, story')
-    .neq('id', spot.id)
-    .or(`category_id.eq.${spot.category_id},emotion_id.eq.${spot.emotion_id},city.eq.${spot.city}`);
-
-  if (error || !data) {
-    console.error('Failed to load related spots', error);
+  if (!user) {
+    btn.textContent = 'Login to Save';
+    btn.disabled = true;
     return;
   }
 
-  relatedSpots = [spot, ...data];
-}
+  const { data: existing } = await sb
+    .from('destiny_saves')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('spot_id', spotId)
+    .maybeSingle();
 
-function renderCards() {
-  const container = document.getElementById('spotCardsContainer');
-  if (!container) {
-    const main = document.querySelector('.main');
-    const div = document.createElement('div');
-    div.id = 'spotCardsContainer';
-    main.appendChild(div);
-    container = div;
-  }
+  const isSaved = !!existing;
+  btn.textContent = isSaved ? 'Saved ❤️' : 'Add to Destiny';
+  if (isSaved) btn.classList.add('saved');
 
-  container.innerHTML = '';
-
-  relatedSpots.forEach((s, index) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    if (index === currentIndex) card.classList.add('active');
-    else if (index === currentIndex + 1) card.classList.add('next');
-    else if (index === currentIndex - 1) card.classList.add('prev');
-
-    const firstMedia = s.media_urls?.[0]?.url || s.media_url || 'https://via.placeholder.com/800x400/141824/FFD88D?text=No+Image';
-
-    card.innerHTML = `
-      <div class="hero-media" id="heroMedia">
-        <img src="${firstMedia}" alt="${s.name}" onerror="this.src='https://via.placeholder.com/800x400/141824/FFD88D?text=No+Image'">
-      </div>
-      <div class="gallery" id="gallery"></div>
-      <div class="info">
-        <h1 class="title" id="title">${s.name}</h1>
-        <p class="sub" id="sub">${s.place}, ${s.city}${s.state ? ', ' + s.state : ''}, ${s.country}</p>
-        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-          <div class="tags" id="tags">
-            <span class="tag">${categoryNames[s.category_id] || 'Other'}</span>
-            <span class="tag">${emotionNames[s.emotion_id] || ''}</span>
-          </div>
-          <button class="destiny-btn" id="destinyBtn">Add to Destiny</button>
-        </div>
-        <div class="story" id="story">${s.story || 'No story shared.'}</div>
-        <div class="details">
-          <div class="detail-item"><strong>Solo Woman Safety Rating:</strong> <span id="safety"><span class="stars">${'★'.repeat(s.safety_rating || 0)}${'☆'.repeat(5 - (s.safety_rating || 0)).replace(/★/g, '<span class="filled">★</span>')}</span></span></div>
-          <div class="detail-item"><strong>Best Time:</strong> <span id="besttime">${s.best_time || '-'}</span></div>
-          <div class="detail-item"><strong>Tips:</strong> <span id="tips">${s.tips || '-'}</span></div>
-          <div class="detail-item"><strong>Hashtags:</strong> <span id="hashtags">${s.hashtags || '-'}</span></div>
-          <div class="detail-item"><strong>Credits:</strong> <span id="credits">${s.credits || '-'}</span></div>
-        </div>
-        <div class="user" style="cursor:pointer;" onclick="window.location.href='Profile.html?user=${s.username || 'traveller'}'">
-          <img class="avatar" id="userAvatar" src="${WORKER_URL}/file/avatars/${s.username || 'traveller'}-avatar.jpg" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.username || 'traveller')}&background=FFD88D&color=0c0f18&size=120'">
-          <span>Posted by <span id="username" style="color:var(--gold);">@${s.username || 'traveller'}</span></span>
-        </div>
-      </div>
-    `;
-
-    container.appendChild(card);
-  });
-
-  initSwipe();
-}
-
-function initSwipe() {
-  const container = document.getElementById('spotCardsContainer');
-  let isDragging = false;
-  let startX = 0;
-  let direction = 0;
-
-  const handleStart = (e) => {
-    isDragging = true;
-    startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-    e.preventDefault();
-  };
-
-  const handleMove = (e) => {
-    if (!isDragging) return;
-    const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
-    direction = x - startX;
-  };
-
-  const handleEnd = () => {
-    if (!isDragging) return;
-    isDragging = false;
-
-    if (Math.abs(direction) > 80) {
-      if (direction > 0) changeSpot(-1); // left swipe → previous
-      else changeSpot(1); // right swipe → next
+  btn.onclick = async () => {
+    if (isSaved) {
+      await sb.from('destiny_saves').delete().eq('id', existing.id);
+      btn.textContent = 'Add to Destiny';
+      btn.classList.remove('saved');
+    } else {
+      await sb.from('destiny_saves').insert({ user_id: user.id, spot_id: spotId });
+      btn.textContent = 'Saved ❤️';
+      btn.classList.add('saved');
     }
   };
-
-  // Mouse
-  container.addEventListener('mousedown', handleStart);
-  container.addEventListener('mousemove', handleMove);
-  container.addEventListener('mouseup', handleEnd);
-  container.addEventListener('mouseleave', handleEnd);
-
-  // Touch
-  container.addEventListener('touchstart', handleStart, { passive: false });
-  container.addEventListener('touchmove', handleMove, { passive: false });
-  container.addEventListener('touchend', handleEnd);
-
-  // Arrows (if you want them)
-  // Uncomment if you want visible arrows
-  /*
-  const prevBtn = document.createElement('button');
-  prevBtn.className = 'swipe-arrow prev';
-  prevBtn.textContent = '←';
-  prevBtn.onclick = () => changeSpot(-1);
-  container.appendChild(prevBtn);
-
-  const nextBtn = document.createElement('button');
-  nextBtn.className = 'swipe-arrow next';
-  nextBtn.textContent = '→';
-  nextBtn.onclick = () => changeSpot(1);
-  container.appendChild(nextBtn);
-  */
-}
-
-function changeSpot(dir) {
-  const newIndex = currentIndex + dir;
-  if (newIndex < 0 || newIndex >= relatedSpots.length) return;
-
-  currentIndex = newIndex;
-  renderCards();
 }
 </script>
 </body>
+
 </html>
 

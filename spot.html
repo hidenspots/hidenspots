@@ -298,18 +298,18 @@
     </div>
   </article>
 
-  <!-- NEW: Swipeable Suggestions Section - Unlimited -->
-  <section class="suggestions-section">
-    <h2 style="text-align:center; color:#FFD88D; font-size:2rem; margin-bottom:2rem;">More Hidden Spots Like This</h2>
-    <div class="suggestions-container">
-      <div class="suggestions-track" id="suggestionsTrack">
-        <!-- Cards will be inserted here dynamically -->
-      </div>
+  <!-- Swipeable Suggestions - Unlimited -->
+<section class="suggestions-section" style="padding:3rem 1rem; background:#141824;">
+  <h2 style="text-align:center; color:#FFD88D; font-size:2rem; margin-bottom:2rem;">More Hidden Spots Like This</h2>
+  <div class="suggestions-container" id="suggestionsContainer" style="position:relative; max-width:1000px; margin:0 auto; overflow:hidden;">
+    <div class="suggestions-track" id="suggestionsTrack" style="display:flex; gap:1.5rem; overflow-x:auto; -webkit-overflow-scrolling:touch; scroll-snap-type:x mandatory; padding:0 1rem;">
+      <!-- Cards inserted here -->
     </div>
-    <div style="text-align:center; margin-top:1.5rem; opacity:0.7; font-size:0.95rem;">
-      Swipe left/right or scroll horizontally to explore more
-    </div>
-  </section>
+  </div>
+  <div style="text-align:center; margin-top:1.5rem; opacity:0.7; font-size:0.95rem;">
+    Swipe left/right or scroll horizontally
+  </div>
+</section>
 </div>
 
 <!-- Bottom Navigation Bar -->
@@ -469,16 +469,14 @@ async function setupDestinyButton(spotId) {
   };
 }
 
-// NEW: Load unlimited related spots (same category/emotion/city)
 async function loadRelatedSpots() {
   if (!spot || !spot.category_id || !spot.emotion_id || !spot.city) return;
 
-  const container = document.getElementById('suggestionsTrack');
-  if (!container) return;
+  const track = document.getElementById('suggestionsTrack');
+  if (!track) return;
 
-  container.innerHTML = '<p style="text-align:center; width:100%; padding:2rem; opacity:0.7;">Loading similar spots...</p>';
+  track.innerHTML = '<p style="text-align:center; width:100%; padding:2rem; opacity:0.7;">Loading similar spots...</p>';
 
-  // Query: same category OR emotion OR city, exclude current spot, NO LIMIT
   const { data: related, error } = await sb
     .from('spots')
     .select('id, name, place, city, media_url, media_urls')
@@ -486,22 +484,23 @@ async function loadRelatedSpots() {
     .or(`category_id.eq.${spot.category_id},emotion_id.eq.${spot.emotion_id},city.eq.${spot.city}`);
 
   if (error || !related || related.length === 0) {
-    container.innerHTML = '<p style="text-align:center; width:100%; padding:2rem; opacity:0.7;">No similar spots found yet</p>';
+    track.innerHTML = '<p style="text-align:center; width:100%; padding:2rem; opacity:0.7;">No similar spots found yet</p>';
     return;
   }
 
-  container.innerHTML = '';
+  track.innerHTML = '';
 
   related.forEach(r => {
     const firstMedia = r.media_urls?.[0]?.url || r.media_url || 'https://via.placeholder.com/300x200/141824/FFD88D?text=No+Image';
 
     const card = document.createElement('div');
     card.className = 'suggestion-card';
+    card.style.scrollSnapAlign = 'start';
     card.innerHTML = `
-      <img src="${firstMedia}" alt="${r.name}" onerror="this.src='https://via.placeholder.com/300x200/141824/FFD88D?text=No+Image'">
-      <div class="info">
-        <h3>${r.name}</h3>
-        <p>${r.place || ''}, ${r.city}</p>
+      <img src="${firstMedia}" alt="${r.name}" style="width:100%;height:180px;object-fit:cover;" onerror="this.src='https://via.placeholder.com/300x200/141824/FFD88D?text=No+Image'">
+      <div style="padding:1rem;">
+        <h3 style="margin:0;font-size:1.2rem;color:#FFD88D;">${r.name}</h3>
+        <p style="margin:0.5rem 0 0;opacity:0.8;font-size:0.95rem;">${r.place || ''}, ${r.city}</p>
       </div>
     `;
 
@@ -509,57 +508,61 @@ async function loadRelatedSpots() {
       window.location.href = `spot.html?id=${r.id}`;
     };
 
-    container.appendChild(card);
+    track.appendChild(card);
   });
 
-  // Swipe/drag support (touch + mouse)
-  let isDragging = false;
+  // ────────────────────────────────────────────────
+  // FIXED SWIPE / DRAG LOGIC (touch + mouse)
+  // ────────────────────────────────────────────────
+  let isDown = false;
   let startX;
   let scrollLeft;
 
-  container.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    startX = e.pageX - container.offsetLeft;
-    scrollLeft = container.scrollLeft;
-    container.style.cursor = 'grabbing';
+  track.addEventListener('mousedown', (e) => {
+    isDown = true;
+    startX = e.pageX - track.offsetLeft;
+    scrollLeft = track.scrollLeft;
+    track.style.cursor = 'grabbing';
   });
 
-  container.addEventListener('mouseleave', () => {
-    isDragging = false;
-    container.style.cursor = 'grab';
+  track.addEventListener('mouseleave', () => {
+    isDown = false;
+    track.style.cursor = 'grab';
   });
 
-  container.addEventListener('mouseup', () => {
-    isDragging = false;
-    container.style.cursor = 'grab';
+  track.addEventListener('mouseup', () => {
+    isDown = false;
+    track.style.cursor = 'grab';
   });
 
-  container.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
+  track.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
     e.preventDefault();
-    const x = e.pageX - container.offsetLeft;
+    const x = e.pageX - track.offsetLeft;
+    const walk = (x - startX) * 2; // ×2 = faster swipe feel
+    track.scrollLeft = scrollLeft - walk;
+  });
+
+  // Touch events (mobile swipe)
+  track.addEventListener('touchstart', (e) => {
+    isDown = true;
+    startX = e.touches[0].pageX - track.offsetLeft;
+    scrollLeft = track.scrollLeft;
+  }, { passive: false });
+
+  track.addEventListener('touchend', () => {
+    isDown = false;
+  }, { passive: false });
+
+  track.addEventListener('touchmove', (e) => {
+    if (!isDown) return;
+    const x = e.touches[0].pageX - track.offsetLeft;
     const walk = (x - startX) * 2;
-    container.scrollLeft = scrollLeft - walk;
-  });
+    track.scrollLeft = scrollLeft - walk;
+  }, { passive: false });
 
-  // Touch support for mobile swipe
-  container.addEventListener('touchstart', (e) => {
-    isDragging = true;
-    startX = e.touches[0].pageX - container.offsetLeft;
-    scrollLeft = container.scrollLeft;
-  });
-
-  container.addEventListener('touchend', () => {
-    isDragging = false;
-  });
-
-  container.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-    const x = e.touches[0].pageX - container.offsetLeft;
-    const walk = (x - startX) * 2;
-    container.scrollLeft = scrollLeft - walk;
-  });
 }
 </script>
 </body>
 </html>
+

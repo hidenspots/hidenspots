@@ -208,24 +208,27 @@
       .nav-bar{gap:2rem;padding:.9rem 1.6rem}
     }
 
-    /* NEW: Suggestions Section Styles */
+    /* ────────────────────────────────────────────────
+       NEW: Suggestions Section with Swipe + Buttons
+    ──────────────────────────────────────────────── */
     .suggestions-section {
       padding: 3rem 1rem;
       background: #141824;
     }
     .suggestions-container {
       position: relative;
-      overflow: hidden;
       max-width: 1000px;
       margin: 0 auto;
+      overflow: hidden;
     }
     .suggestions-track {
       display: flex;
       gap: 1.5rem;
-      padding: 0 1rem;
       overflow-x: auto;
-      scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      padding: 0 1rem;
+      scroll-behavior: smooth;
     }
     .suggestion-card {
       flex: 0 0 280px;
@@ -258,6 +261,41 @@
       margin: 0.5rem 0 0;
       opacity: 0.8;
       font-size: 0.95rem;
+    }
+    /* Swipe Buttons */
+    .swipe-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      color: #FFD88D;
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      font-size: 1.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: background 0.3s;
+    }
+    .swipe-btn:hover {
+      background: rgba(255,216,141,0.3);
+    }
+    .swipe-btn.prev {
+      left: 10px;
+    }
+    .swipe-btn.next {
+      right: 10px;
+    }
+    @media (max-width: 768px) {
+      .swipe-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1.5rem;
+      }
     }
   </style>
 </head>
@@ -298,18 +336,18 @@
     </div>
   </article>
 
-  <!-- Swipeable Suggestions - Unlimited -->
-<section class="suggestions-section" style="padding:3rem 1rem; background:#141824;">
-  <h2 style="text-align:center; color:#FFD88D; font-size:2rem; margin-bottom:2rem;">More Hidden Spots Like This</h2>
-  <div class="suggestions-container" id="suggestionsContainer" style="position:relative; max-width:1000px; margin:0 auto; overflow:hidden;">
-    <div class="suggestions-track" id="suggestionsTrack" style="display:flex; gap:1.5rem; overflow-x:auto; -webkit-overflow-scrolling:touch; scroll-snap-type:x mandatory; padding:0 1rem;">
-      <!-- Cards inserted here -->
+  <!-- Swipeable Suggestions Section -->
+  <section class="suggestions-section">
+    <h2 style="text-align:center; color:#FFD88D; font-size:2rem; margin-bottom:2rem;">More Hidden Spots Like This</h2>
+    <div class="suggestions-container">
+      <button class="swipe-btn prev" id="prevBtn">←</button>
+      <div class="suggestions-track" id="suggestionsTrack"></div>
+      <button class="swipe-btn next" id="nextBtn">→</button>
     </div>
-  </div>
-  <div style="text-align:center; margin-top:1.5rem; opacity:0.7; font-size:0.95rem;">
-    Swipe left/right or scroll horizontally
-  </div>
-</section>
+    <div style="text-align:center; margin-top:1.5rem; opacity:0.7; font-size:0.95rem;">
+      Swipe left/right or use arrows
+    </div>
+  </section>
 </div>
 
 <!-- Bottom Navigation Bar -->
@@ -341,7 +379,7 @@ const sb = supabase.createClient(
   "https://bhktkjegansxplpdtack.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
-const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
+const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 const urlParams = new URLSearchParams(window.location.search);
 const spotId = urlParams.get('id');
 if (!spotId) {
@@ -361,14 +399,12 @@ async function loadSpot(id) {
   }
   const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
   const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
-  // Build media list from R2 Worker URLs
   let mediaList = [];
   if (spot.media_urls && Array.isArray(spot.media_urls)) {
     mediaList = spot.media_urls;
   } else if (spot.media_url) {
     mediaList = [{ url: spot.media_url, type: 'image' }];
   }
-  // Hero media (first image/video)
   if (mediaList.length > 0) {
     const first = mediaList[0];
     const heroEl = document.getElementById('heroMedia');
@@ -378,9 +414,8 @@ async function loadSpot(id) {
       heroEl.innerHTML = `<img src="${first.url}" alt="${spot.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/800x400/141824/FFD88D?text=No+Image'">`;
     }
   }
-  // Gallery thumbnails
   const gallery = document.getElementById('gallery');
-  gallery.innerHTML = ''; // clear
+  gallery.innerHTML = '';
   if (mediaList.length > 1) {
     mediaList.forEach((media, index) => {
       const thumb = document.createElement('div');
@@ -403,7 +438,6 @@ async function loadSpot(id) {
       gallery.appendChild(thumb);
     });
   }
-  // Content
   document.getElementById('title').textContent = spot.name;
   document.getElementById('sub').textContent = `${spot.place}, ${spot.city}${spot.state ? ', ' + spot.state : ''}, ${spot.country}`;
   document.getElementById('tags').innerHTML = `
@@ -411,7 +445,6 @@ async function loadSpot(id) {
     <span class="tag">${emotionNames[spot.emotion_id] || ''}</span>
   `;
   document.getElementById('story').textContent = spot.story || 'No story shared.';
-  // Safety stars
   const rating = spot.safety_rating || 0;
   const starsHtml = '★'.repeat(rating) + '☆'.repeat(5 - rating);
   document.getElementById('safety').innerHTML = `<span class="stars">${starsHtml.replace(/★/g, '<span class="filled">★</span>')}</span>`;
@@ -419,23 +452,19 @@ async function loadSpot(id) {
   document.getElementById('tips').textContent = spot.tips || '-';
   document.getElementById('hashtags').textContent = spot.hashtags || '-';
   document.getElementById('credits').textContent = spot.credits || '-';
-  // Username
   const username = spot.username || 'traveller';
   document.getElementById('username').textContent = `@${username}`;
-  // Avatar from R2 Worker
   const avatarUrl = `${WORKER_URL}/file/avatars/${username}-avatar.jpg`;
   const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=FFD88D&color=0c0f18&size=120`;
   const avatarImg = document.getElementById('userAvatar');
   avatarImg.src = avatarUrl;
   avatarImg.onerror = () => { avatarImg.src = fallbackAvatar; };
-  // Click username/avatar to go to profile
   document.querySelector('.user').onclick = () => {
     window.location.href = `Profile.html?user=${username}`;
   };
-  // Destiny button
   setupDestinyButton(spot.id);
 
-  // Load unlimited related spots suggestions
+  // Load suggestions
   loadRelatedSpots();
 }
 
@@ -469,6 +498,9 @@ async function setupDestinyButton(spotId) {
   };
 }
 
+// ────────────────────────────────────────────────
+// Load unlimited related spots + swipe + buttons
+// ────────────────────────────────────────────────
 async function loadRelatedSpots() {
   if (!spot || !spot.category_id || !spot.emotion_id || !spot.city) return;
 
@@ -495,9 +527,8 @@ async function loadRelatedSpots() {
 
     const card = document.createElement('div');
     card.className = 'suggestion-card';
-    card.style.scrollSnapAlign = 'start';
     card.innerHTML = `
-      <img src="${firstMedia}" alt="${r.name}" style="width:100%;height:180px;object-fit:cover;" onerror="this.src='https://via.placeholder.com/300x200/141824/FFD88D?text=No+Image'">
+      <img src="${firstMedia}" alt="${r.name}" onerror="this.src='https://via.placeholder.com/300x200/141824/FFD88D?text=No+Image'">
       <div style="padding:1rem;">
         <h3 style="margin:0;font-size:1.2rem;color:#FFD88D;">${r.name}</h3>
         <p style="margin:0.5rem 0 0;opacity:0.8;font-size:0.95rem;">${r.place || ''}, ${r.city}</p>
@@ -512,8 +543,23 @@ async function loadRelatedSpots() {
   });
 
   // ────────────────────────────────────────────────
-  // FIXED SWIPE / DRAG LOGIC (touch + mouse)
+  // FIXED SWIPE + ARROW BUTTONS
   // ────────────────────────────────────────────────
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  // Scroll amount per click (adjust if needed)
+  const scrollAmount = 300;
+
+  prevBtn.addEventListener('click', () => {
+    track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+  });
+
+  nextBtn.addEventListener('click', () => {
+    track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  });
+
+  // Mouse drag
   let isDown = false;
   let startX;
   let scrollLeft;
@@ -539,11 +585,11 @@ async function loadRelatedSpots() {
     if (!isDown) return;
     e.preventDefault();
     const x = e.pageX - track.offsetLeft;
-    const walk = (x - startX) * 2; // ×2 = faster swipe feel
+    const walk = (x - startX) * 2;
     track.scrollLeft = scrollLeft - walk;
   });
 
-  // Touch events (mobile swipe)
+  // Touch swipe (mobile)
   track.addEventListener('touchstart', (e) => {
     isDown = true;
     startX = e.touches[0].pageX - track.offsetLeft;
@@ -560,9 +606,7 @@ async function loadRelatedSpots() {
     const walk = (x - startX) * 2;
     track.scrollLeft = scrollLeft - walk;
   }, { passive: false });
-
 }
 </script>
 </body>
 </html>
-

@@ -424,67 +424,82 @@ setInterval(()=>{
   slides[i].classList.add('active');
 },5000);
 </script>
-<!-- Keep this trigger div at the very bottom of your content, before </body> -->
-<div id="scroll-trigger" style="height: 600px; width: 100%;"></div>
+<!-- Invisible tall trigger zone at the end of your content -->
+<div id="scroll-trigger" style="height: 800px; width: 100%;"></div>
 
 <script>
-// Flags to prevent multiple triggers or early start
-let hasStartedObserving = false;
-let hasNavigated = false;
+// Flags to prevent double-trigger or early start
+let observerStarted = false;
+let navigationDone = false;
 
-// Start observing only after real scrolling (40% of page)
-function startObserver() {
-  if (hasStartedObserving || hasNavigated) return;
-  hasStartedObserving = true;
+// Cross-browser smooth scroll fallback (for top of Search.html if needed)
+function smoothScrollToTop() {
+  if ('scrollBehavior' in document.documentElement.style) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    window.scrollTo(0, 0);
+  }
+}
 
-  console.log('Scroll observer ACTIVATED — now waiting for bottom trigger');
+// Start observer only after meaningful scroll (40% of page)
+function activateObserver() {
+  if (observerStarted || navigationDone) return;
+  observerStarted = true;
+
+  console.log('Scroll observer now ACTIVE - waiting for bottom');
 
   const trigger = document.getElementById('scroll-trigger');
   if (!trigger) {
-    console.log('Error: scroll-trigger div not found!');
+    console.log('Trigger element missing!');
     return;
   }
 
   const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !hasNavigated) {
-      console.log('Bottom trigger is now visible → navigating to Search.html');
-      hasNavigated = true;
+    if (entries[0].isIntersecting && !navigationDone) {
+      console.log('Bottom reached - navigating to Search.html');
+      navigationDone = true;
       observer.disconnect();
       window.location.href = 'Search.html';
     }
   }, {
-    rootMargin: '0px 0px 1000px 0px', // Trigger when 1000px before real bottom
-    threshold: 0.1 // Only when 10% of trigger is visible
+    rootMargin: '0px 0px 1200px 0px', // Trigger when ~1200px from real bottom
+    threshold: 0.05 // Small part visible is enough
   });
 
   observer.observe(trigger);
 }
 
-// Check scroll progress — activate observer only after 40% scrolled
+// Watch scroll progress - activate only after ~40% scrolled
 window.addEventListener('scroll', () => {
-  if (!hasStartedObserving) {
-    const scrolled = window.scrollY;
-    const totalScrollable = document.body.scrollHeight - window.innerHeight;
-    const scrollPercentage = scrolled / totalScrollable;
+  if (observerStarted) return;
 
-    console.log(`Current scroll: ${Math.round(scrollPercentage * 100)}%`);
+  const scrolled = window.scrollY;
+  const totalScrollable = Math.max(
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight
+  ) - window.innerHeight;
 
-    if (scrollPercentage >= 0.4) { // Change 0.4 to 0.6 if you want to wait longer
-      startObserver();
-    }
+  const scrollPercent = totalScrollable > 0 ? scrolled / totalScrollable : 0;
+
+  console.log(`Scroll progress: ${Math.round(scrollPercent * 100)}%`);
+
+  if (scrollPercent >= 0.4) { // 40% - increase to 0.6 or 0.7 if too early
+    console.log('Enough scrolling detected - starting observer');
+    activateObserver();
   }
 }, { passive: true });
 
-// Safety fallback: if user doesn't scroll much but page is loaded long, start after 3s
+// Fallback: if no scroll but page is long enough, start after 4 seconds
 setTimeout(() => {
-  if (!hasStartedObserving) {
-    console.log('Fallback: starting observer after 3s delay');
-    startObserver();
+  if (!observerStarted) {
+    console.log('Fallback: starting observer after delay');
+    activateObserver();
   }
-}, 3000);
+}, 4000);
 </script>
 </body>
 </html>
+
 
 
 

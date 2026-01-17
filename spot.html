@@ -310,6 +310,8 @@ const sb = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
 const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
+const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
 let spot = null;
 let relatedSpots = [];
 let currentIndex = 0;
@@ -482,3 +484,4 @@ function changeSpot(dir) {
 </script>
 </body>
 </html>
+

@@ -424,42 +424,27 @@ setInterval(()=>{
   slides[i].classList.add('active');
 },5000);
 </script>
+<!-- Invisible trigger element at the very bottom -->
+<div id="scroll-trigger" style="height: 1px; position: absolute; bottom: 0; width: 100%;"></div>
+
 <script>
-let hasNavigated = false;
-
-function checkScroll() {
-  if (hasNavigated) return;
-
-  const scrollBottom = window.scrollY + window.innerHeight;
-  const pageBottom = Math.max(
-    document.body.scrollHeight,
-    document.body.offsetHeight,
-    document.documentElement.clientHeight,
-    document.documentElement.scrollHeight,
-    document.documentElement.offsetHeight
-  );
-
-  // Trigger 600px before bottom (more forgiving on mobile)
-  if (scrollBottom >= pageBottom - 600) {
-    hasNavigated = true;
+// Use Intersection Observer to detect when bottom is visible
+const trigger = document.getElementById('scroll-trigger');
+const observer = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    // Bottom is visible → go to Search.html
     window.location.href = 'Search.html';
+    observer.disconnect(); // Stop watching
   }
-}
+}, {
+  rootMargin: '0px 0px 300px 0px' // Trigger 300px before bottom
+});
 
-// Use throttle/debounce for better mobile performance
-let ticking = false;
-window.addEventListener('scroll', () => {
-  if (!ticking) {
-    window.requestAnimationFrame(() => {
-      checkScroll();
-      ticking = false;
-    });
-    ticking = true;
-  }
-}, { passive: true });
+observer.observe(trigger);
 </script>
 </body>
 </html>
+
 
 
 

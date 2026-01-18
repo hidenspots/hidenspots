@@ -216,7 +216,7 @@ function renderHero(i) {
   slideEls.forEach(s => s.classList.remove('active'));
   slideEls[i].classList.add('active');
 
-  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant', 8:'Nature'};
   themeEl.textContent = categoryNames[spot.category_id] || 'Hidden Gem';
   titleEl.textContent = spot.name;
   subEl.textContent = spot.story?.slice(0, 120) + '...' || 'Discover this hidden place...';
@@ -341,6 +341,7 @@ init();
 </body>
 
 </html>
+
 
 
 

@@ -23,7 +23,6 @@
     html,body{height:100%; margin:0}
     body{
       background:var(--bg); color:#fff; font-family:'Playfair Display',serif;
-      overflow-x:hidden;
     }
     /* Header */
     .header{
@@ -42,7 +41,6 @@
       max-width:800px;
       margin:0 auto;
       padding:20px;
-      position:relative;
     }
     .card{
       background:var(--panel);
@@ -50,21 +48,15 @@
       border-radius:16px;
       overflow:hidden;
       box-shadow:0 12px 26px rgba(0,0,0,.25);
-      transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      position:absolute;
-      inset:20px 0;
-      opacity:0;
-      transform:translateX(100%);
+      transition: opacity 0.5s ease, transform 0.5s ease;
     }
-    .card.active{
-      opacity:1;
-      transform:translateX(0);
-      position:relative;
-      inset:auto;
+    .card.fade-out {
+      opacity: 0;
+      transform: translateX(-30px);
     }
-    .card.prev{
-      transform:translateX(-100%);
-      opacity:0;
+    .card.fade-in {
+      opacity: 1;
+      transform: translateX(0);
     }
     /* HERO MEDIA */
     .hero-media {
@@ -330,11 +322,10 @@ async function loadSpot(id) {
   currentSpot = data;
   currentIndex = 0;
 
-  // Load similar spots
   await loadRelatedSpots();
 
-  // Render initial card
-  renderCard(currentSpot, 'active');
+  // Initial render
+  renderCard(currentSpot);
 }
 
 async function loadRelatedSpots() {
@@ -354,49 +345,11 @@ async function loadRelatedSpots() {
   relatedSpots = data;
 }
 
-function renderCard(spotData, stateClass = 'active') {
-  const main = document.querySelector('.main');
-  const existingCard = document.querySelector('.card');
-  if (existingCard) {
-    existingCard.className = 'card ' + stateClass;
-    updateCardContent(existingCard, spotData);
-  } else {
-    const card = document.createElement('article');
-    card.className = 'card ' + stateClass;
-    card.innerHTML = `
-      <div class="hero-media" id="heroMedia"></div>
-      <div class="gallery" id="gallery"></div>
-      <div class="info">
-        <h1 class="title" id="title"></h1>
-        <p class="sub" id="sub"></p>
-        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-          <div class="tags" id="tags"></div>
-          <button class="destiny-btn" id="destinyBtn">Add to Destiny</button>
-        </div>
-        <div class="story" id="story"></div>
-        <div class="details">
-          <div class="detail-item"><strong>Solo Woman Safety Rating:</strong> <span id="safety"></span></div>
-          <div class="detail-item"><strong>Best Time:</strong> <span id="besttime"></span></div>
-          <div class="detail-item"><strong>Tips:</strong> <span id="tips"></span></div>
-          <div class="detail-item"><strong>Hashtags:</strong> <span id="hashtags"></span></div>
-          <div class="detail-item"><strong>Credits:</strong> <span id="credits"></span></div>
-        </div>
-        <div class="user">
-          <div class="user" style="cursor:pointer;" onclick="goToProfile()">
-            <img class="avatar" id="userAvatar" src="">
-            <span>Posted by <span id="username" style="color:var(--gold);"></span></span>
-          </div>
-        </div>
-      </div>
-    `;
-    main.appendChild(card);
-    updateCardContent(card, spotData);
-  }
-}
+function renderCard(spot) {
+  const card = document.getElementById('spotCard');
 
-function updateCardContent(card, spot) {
   // Hero media
-  const heroEl = card.querySelector('#heroMedia');
+  const heroEl = document.getElementById('heroMedia');
   let mediaList = [];
   if (spot.media_urls && Array.isArray(spot.media_urls)) {
     mediaList = spot.media_urls;
@@ -413,7 +366,7 @@ function updateCardContent(card, spot) {
   }
 
   // Gallery
-  const gallery = card.querySelector('#gallery');
+  const gallery = document.getElementById('gallery');
   gallery.innerHTML = '';
   if (mediaList.length > 1) {
     mediaList.forEach((media, index) => {
@@ -424,8 +377,11 @@ function updateCardContent(card, spot) {
       } else {
         thumb.innerHTML = `<img src="${media.url}" alt="thumb" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/80/141824/FFD88D?text=No+Image'">`;
       }
+      // Prevent swipe from being blocked by gallery thumbs
+      thumb.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+      thumb.addEventListener('mousedown', e => e.stopPropagation());
       thumb.onclick = () => {
-        const heroEl = card.querySelector('#heroMedia');
+        const heroEl = document.getElementById('heroMedia');
         if (media.type === 'video') {
           heroEl.innerHTML = `<video src="${media.url}" controls autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
         } else {
@@ -439,80 +395,54 @@ function updateCardContent(card, spot) {
   }
 
   // Content
-  card.querySelector('#title').textContent = spot.name;
-  card.querySelector('#sub').textContent = `${spot.place}, ${spot.city}${spot.state ? ', ' + spot.state : ''}, ${spot.country}`;
-  card.querySelector('#tags').innerHTML = `
+  document.getElementById('title').textContent = spot.name;
+  document.getElementById('sub').textContent = `${spot.place}, ${spot.city}${spot.state ? ', ' + spot.state : ''}, ${spot.country}`;
+  document.getElementById('tags').innerHTML = `
     <span class="tag">${categoryNames[spot.category_id] || 'Other'}</span>
     <span class="tag">${emotionNames[spot.emotion_id] || ''}</span>
   `;
-  card.querySelector('#story').textContent = spot.story || 'No story shared.';
+  document.getElementById('story').textContent = spot.story || 'No story shared.';
 
   const rating = spot.safety_rating || 0;
   const starsHtml = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-  card.querySelector('#safety').innerHTML = `<span class="stars">${starsHtml.replace(/★/g, '<span class="filled">★</span>')}</span>`;
+  document.getElementById('safety').innerHTML = `<span class="stars">${starsHtml.replace(/★/g, '<span class="filled">★</span>')}</span>`;
 
-  card.querySelector('#besttime').textContent = spot.best_time || '-';
-  card.querySelector('#tips').textContent = spot.tips || '-';
-  card.querySelector('#hashtags').textContent = spot.hashtags || '-';
-  card.querySelector('#credits').textContent = spot.credits || '-';
+  document.getElementById('besttime').textContent = spot.best_time || '-';
+  document.getElementById('tips').textContent = spot.tips || '-';
+  document.getElementById('hashtags').textContent = spot.hashtags || '-';
+  document.getElementById('credits').textContent = spot.credits || '-';
 
   const username = spot.username || 'traveller';
-  card.querySelector('#username').textContent = `@${username}`;
+  document.getElementById('username').textContent = `@${username}`;
 
   const avatarUrl = `${WORKER_URL}/file/avatars/${username}-avatar.jpg`;
   const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=FFD88D&color=0c0f18&size=120`;
-  const avatarImg = card.querySelector('#userAvatar');
+  const avatarImg = document.getElementById('userAvatar');
   avatarImg.src = avatarUrl;
   avatarImg.onerror = () => { avatarImg.src = fallbackAvatar; };
 
-  card.querySelector('.user').onclick = () => {
+  document.querySelector('.user').onclick = () => {
     window.location.href = `Profile.html?user=${username}`;
   };
 
   // Destiny button
-  setupDestinyButton(spot.id, card);
-}
-
-async function setupDestinyButton(spotId, card) {
-  const { data: { user } } = await sb.auth.getUser();
-  const btn = card.querySelector('#destinyBtn');
-  if (!user) {
-    btn.textContent = 'Login to Save';
-    btn.disabled = true;
-    return;
-  }
-  const { data: existing } = await sb
-    .from('destiny_saves')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('spot_id', spotId)
-    .maybeSingle();
-  const isSaved = !!existing;
-  btn.textContent = isSaved ? 'Saved ❤️' : 'Add to Destiny';
-  if (isSaved) btn.classList.add('saved');
-  btn.onclick = async () => {
-    if (isSaved) {
-      await sb.from('destiny_saves').delete().eq('id', existing.id);
-      btn.textContent = 'Add to Destiny';
-      btn.classList.remove('saved');
-    } else {
-      await sb.from('destiny_saves').insert({ user_id: user.id, spot_id: spotId });
-      btn.textContent = 'Saved ❤️';
-      btn.classList.add('saved');
-    }
-  };
+  setupDestinyButton(spot.id);
 }
 
 // ────────────────────────────────────────────────
-// SWIPE LOGIC
+// SWIPE LOGIC - FULL CARD WITH ALL DETAILS
 // ────────────────────────────────────────────────
 function initSwipe() {
-  const main = document.querySelector('.main');
+  const card = document.getElementById('spotCard');
   let isDragging = false;
   let startX = 0;
   let direction = 0;
 
   const handleStart = (e) => {
+    // Allow clicks on destiny button, gallery, etc. to work
+    if (e.target.closest('#destinyBtn') || e.target.closest('.thumb') || e.target.closest('.user')) {
+      return;
+    }
     isDragging = true;
     startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
     e.preventDefault();
@@ -522,28 +452,30 @@ function initSwipe() {
     if (!isDragging) return;
     const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
     direction = x - startX;
+    // Optional: slight visual feedback during drag
+    card.style.transform = `translateX(${direction * 0.3}px)`;
   };
 
   const handleEnd = () => {
     if (!isDragging) return;
     isDragging = false;
 
-    if (Math.abs(direction) > 80) {
+    card.style.transform = 'translateX(0)';
+    if (Math.abs(direction) > 100) { // higher threshold so buttons/thumbs don't trigger swipe
       if (direction > 0) changeSpot(-1); // left swipe → previous
       else changeSpot(1); // right swipe → next
     }
   };
 
   // Mouse
-  main.addEventListener('mousedown', handleStart);
-  main.addEventListener('mousemove', handleMove);
-  main.addEventListener('mouseup', handleEnd);
-  main.addEventListener('mouseleave', handleEnd);
+  card.addEventListener('mousedown', handleStart);
+  document.addEventListener('mousemove', handleMove);
+  document.addEventListener('mouseup', handleEnd);
 
   // Touch
-  main.addEventListener('touchstart', handleStart, { passive: false });
-  main.addEventListener('touchmove', handleMove, { passive: false });
-  main.addEventListener('touchend', handleEnd);
+  card.addEventListener('touchstart', handleStart, { passive: false });
+  document.addEventListener('touchmove', handleMove, { passive: false });
+  document.addEventListener('touchend', handleEnd);
 }
 
 function changeSpot(dir) {
@@ -553,8 +485,18 @@ function changeSpot(dir) {
   currentIndex = newIndex;
   const nextSpot = relatedSpots[newIndex];
 
-  // Replace current card content with new spot data
-  updateCardContent(document.querySelector('.card'), nextSpot);
+  // Fade out current card
+  const card = document.getElementById('spotCard');
+  card.classList.add('fade-out');
+
+  setTimeout(() => {
+    // Update content
+    renderCard(nextSpot);
+    // Fade in new content
+    card.classList.remove('fade-out');
+    card.classList.add('fade-in');
+    setTimeout(() => card.classList.remove('fade-in'), 600);
+  }, 300);
 }
 </script>
 </body>

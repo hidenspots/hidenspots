@@ -23,7 +23,6 @@
     html,body{height:100%; margin:0}
     body{
       background:var(--bg); color:#fff; font-family:'Playfair Display',serif;
-      overflow-x: hidden;
     }
     /* Header */
     .header{
@@ -49,7 +48,11 @@
       border-radius:16px;
       overflow:hidden;
       box-shadow:0 12px 26px rgba(0,0,0,.25);
-      transition: all 0.5s ease;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .card.fade {
+      opacity: 0;
+      transform: translateX(30px);
     }
     /* HERO MEDIA */
     .hero-media {
@@ -209,6 +212,42 @@
     @media(max-width:768px){
       .nav-bar{gap:2rem;padding:.9rem 1.6rem}
     }
+    /* Arrows */
+    .swipe-arrow {
+      position: fixed;
+      bottom: 120px;
+      background: rgba(0,0,0,0.6);
+      color: #FFD88D;
+      border: none;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      font-size: 2.2rem;
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .swipe-arrow:hover {
+      background: rgba(255,216,141,0.5);
+      transform: scale(1.1);
+    }
+    .swipe-arrow.prev {
+      left: 20px;
+    }
+    .swipe-arrow.next {
+      right: 20px;
+    }
+    @media (max-width: 768px) {
+      .swipe-arrow {
+        bottom: 100px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.8rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -251,6 +290,10 @@
     </div>
   </article>
 </div>
+
+<!-- Arrows - always visible -->
+<button class="swipe-arrow prev" id="prevBtn">←</button>
+<button class="swipe-arrow next" id="nextBtn">→</button>
 
 <!-- Bottom Navigation Bar -->
 <nav class="nav-bar" aria-label="Primary">
@@ -422,6 +465,36 @@ function renderCard(spot) {
   setupDestinyButton(spot.id);
 }
 
+async function setupDestinyButton(spotId) {
+  const { data: { user } } = await sb.auth.getUser();
+  const btn = document.getElementById('destinyBtn');
+  if (!user) {
+    btn.textContent = 'Login to Save';
+    btn.disabled = true;
+    return;
+  }
+  const { data: existing } = await sb
+    .from('destiny_saves')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('spot_id', spotId)
+    .maybeSingle();
+  const isSaved = !!existing;
+  btn.textContent = isSaved ? 'Saved ❤️' : 'Add to Destiny';
+  if (isSaved) btn.classList.add('saved');
+  btn.onclick = async () => {
+    if (isSaved) {
+      await sb.from('destiny_saves').delete().eq('id', existing.id);
+      btn.textContent = 'Add to Destiny';
+      btn.classList.remove('saved');
+    } else {
+      await sb.from('destiny_saves').insert({ user_id: user.id, spot_id: spotId });
+      btn.textContent = 'Saved ❤️';
+      btn.classList.add('saved');
+    }
+  };
+}
+
 // ────────────────────────────────────────────────
 // SWIPE LOGIC - FULL CARD WITH ALL DETAILS
 // ────────────────────────────────────────────────
@@ -432,7 +505,7 @@ function initSwipe() {
   let direction = 0;
 
   const handleStart = (e) => {
-    // Allow clicks on interactive elements
+    // Allow clicks on buttons and thumbs
     if (e.target.closest('#destinyBtn') || e.target.closest('.thumb') || e.target.closest('.user')) {
       return;
     }
@@ -445,7 +518,6 @@ function initSwipe() {
     if (!isDragging) return;
     const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
     direction = x - startX;
-    // Visual drag feedback
     card.style.transform = `translateX(${direction * 0.4}px)`;
     card.style.opacity = 1 - Math.abs(direction) / 400;
   };
@@ -454,11 +526,10 @@ function initSwipe() {
     if (!isDragging) return;
     isDragging = false;
 
-    // Reset visual feedback
     card.style.transform = 'translateX(0)';
     card.style.opacity = '1';
 
-    if (Math.abs(direction) > 120) { // Higher threshold to avoid button conflicts
+    if (Math.abs(direction) > 120) {
       if (direction > 0) changeSpot(-1); // left swipe → previous
       else changeSpot(1); // right swipe → next
     }
@@ -474,6 +545,10 @@ function initSwipe() {
   card.addEventListener('touchstart', handleStart, { passive: false });
   document.addEventListener('touchmove', handleMove, { passive: false });
   document.addEventListener('touchend', handleEnd);
+
+  // Arrows
+  document.getElementById('prevBtn').onclick = () => changeSpot(-1);
+  document.getElementById('nextBtn').onclick = () => changeSpot(1);
 }
 
 function changeSpot(dir) {
@@ -483,21 +558,20 @@ function changeSpot(dir) {
   currentIndex = newIndex;
   const nextSpot = relatedSpots[newIndex];
 
-  // Fade out current card
   const card = document.getElementById('spotCard');
   card.style.transition = 'all 0.5s ease';
   card.style.opacity = '0';
-  card.style.transform = `translateX(${dir * 100}px)`;
+  card.style.transform = `translateX(${dir * 80}px)`;
 
   setTimeout(() => {
-    // Update content with new spot
     renderCard(nextSpot);
-
-    // Fade in new content
     card.style.opacity = '1';
     card.style.transform = 'translateX(0)';
   }, 500);
 }
+
+// Start swipe after page load
+window.addEventListener('load', initSwipe);
 </script>
 </body>
 </html>

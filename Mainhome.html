@@ -363,12 +363,11 @@ function getAvatarUrl(username) {
   return r2Avatar + `?fallback=${encodeURIComponent('https://ui-avatars.com/api/?name=' + encodeURIComponent(username) + '&background=FFD88D&color=0c0f18&size=80')}`;
 }
 
-// Load 4 random spots for hero slideshow
+// Load 4 random hero slides
 async function loadHeroSlides() {
   const { data: spots } = await sb
     .from('spots')
     .select('id, name, place, city, story, media_urls, media_url, category_id')
-    .order('created_at', { ascending: false })
     .limit(12);
 
   if (!spots || spots.length === 0) return;
@@ -383,7 +382,6 @@ async function loadHeroSlides() {
   renderHero(0);
 }
 
-// Render current hero slide
 function renderHero(i) {
   const spot = heroSpots[i];
   if (!spot) return;
@@ -397,14 +395,13 @@ function renderHero(i) {
   ctaBtn.onclick = () => window.location.href = `spot.html?id=${spot.id}`;
 }
 
-// Auto rotate hero every 5.2s
 setInterval(() => {
   heroIdx = (heroIdx + 1) % heroSpots.length;
   renderHero(heroIdx);
 }, 5200);
 
 // ────────────────────────────────────────────────
-// MAIN SPOTS GRID – RANDOM + FILTERABLE
+// MAIN SPOTS GRID – RANDOM ORDER + FILTERS
 // ────────────────────────────────────────────────
 async function loadSpots() {
   const grid = document.getElementById('grid');
@@ -427,14 +424,12 @@ async function loadSpots() {
 
   allSpots = spots;
 
-  // Shuffle once on load
+  // Shuffle once on initial load
   allSpots.sort(() => Math.random() - 0.5);
 
-  // Show all initially
   renderGrid(allSpots);
 }
 
-// Render grid cards
 function renderGrid(spots) {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
@@ -476,31 +471,32 @@ function renderGrid(spots) {
 }
 
 // ────────────────────────────────────────────────
-// FILTER LOGIC
+// CATEGORY FILTER LOGIC
 // ────────────────────────────────────────────────
 document.querySelectorAll('.category').forEach(chip => {
   chip.addEventListener('click', () => {
+    // Update active state
     document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
 
-    const filter = chip.textContent.trim().toLowerCase();
+    const filterText = chip.textContent.trim().toLowerCase();
 
-    if (filter === 'all') {
-      // Re-shuffle every time "All" is clicked
+    if (filterText === 'all') {
+      // Re-shuffle every time "All" is tapped
       allSpots.sort(() => Math.random() - 0.5);
       renderGrid(allSpots);
     } else {
-      // Keyword filter on name or story
+      // Keyword filter (name or story)
       const filtered = allSpots.filter(spot =>
-        spot.name.toLowerCase().includes(filter) ||
-        spot.story?.toLowerCase().includes(filter)
+        spot.name.toLowerCase().includes(filterText) ||
+        spot.story?.toLowerCase().includes(filterText)
       );
       renderGrid(filtered);
     }
   });
 });
 
-// Rest of your original functions (goToProfile, toggleFollow, toggleDestiny, init, etc.)
+// Rest of your functions (unchanged)
 function goToProfile(username) {
   if (username) window.location.href = `Profile.html?user=${username}`;
 }
@@ -549,4 +545,5 @@ init();
 
 
   
+
 

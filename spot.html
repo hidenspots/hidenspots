@@ -326,11 +326,13 @@ const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 // ────────────────────────────────────────────────
 // Read slug or id from URL (clean & safe)
 // ────────────────────────────────────────────────
+// Full fixed top section — replace from "let slug = null;" to "loadSpot(spotId, slug);"
+
 let slug = null;
 let spotId = null;
 
 // 1. Clean path: /spot/your-slug-here
-const pathParts = window.location.pathname.split('/').filter(Boolean); // remove empty parts
+const pathParts = window.location.pathname.split('/').filter(Boolean);
 if (pathParts.length >= 2 && pathParts[0].toLowerCase() === 'spot') {
   slug = pathParts[1];
   console.log('Detected slug from path:', slug);
@@ -343,7 +345,7 @@ if (spotId) {
   console.log('Detected old ID from query:', spotId);
 }
 
-// 3. If old ?id= link → redirect to slug (if slug exists)
+// 3. If old ?id= link → redirect to slug if possible
 if (spotId && !slug) {
   (async () => {
     console.log('Attempting redirect from old ?id= to slug...');
@@ -353,7 +355,9 @@ if (spotId && !slug) {
       .eq('id', spotId)
       .single();
 
-    if (error) console.error('Redirect fetch error:', error.message);
+    if (error) {
+      console.error('Redirect fetch error:', error.message);
+    }
 
     if (data && data.slug) {
       console.log('Redirecting to:', `/spot/${data.slug}`);
@@ -363,18 +367,17 @@ if (spotId && !slug) {
       loadSpot(spotId, null);
     }
   })();
-  // Don't continue - wait for redirect
 }
 
-// 4. If neither → error
+// 4. If neither slug nor id → show error
 if (!slug && !spotId) {
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
-  return;
+} else if (!slug && !spotId) {
+  // This line is redundant — remove it
+} else {
+  console.log('Loading spot - slug:', slug, 'id:', spotId);
+  loadSpot(spotId, slug);
 }
-
-// 5. Load spot
-console.log('Loading spot - slug:', slug, 'id:', spotId);
-loadSpot(spotId, slug);
 
 // ────────────────────────────────────────────────
 // Original loadSpot, loadRelatedSpots, renderCard, etc. (unchanged)
@@ -598,3 +601,4 @@ window.addEventListener('load', initSwipe);
 </script>
 </body>
 </html>
+

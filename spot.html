@@ -14,7 +14,6 @@
   <title>Spot • Hiden Spots</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    /* Your original styles - unchanged */
     :root{
       --bg:#0c0f18; --panel:#121624; --glass:rgba(255,255,255,.06);
       --border:rgba(255,255,255,.12); --muted:rgba(255,255,255,.78);
@@ -25,6 +24,7 @@
     body{
       background:var(--bg); color:#fff; font-family:'Playfair Display',serif;
     }
+    /* Header */
     .header{
       position:sticky; top:0; z-index:40;
       backdrop-filter:blur(12px);
@@ -36,6 +36,7 @@
     .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff}
     .brand svg{width:30px;height:30px}
     .brand span{letter-spacing:3px}
+    /* Main Content */
     .main{
       max-width:800px;
       margin:0 auto;
@@ -53,6 +54,7 @@
       opacity: 0;
       transform: translateX(30px);
     }
+    /* HERO MEDIA */
     .hero-media {
       width: 100%;
       height: 400px;
@@ -65,6 +67,7 @@
       height: 100%;
       object-fit: cover;
     }
+    /* GALLERY THUMBNAILS */
     .gallery {
       display: flex;
       overflow-x: auto;
@@ -102,6 +105,7 @@
       height: 100%;
       object-fit: cover;
     }
+    /* Info */
     .info{
       padding:20px;
     }
@@ -189,6 +193,7 @@
       background: var(--gold);
       color: #000;
     }
+    /* Bottom Nav Bar */
     .nav-bar{
       background:rgba(255,255,255,.05);
       backdrop-filter:blur(25px);
@@ -207,6 +212,7 @@
     @media(max-width:768px){
       .nav-bar{gap:2rem;padding:.9rem 1.6rem}
     }
+    /* Arrows */
     .swipe-arrow {
       position: fixed;
       bottom: 120px;
@@ -316,120 +322,68 @@ const sb = supabase.createClient(
 );
 const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
-// ────────────────────────────────────────────────
-// Robust URL parsing for slug and id
-// ────────────────────────────────────────────────
-let slug = null;
-let spotId = null;
-
-console.log('Full URL:', window.location.href);
-console.log('Pathname:', window.location.pathname);
-
-// Clean path (remove trailing slash, handle /spot.html)
-let cleanPath = window.location.pathname.replace(/\/+$/, '');
-if (cleanPath.endsWith('.html')) {
-  cleanPath = cleanPath.replace(/\.html$/, '');
-}
-const pathParts = cleanPath.split('/').filter(part => part.trim() !== '');
-
-console.log('Clean path parts:', pathParts);
-
-if (pathParts.length >= 2 && ['spot', 'spot.html'].includes(pathParts[0].toLowerCase())) {
-  slug = pathParts[1];
-  console.log('Detected slug:', slug);
-}
-
-// Old ?id= param
-const urlParams = new URLSearchParams(window.location.search);
-spotId = urlParams.get('id');
-if (spotId) {
-  console.log('Detected ID from query:', spotId);
-}
-
-// If old ?id= → try redirect to slug
-if (spotId && !slug) {
-  (async () => {
-    console.log('Redirect check: trying to find slug for ID', spotId);
-    const { data, error } = await sb
-      .from('spots')
-      .select('slug')
-      .eq('id', spotId)
-      .single();
-
-    if (error) {
-      console.error('Redirect error:', error.message);
-    }
-
-    if (data && data.slug) {
-      console.log('Found slug - redirecting to:', `/spot/${data.slug}`);
-      window.location.replace(`/spot/${data.slug}`);
-      return;
-    } else {
-      console.log('No slug found for this ID - loading by ID');
-      loadSpot(spotId, null);
-    }
-  })();
-}
-
-// Final check - if no identifier at all
-if (!slug && !spotId) {
-  console.warn('No slug or ID detected in URL');
-  document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
-} else {
-  console.log('Proceeding to load spot - slug:', slug, 'id:', spotId);
-  loadSpot(spotId, slug);
-}
-
-// ────────────────────────────────────────────────
-// Load spot function (with debug)
-// ────────────────────────────────────────────────
-async function loadSpot(id, slugParam) {
-  let query = sb.from('spots').select('*');
-
-  if (slugParam) {
-    console.log('Querying Supabase by slug:', slugParam);
-    query = query.eq('slug', slugParam);
-  } else if (id) {
-    console.log('Querying Supabase by id:', id);
-    query = query.eq('id', id);
-  } else {
-    console.error('loadSpot called without id or slug');
-    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Invalid spot request</h1>';
-    return;
-  }
-
-  const { data, error } = await query.single();
-
-  if (error) {
-    console.error('Supabase fetch failed:', error.message);
-    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Error loading spot: ' + error.message + '</h1>';
-    return;
-  }
-
-  if (!data) {
-    console.warn('No spot returned from Supabase');
-    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Spot not found</h1>';
-    return;
-  }
-
-  console.log('Spot successfully loaded:', data.name);
-  currentSpot = data;
-  currentIndex = 0;
-
-  await loadRelatedSpots();
-  renderCard(currentSpot);
-}
-
-// ────────────────────────────────────────────────
-// Your original functions below (unchanged)
-// ────────────────────────────────────────────────
+// Global variables
 let currentSpot = null;
 let relatedSpots = [];
 let currentIndex = 0;
 
+// Category & Emotion mappings
 const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
 const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
 
+// ────────────────────────────────────────────────
+// Read slug from URL (clean path support)
+// ────────────────────────────────────────────────
+let slug = null;
+let spotId = null;
+
+// Check clean URL path first (e.g. /spot/srs-hill-708c72d7)
+const pathParts = window.location.pathname.split('/');
+if (pathParts.length > 2 && pathParts[1] === 'spot') {
+  slug = pathParts[2]; // srs-hill-708c72d7
+}
+
+// Fallback to old ?id= param
+const urlParams = new URLSearchParams(window.location.search);
+spotId = urlParams.get('id');
+
+if (!slug && !spotId) {
+  document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
+} else {
+  loadSpot(spotId, slug);
+}
+
+// ────────────────────────────────────────────────
+// Load spot by ID or slug
+// ────────────────────────────────────────────────
+async function loadSpot(id, slug) {
+  let query = sb.from('spots').select('*');
+
+  if (slug) {
+    // Prefer slug if available
+    query = query.eq('slug', slug);
+  } else if (id) {
+    query = query.eq('id', id);
+  }
+
+  const { data, error } = await query.single();
+
+  if (error || !data) {
+    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Spot not found</h1>';
+    return;
+  }
+
+  currentSpot = data;
+  currentIndex = 0;
+
+  // Load similar spots
+  await loadRelatedSpots();
+
+  // Initial render
+  renderCard(currentSpot);
+}
+
+// Rest of your original code (loadRelatedSpots, renderCard, setupDestinyButton, initSwipe, changeSpot) remains 100% unchanged
 async function loadRelatedSpots() {
   if (!currentSpot || !currentSpot.category_id || !currentSpot.emotion_id || !currentSpot.city) return;
   const { data, error } = await sb
@@ -514,6 +468,7 @@ function renderCard(spot) {
   document.querySelector('.user').onclick = () => {
     window.location.href = `Profile.html?user=${username}`;
   };
+  // Destiny button
   setupDestinyButton(spot.id);
 }
 async function setupDestinyButton(spotId) {
@@ -546,18 +501,15 @@ async function setupDestinyButton(spotId) {
   };
 }
 // ────────────────────────────────────────────────
-// SWIPE LOGIC - with guard
+// SWIPE LOGIC - FULL CARD WITH ALL DETAILS
 // ────────────────────────────────────────────────
 function initSwipe() {
   const card = document.getElementById('spotCard');
-  if (!card) {
-    console.log('spotCard element not found - skipping swipe init');
-    return;
-  }
   let isDragging = false;
   let startX = 0;
   let direction = 0;
   const handleStart = (e) => {
+    // Allow clicks on buttons and thumbs
     if (e.target.closest('#destinyBtn') || e.target.closest('.thumb') || e.target.closest('.user')) {
       return;
     }
@@ -578,29 +530,29 @@ function initSwipe() {
     card.style.transform = 'translateX(0)';
     card.style.opacity = '1';
     if (Math.abs(direction) > 120) {
-      if (direction > 0) changeSpot(-1);
-      else changeSpot(1);
+      if (direction > 0) changeSpot(-1); // left swipe → previous
+      else changeSpot(1); // right swipe → next
     }
   };
+  // Mouse events
   card.addEventListener('mousedown', handleStart);
   document.addEventListener('mousemove', handleMove);
   document.addEventListener('mouseup', handleEnd);
   document.addEventListener('mouseleave', handleEnd);
+  // Touch events
   card.addEventListener('touchstart', handleStart, { passive: false });
   document.addEventListener('touchmove', handleMove, { passive: false });
   document.addEventListener('touchend', handleEnd);
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  if (prevBtn) prevBtn.onclick = () => changeSpot(-1);
-  if (nextBtn) nextBtn.onclick = () => changeSpot(1);
+  // Arrows
+  document.getElementById('prevBtn').onclick = () => changeSpot(-1);
+  document.getElementById('nextBtn').onclick = () => changeSpot(1);
 }
 function changeSpot(dir) {
-  const card = document.getElementById('spotCard');
-  if (!card) return;
   const newIndex = currentIndex + dir;
   if (newIndex < 0 || newIndex >= relatedSpots.length) return;
   currentIndex = newIndex;
   const nextSpot = relatedSpots[newIndex];
+  const card = document.getElementById('spotCard');
   card.style.transition = 'all 0.5s ease';
   card.style.opacity = '0';
   card.style.transform = `translateX(${dir * 80}px)`;
@@ -610,11 +562,8 @@ function changeSpot(dir) {
     card.style.transform = 'translateX(0)';
   }, 500);
 }
-// Start swipe only if card exists
+// Start swipe after page load
 window.addEventListener('load', initSwipe);
 </script>
 </body>
 </html>
-</body>
-</html>
-

@@ -337,38 +337,37 @@ const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'
 // ────────────────────────────────────────────────
 // Safe slug + id detection – keeps original ?id= working
 // ────────────────────────────────────────────────
+// Safe slug + id detection – original ?id= always works
+// ────────────────────────────────────────────────
 let slug = null;
 let spotId = null;
 
-// Clean path (handle trailing slash, .html, empty parts)
+// Clean path (remove trailing slash and .html if present)
 let cleanPath = window.location.pathname.replace(/\/+$/, '');
 if (cleanPath.endsWith('.html')) {
   cleanPath = cleanPath.slice(0, -5);
 }
 const pathParts = cleanPath.split('/').filter(p => p.trim());
 
-// Detect slug if path starts with /spot or /spot.html
+// Detect slug if URL is /spot/slug-xxx or /spot.html/slug-xxx
 if (pathParts.length >= 2 && ['spot', 'spot.html'].includes(pathParts[0].toLowerCase())) {
   slug = pathParts[1];
+  console.log('Detected slug from path:', slug);
 }
 
-// Always check ?id=
+// Always detect ?id=
 const urlParams = new URLSearchParams(window.location.search);
 spotId = urlParams.get('id');
+if (spotId) {
+  console.log('Detected ID from query:', spotId);
+}
 
-// Debug logs (remove later)
-console.log('URL:', window.location.href);
-console.log('Path parts:', pathParts);
-console.log('Detected slug:', slug || 'none');
-console.log('Detected id:', spotId || 'none');
-
-// Load spot
+// Load spot – prefer slug if present, else id
 if (!slug && !spotId) {
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
 } else {
   loadSpot(spotId, slug);
 }
-
 // ────────────────────────────────────────────────
 // Your original loadSpot, renderCard, etc. – unchanged
 // ────────────────────────────────────────────────
@@ -573,4 +572,5 @@ window.addEventListener('load', initSwipe);
 </script>
 </body>
 </html>
+
 

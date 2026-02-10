@@ -314,6 +314,7 @@
     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
   </a>
 </nav>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const sb = supabase.createClient(
@@ -322,31 +323,41 @@ const sb = supabase.createClient(
 );
 const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
-// Global variables
-let currentSpot = null;
-let relatedSpots = [];
-let currentIndex = 0;
-
-// Category & Emotion mappings
-const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
-const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
-
 // ────────────────────────────────────────────────
-// Read slug from URL (clean path support)
+// Read slug from clean URL path or fallback to ?id=
 // ────────────────────────────────────────────────
 let slug = null;
 let spotId = null;
 
-// Check clean URL path first (e.g. /spot/srs-hill-708c72d7)
+// Get slug from path (e.g. /spot/underwater-waterfall-0476e9b2)
 const pathParts = window.location.pathname.split('/');
-if (pathParts.length > 2 && pathParts[1] === 'spot') {
-  slug = pathParts[2]; // srs-hill-708c72d7
+if (pathParts.length > 2 && pathParts[1].toLowerCase() === 'spot') {
+  slug = pathParts[2]; // underwater-waterfall-0476e9b2
 }
 
-// Fallback to old ?id= param
+// Fallback to old ?id=
 const urlParams = new URLSearchParams(window.location.search);
 spotId = urlParams.get('id');
 
+// If we have id but no slug → auto-redirect to clean slug URL
+if (spotId && !slug) {
+  (async () => {
+    const { data } = await sb
+      .from('spots')
+      .select('slug')
+      .eq('id', spotId)
+      .single();
+    if (data && data.slug) {
+      window.location.replace(`/spot/${data.slug}`);
+    } else {
+      // If no slug found, proceed with id
+      loadSpot(spotId, null);
+    }
+  })();
+  return; // wait for redirect
+}
+
+// If neither → error
 if (!slug && !spotId) {
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
 } else {
@@ -354,14 +365,13 @@ if (!slug && !spotId) {
 }
 
 // ────────────────────────────────────────────────
-// Load spot by ID or slug
+// Load spot by id or slug
 // ────────────────────────────────────────────────
-async function loadSpot(id, slug) {
+async function loadSpot(id, slugParam) {
   let query = sb.from('spots').select('*');
 
-  if (slug) {
-    // Prefer slug if available
-    query = query.eq('slug', slug);
+  if (slugParam) {
+    query = query.eq('slug', slugParam);
   } else if (id) {
     query = query.eq('id', id);
   }
@@ -376,14 +386,20 @@ async function loadSpot(id, slug) {
   currentSpot = data;
   currentIndex = 0;
 
-  // Load similar spots
   await loadRelatedSpots();
-
-  // Initial render
   renderCard(currentSpot);
 }
 
-// Rest of your original code (loadRelatedSpots, renderCard, setupDestinyButton, initSwipe, changeSpot) remains 100% unchanged
+// ────────────────────────────────────────────────
+// Your original code (unchanged)
+// ────────────────────────────────────────────────
+let currentSpot = null;
+let relatedSpots = [];
+let currentIndex = 0;
+
+const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
+const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
+
 async function loadRelatedSpots() {
   if (!currentSpot || !currentSpot.category_id || !currentSpot.emotion_id || !currentSpot.city) return;
   const { data, error } = await sb
@@ -468,7 +484,6 @@ function renderCard(spot) {
   document.querySelector('.user').onclick = () => {
     window.location.href = `Profile.html?user=${username}`;
   };
-  // Destiny button
   setupDestinyButton(spot.id);
 }
 async function setupDestinyButton(spotId) {
@@ -509,7 +524,6 @@ function initSwipe() {
   let startX = 0;
   let direction = 0;
   const handleStart = (e) => {
-    // Allow clicks on buttons and thumbs
     if (e.target.closest('#destinyBtn') || e.target.closest('.thumb') || e.target.closest('.user')) {
       return;
     }
@@ -534,16 +548,13 @@ function initSwipe() {
       else changeSpot(1); // right swipe → next
     }
   };
-  // Mouse events
   card.addEventListener('mousedown', handleStart);
   document.addEventListener('mousemove', handleMove);
   document.addEventListener('mouseup', handleEnd);
   document.addEventListener('mouseleave', handleEnd);
-  // Touch events
   card.addEventListener('touchstart', handleStart, { passive: false });
   document.addEventListener('touchmove', handleMove, { passive: false });
   document.addEventListener('touchend', handleEnd);
-  // Arrows
   document.getElementById('prevBtn').onclick = () => changeSpot(-1);
   document.getElementById('nextBtn').onclick = () => changeSpot(1);
 }
@@ -562,7 +573,6 @@ function changeSpot(dir) {
     card.style.transform = 'translateX(0)';
   }, 500);
 }
-// Start swipe after page load
 window.addEventListener('load', initSwipe);
 </script>
 </body>

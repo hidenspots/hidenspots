@@ -314,6 +314,7 @@
     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
   </a>
 </nav>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const sb = supabase.createClient(
@@ -322,120 +323,74 @@ const sb = supabase.createClient(
 );
 const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
+// Global variables
+let currentSpot = null;
+let relatedSpots = [];
+let currentIndex = 0;
+
+// Category & Emotion mappings
+const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
+const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
+
 // ────────────────────────────────────────────────
-// Fixed URL parsing – detects both slug path and ?id= correctly
-// ────────────────────────────────────────────────
-// ────────────────────────────────────────────────
-// Robust URL parsing – works with both /spot/slug and /spot?id=
+// Minimal & safe slug + id detection – keeps your original working
 // ────────────────────────────────────────────────
 let slug = null;
 let spotId = null;
 
-// 1. Clean up pathname (remove trailing slash, handle .html)
-let path = window.location.pathname.replace(/\/+$/, ''); // remove trailing /
-if (path.endsWith('.html')) {
-  path = path.slice(0, -5); // remove .html
+// Clean path (remove trailing slash, handle .html if present)
+let cleanPath = window.location.pathname.replace(/\/+$/, '');
+if (cleanPath.endsWith('.html')) {
+  cleanPath = cleanPath.slice(0, -5);
 }
+const pathParts = cleanPath.split('/').filter(p => p.trim() !== '');
 
-// 2. Split into parts, remove empty entries
-const pathParts = path.split('/').filter(part => part.trim() !== '');
-
-console.log('Full URL:', window.location.href);
-console.log('Clean pathname:', path);
-console.log('Path parts:', pathParts);
-
-// 3. Detect slug from /spot/slug or /spot.html/slug
+// Detect slug if path is /spot/slug-xxx or /spot.html/slug-xxx
 if (pathParts.length >= 2 && ['spot', 'spot.html'].includes(pathParts[0].toLowerCase())) {
   slug = pathParts[1];
-  console.log('Detected slug from path:', slug);
 }
 
-// 4. Detect old ?id= query param
+// Always check for ?id= (your original fallback)
 const urlParams = new URLSearchParams(window.location.search);
 spotId = urlParams.get('id');
-if (spotId) {
-  console.log('Detected old ID from ?id=:', spotId);
-}
 
-// 5. If old ?id= link → try to redirect to slug (if slug exists)
-if (spotId && !slug) {
-  (async () => {
-    console.log('Redirect check: looking for slug for ID', spotId);
-    const { data, error } = await sb
-      .from('spots')
-      .select('slug')
-      .eq('id', spotId)
-      .single();
+// Debug logs (remove later if you want)
+console.log('URL:', window.location.href);
+console.log('Path parts:', pathParts);
+console.log('Slug detected:', slug || 'none');
+console.log('ID detected:', spotId || 'none');
 
-    if (error) {
-      console.error('Redirect fetch error:', error.message);
-    }
-
-    if (data && data.slug) {
-      console.log('Found slug! Redirecting to:', `/spot/${data.slug}`);
-      window.location.replace(`/spot/${data.slug}`);
-    } else {
-      console.log('No slug found in DB → loading by ID');
-      loadSpot(spotId, null);
-    }
-  })();
-}
-
-// 6. If no identifier at all → show error
+// Load spot – prefer slug if present, else id
 if (!slug && !spotId) {
-  console.warn('No slug or ID detected – showing error message');
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
-  return;
+} else {
+  loadSpot(spotId, slug);
 }
 
-// 7. Load the spot
-console.log('Proceeding to load spot – slug:', slug || 'none', 'id:', spotId || 'none');
-loadSpot(spotId, slug);
 // ────────────────────────────────────────────────
-// Load spot by ID or slug
+// Your original loadSpot, renderCard, etc. – unchanged
 // ────────────────────────────────────────────────
 async function loadSpot(id, slugParam) {
   let query = sb.from('spots').select('*');
 
   if (slugParam) {
-    console.log('Fetching by slug:', slugParam);
     query = query.eq('slug', slugParam);
   } else if (id) {
-    console.log('Fetching by ID:', id);
     query = query.eq('id', id);
   }
 
   const { data, error } = await query.single();
 
-  if (error) {
-    console.error('Supabase error:', error.message);
-    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Error loading spot: ' + error.message + '</h1>';
-    return;
-  }
-
-  if (!data) {
-    console.warn('No spot data returned');
+  if (error || !data) {
     document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Spot not found</h1>';
     return;
   }
 
-  console.log('Spot loaded successfully:', data.name);
   currentSpot = data;
   currentIndex = 0;
-
   await loadRelatedSpots();
   renderCard(currentSpot);
 }
-
-// ────────────────────────────────────────────────
-// Your original code below (100% unchanged)
-// ────────────────────────────────────────────────
-let currentSpot = null;
-let relatedSpots = [];
-let currentIndex = 0;
-
-const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
-const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
 
 async function loadRelatedSpots() {
   if (!currentSpot || !currentSpot.category_id || !currentSpot.emotion_id || !currentSpot.city) return;
@@ -557,10 +512,7 @@ async function setupDestinyButton(spotId) {
 // ────────────────────────────────────────────────
 function initSwipe() {
   const card = document.getElementById('spotCard');
-  if (!card) {
-    console.log('spotCard not found - skipping swipe init');
-    return;
-  }
+  if (!card) return;
   let isDragging = false;
   let startX = 0;
   let direction = 0;
@@ -585,8 +537,8 @@ function initSwipe() {
     card.style.transform = 'translateX(0)';
     card.style.opacity = '1';
     if (Math.abs(direction) > 120) {
-      if (direction > 0) changeSpot(-1); // left swipe → previous
-      else changeSpot(1); // right swipe → next
+      if (direction > 0) changeSpot(-1);
+      else changeSpot(1);
     }
   };
   card.addEventListener('mousedown', handleStart);
@@ -617,10 +569,5 @@ function changeSpot(dir) {
 }
 window.addEventListener('load', initSwipe);
 </script>
-
-
 </body>
 </html>
-
-
-

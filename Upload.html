@@ -483,8 +483,8 @@ form.addEventListener('submit', async (e) => {
       });
     }
 
-    // NEW: Generate unique slug
-    const spotId = crypto.randomUUID(); // or let Supabase generate
+    // Generate unique slug
+    const spotId = crypto.randomUUID();
     const slugBase = createSlug(name);
     const shortId = spotId.slice(0, 8);
     const slug = `${slugBase}-${shortId}`;
@@ -495,7 +495,7 @@ form.addEventListener('submit', async (e) => {
       user_id: session.user.id,
       username: session.user.user_metadata?.username || session.user.email.split('@')[0],
       name: name,
-      slug: slug,                  // ← saved here
+      slug: slug,
       place: place,
       city: city,
       state: state || null,
@@ -513,24 +513,33 @@ form.addEventListener('submit', async (e) => {
       lat: lat,
       lng: lng
     }]);
+
     if (error) {
       alert('Save failed: ' + error.message);
     } else {
-      alert('Hidden gem uploaded successfully! 🎉');
+      alert('Hidden gem uploaded successfully! 🎉\n\nRedirecting to your new spot...');
+
+      // Reset form AFTER alert (prevents reset before user sees message)
       form.reset();
       selectedFiles = [];
       mediaPreview.innerHTML = '';
       stars.forEach(s => s.classList.remove('selected'));
       safetyInput.value = '';
 
-      // NEW: Redirect to clean URL
-      window.location.href = `/spot/${slug}`;
+      // Force redirect after short delay (gives alert time to be seen)
+      setTimeout(() => {
+        window.location.href = `/spot/${slug}`;
+        // Alternative: go to Explore page instead
+        // window.location.href = '/Explore.html';
+      }, 1500);  // 1.5 seconds delay - adjust if needed
     }
   } catch (err) {
     console.error(err);
     alert('Upload failed: ' + err.message);
   }
 });
+   
 </script>
 </body>
 </html>
+

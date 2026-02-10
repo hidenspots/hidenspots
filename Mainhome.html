@@ -477,9 +477,9 @@ const grid = document.getElementById('grid');
         </div>
       </div>
       <div class="card-story">
-        <p class="story-text">${spot.story || 'No story shared.'}</p>
-        <a class="read-more" href="spot.html?id=${spot.id}">Read more</a>
-      </div>
+  <p class="story-text">${spot.story || 'No story shared.'}</p>
+  <a class="read-more" href="/spot/${spot.slug}">Read more</a>
+</div>
     </article>`;
   }).join('');
 
@@ -543,3 +543,4 @@ document.querySelectorAll('.category').forEach(chip => {
 
 
   
+

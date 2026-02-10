@@ -333,34 +333,40 @@ let spotId = null;
 const pathParts = window.location.pathname.split('/');
 if (pathParts.length > 2 && pathParts[1].toLowerCase() === 'spot') {
   slug = pathParts[2]; // underwater-waterfall-0476e9b2
+  console.log('Detected slug from path:', slug);
 }
 
 // Fallback to old ?id=
 const urlParams = new URLSearchParams(window.location.search);
 spotId = urlParams.get('id');
+if (spotId) {
+  console.log('Detected old ID from query:', spotId);
+}
 
 // If we have id but no slug → auto-redirect to clean slug URL
 if (spotId && !slug) {
   (async () => {
-    const { data } = await sb
+    console.log('Redirecting old ?id= link to slug...');
+    const { data, error } = await sb
       .from('spots')
       .select('slug')
       .eq('id', spotId)
       .single();
+    if (error) {
+      console.error('Error fetching slug for redirect:', error);
+    }
     if (data && data.slug) {
+      console.log('Redirecting to:', `/spot/${data.slug}`);
       window.location.replace(`/spot/${data.slug}`);
     } else {
-      // If no slug found, proceed with id
+      console.warn('No slug found for ID, loading by ID instead');
       loadSpot(spotId, null);
     }
   })();
-  return; // wait for redirect
-}
-
-// If neither → error
-if (!slug && !spotId) {
+} else if (!slug && !spotId) {
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
 } else {
+  console.log('Loading spot with slug:', slug, 'or ID:', spotId);
   loadSpot(spotId, slug);
 }
 
@@ -371,18 +377,28 @@ async function loadSpot(id, slugParam) {
   let query = sb.from('spots').select('*');
 
   if (slugParam) {
+    console.log('Fetching by slug:', slugParam);
     query = query.eq('slug', slugParam);
   } else if (id) {
+    console.log('Fetching by ID:', id);
     query = query.eq('id', id);
   }
 
   const { data, error } = await query.single();
 
-  if (error || !data) {
+  if (error) {
+    console.error('Supabase fetch error:', error);
+    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Error loading spot: ' + error.message + '</h1>';
+    return;
+  }
+
+  if (!data) {
+    console.warn('No data returned from Supabase');
     document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Spot not found</h1>';
     return;
   }
 
+  console.log('Spot loaded successfully:', data.name);
   currentSpot = data;
   currentIndex = 0;
 
@@ -412,9 +428,11 @@ async function loadRelatedSpots() {
     return;
   }
   relatedSpots = data;
+  console.log('Related spots loaded:', relatedSpots.length);
 }
 
 function renderCard(spot) {
+  console.log('Rendering card for spot:', spot.name);
   const card = document.getElementById('spotCard');
   // Hero media
   const heroEl = document.getElementById('heroMedia');

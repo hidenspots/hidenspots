@@ -261,7 +261,6 @@
     <span>Hiden Spots</span>
   </a>
 </div>
-
 <div class="main">
   <article class="card" id="spotCard">
     <div class="hero-media" id="heroMedia"></div>
@@ -290,11 +289,9 @@
     </div>
   </article>
 </div>
-
 <!-- Arrows - always visible -->
 <button class="swipe-arrow prev" id="prevBtn">←</button>
 <button class="swipe-arrow next" id="nextBtn">→</button>
-
 <!-- Bottom Navigation Bar -->
 <nav class="nav-bar" aria-label="Primary">
   <a href="Mainhome.html" class="nav-icon" title="Home">
@@ -317,7 +314,6 @@
     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
   </a>
 </nav>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const sb = supabase.createClient(
@@ -335,20 +331,42 @@ let currentIndex = 0;
 const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
 const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
 
-const urlParams = new URLSearchParams(window.location.search);
-const spotId = urlParams.get('id');
-if (!spotId) {
-  document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
-} else {
-  loadSpot(spotId);
+// ────────────────────────────────────────────────
+// Read slug from URL (clean path support)
+// ────────────────────────────────────────────────
+let slug = null;
+let spotId = null;
+
+// Check clean URL path first (e.g. /spot/srs-hill-708c72d7)
+const pathParts = window.location.pathname.split('/');
+if (pathParts.length > 2 && pathParts[1] === 'spot') {
+  slug = pathParts[2]; // srs-hill-708c72d7
 }
 
-async function loadSpot(id) {
-  const { data, error } = await sb
-    .from('spots')
-    .select('*')
-    .eq('id', id)
-    .single();
+// Fallback to old ?id= param
+const urlParams = new URLSearchParams(window.location.search);
+spotId = urlParams.get('id');
+
+if (!slug && !spotId) {
+  document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
+} else {
+  loadSpot(spotId, slug);
+}
+
+// ────────────────────────────────────────────────
+// Load spot by ID or slug
+// ────────────────────────────────────────────────
+async function loadSpot(id, slug) {
+  let query = sb.from('spots').select('*');
+
+  if (slug) {
+    // Prefer slug if available
+    query = query.eq('slug', slug);
+  } else if (id) {
+    query = query.eq('id', id);
+  }
+
+  const { data, error } = await query.single();
 
   if (error || !data) {
     document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Spot not found</h1>';
@@ -365,26 +383,23 @@ async function loadSpot(id) {
   renderCard(currentSpot);
 }
 
+// Rest of your original code (loadRelatedSpots, renderCard, setupDestinyButton, initSwipe, changeSpot) remains 100% unchanged
 async function loadRelatedSpots() {
   if (!currentSpot || !currentSpot.category_id || !currentSpot.emotion_id || !currentSpot.city) return;
-
   const { data, error } = await sb
     .from('spots')
     .select('*')
     .neq('id', currentSpot.id)
     .or(`category_id.eq.${currentSpot.category_id},emotion_id.eq.${currentSpot.emotion_id},city.eq.${currentSpot.city}`);
-
   if (error || !data) {
     console.error('Failed to load related spots', error);
     return;
   }
-
   relatedSpots = data;
 }
 
 function renderCard(spot) {
   const card = document.getElementById('spotCard');
-
   // Hero media
   const heroEl = document.getElementById('heroMedia');
   let mediaList = [];
@@ -401,7 +416,6 @@ function renderCard(spot) {
       heroEl.innerHTML = `<img src="${first.url}" alt="${spot.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/800x400/141824/FFD88D?text=No+Image'">`;
     }
   }
-
   // Gallery
   const gallery = document.getElementById('gallery');
   gallery.innerHTML = '';
@@ -429,7 +443,6 @@ function renderCard(spot) {
       gallery.appendChild(thumb);
     });
   }
-
   // Content
   document.getElementById('title').textContent = spot.name;
   document.getElementById('sub').textContent = `${spot.place}, ${spot.city}${spot.state ? ', ' + spot.state : ''}, ${spot.country}`;
@@ -438,33 +451,26 @@ function renderCard(spot) {
     <span class="tag">${emotionNames[spot.emotion_id] || ''}</span>
   `;
   document.getElementById('story').textContent = spot.story || 'No story shared.';
-
   const rating = spot.safety_rating || 0;
   const starsHtml = '★'.repeat(rating) + '☆'.repeat(5 - rating);
   document.getElementById('safety').innerHTML = `<span class="stars">${starsHtml.replace(/★/g, '<span class="filled">★</span>')}</span>`;
-
   document.getElementById('besttime').textContent = spot.best_time || '-';
   document.getElementById('tips').textContent = spot.tips || '-';
   document.getElementById('hashtags').textContent = spot.hashtags || '-';
   document.getElementById('credits').textContent = spot.credits || '-';
-
   const username = spot.username || 'traveller';
   document.getElementById('username').textContent = `@${username}`;
-
   const avatarUrl = `${WORKER_URL}/file/avatars/${username}-avatar.jpg`;
   const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=FFD88D&color=0c0f18&size=120`;
   const avatarImg = document.getElementById('userAvatar');
   avatarImg.src = avatarUrl;
   avatarImg.onerror = () => { avatarImg.src = fallbackAvatar; };
-
   document.querySelector('.user').onclick = () => {
     window.location.href = `Profile.html?user=${username}`;
   };
-
   // Destiny button
   setupDestinyButton(spot.id);
 }
-
 async function setupDestinyButton(spotId) {
   const { data: { user } } = await sb.auth.getUser();
   const btn = document.getElementById('destinyBtn');
@@ -494,7 +500,6 @@ async function setupDestinyButton(spotId) {
     }
   };
 }
-
 // ────────────────────────────────────────────────
 // SWIPE LOGIC - FULL CARD WITH ALL DETAILS
 // ────────────────────────────────────────────────
@@ -503,7 +508,6 @@ function initSwipe() {
   let isDragging = false;
   let startX = 0;
   let direction = 0;
-
   const handleStart = (e) => {
     // Allow clicks on buttons and thumbs
     if (e.target.closest('#destinyBtn') || e.target.closest('.thumb') || e.target.closest('.user')) {
@@ -513,7 +517,6 @@ function initSwipe() {
     startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
     e.preventDefault();
   };
-
   const handleMove = (e) => {
     if (!isDragging) return;
     const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
@@ -521,55 +524,44 @@ function initSwipe() {
     card.style.transform = `translateX(${direction * 0.4}px)`;
     card.style.opacity = 1 - Math.abs(direction) / 400;
   };
-
   const handleEnd = () => {
     if (!isDragging) return;
     isDragging = false;
-
     card.style.transform = 'translateX(0)';
     card.style.opacity = '1';
-
     if (Math.abs(direction) > 120) {
       if (direction > 0) changeSpot(-1); // left swipe → previous
       else changeSpot(1); // right swipe → next
     }
   };
-
   // Mouse events
   card.addEventListener('mousedown', handleStart);
   document.addEventListener('mousemove', handleMove);
   document.addEventListener('mouseup', handleEnd);
   document.addEventListener('mouseleave', handleEnd);
-
   // Touch events
   card.addEventListener('touchstart', handleStart, { passive: false });
   document.addEventListener('touchmove', handleMove, { passive: false });
   document.addEventListener('touchend', handleEnd);
-
   // Arrows
   document.getElementById('prevBtn').onclick = () => changeSpot(-1);
   document.getElementById('nextBtn').onclick = () => changeSpot(1);
 }
-
 function changeSpot(dir) {
   const newIndex = currentIndex + dir;
   if (newIndex < 0 || newIndex >= relatedSpots.length) return;
-
   currentIndex = newIndex;
   const nextSpot = relatedSpots[newIndex];
-
   const card = document.getElementById('spotCard');
   card.style.transition = 'all 0.5s ease';
   card.style.opacity = '0';
   card.style.transform = `translateX(${dir * 80}px)`;
-
   setTimeout(() => {
     renderCard(nextSpot);
     card.style.opacity = '1';
     card.style.transform = 'translateX(0)';
   }, 500);
 }
-
 // Start swipe after page load
 window.addEventListener('load', initSwipe);
 </script>

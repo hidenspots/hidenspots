@@ -7,15 +7,12 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-DWS0BB3H70');
 </script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>Upload • Hiden Spots</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -24,9 +21,7 @@ body{
    color:#fff;
    overflow-x:hidden;
 }
-
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-
 header{
   position:fixed;
   top:0;left:0;width:100%;
@@ -39,7 +34,6 @@ header{
 .brand{display:flex;align-items:center;gap:.7rem;color:#fff;text-decoration:none}
 .brand span{font-size:1.4rem;letter-spacing:3px}
 .brand:hover{color:#ffd88d;transition:.35s}
-
 /* FORM */
 .upload-container{
   max-width: 700px;
@@ -88,7 +82,6 @@ header{
 .upload-container textarea::placeholder{
   color:rgba(255,255,255,.5);
 }
-
 /* Custom Select */
 .upload-container select{
   appearance:none;
@@ -102,7 +95,6 @@ header{
   background:#141824;
   color:#fff;
 }
-
 .upload-container button{
   margin-top:1.5rem;
   padding:0.8rem;
@@ -118,7 +110,6 @@ header{
   filter:brightness(1.1);
   transform:translateY(-2px);
 }
-
 /* MEDIA UPLOAD BOX */
 .media-upload {
   width: 100%;
@@ -142,7 +133,6 @@ header{
   color: rgba(255,255,255,.8);
   margin-bottom: 1rem;
 }
-
 /* PREVIEW GRID */
 .media-preview {
   display: grid;
@@ -184,7 +174,6 @@ header{
   background: #ff4444;
   transform: scale(1.1);
 }
-
 /* STARS */
 .stars{
   display:flex;
@@ -201,7 +190,6 @@ header{
 .stars span:hover ~ span{
   color:#ffd88d;
 }
-
 @media(max-width:768px){
   header{padding:1rem 1.5rem}
   .upload-container{margin:100px 1rem 80px;padding:1rem}
@@ -223,14 +211,12 @@ header{
 .nav-icon{color:rgba(255,255,255,.7);transition:.4s}
 .nav-icon:hover{color:#FFD88D;transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
 .nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
-
 @media(max-width:768px){
   .nav-bar{gap:2rem;padding:.9rem 1.6rem}
 }
 </style>
 </head>
 <body>
-
 <header>
   <a href="index.html" class="brand">
     <svg width="34" viewBox="0 0 48 48">
@@ -266,29 +252,22 @@ header{
 <section class="upload-container">
   <h2>Upload Hidden Gem</h2>
   <form id="uploadForm">
-
     <!-- Media Upload Box -->
     <div class="media-upload" id="mediaBox" onclick="document.getElementById('fileInput').click()">
       <input type="file" id="fileInput" accept="image/*,video/*" multiple>
       <div class="tap-text">Tap to Upload up to 4 Photos or Videos</div>
       <div class="media-preview" id="mediaPreview"></div>
     </div>
-
     <label for="name">Name of Place</label>
     <input type="text" id="name" placeholder="Enter place name" required>
-
     <label for="place">Place / Landmark</label>
     <input type="text" id="place" placeholder="Enter landmark or spot" required>
-
     <label for="city">City / Town</label>
-<input type="text" id="city" placeholder="e.g., Paris, Tokyo, Manali" required>
-
-<label for="state">State / Province (optional)</label>
-<input type="text" id="state" placeholder="e.g., California, Himachal Pradesh, Ontario">
-
-<label for="country">Country</label>
-<input type="text" id="country" placeholder="e.g., France, Japan, India" value="India" required>
-
+    <input type="text" id="city" placeholder="e.g., Paris, Tokyo, Manali" required>
+    <label for="state">State / Province (optional)</label>
+    <input type="text" id="state" placeholder="e.g., California, Himachal Pradesh, Ontario">
+    <label for="country">Country</label>
+    <input type="text" id="country" placeholder="e.g., France, Japan, India" value="India" required>
     <label for="emotion">Emotion</label>
     <select id="emotion" required>
       <option value="" disabled selected>Select emotion</option>
@@ -301,7 +280,6 @@ header{
       <option value="7">Relaxation</option>
       <option value="8">Energetic</option>
     </select>
-
     <label for="category">Category</label>
     <select id="category" required>
       <option value="" disabled selected>Select category</option>
@@ -314,10 +292,8 @@ header{
       <option value="7">Restaurant</option>
        <option value="8">Nature</option>
     </select>
-
     <label for="story">Personal Story</label>
     <textarea id="story" placeholder="Share your personal experience" required></textarea>
-
     <label>Solo Woman Safety Rating</label>
     <div class="stars" id="safetyStars">
       <span data-value="1">★</span>
@@ -327,37 +303,44 @@ header{
       <span data-value="5">★</span>
     </div>
     <input type="hidden" id="safety" required>
-
     <label for="besttime">Best Time to Visit</label>
     <input type="text" id="besttime" placeholder="E.g., March to June" required>
-
     <label for="tips">Tips</label>
     <textarea id="tips" placeholder="Add tips for travelers"></textarea>
-
     <label for="hashtags">Hashtags</label>
     <input type="text" id="hashtags" placeholder="#hidden #gem">
-
     <label for="credits">Credits</label>
     <input type="text" id="credits" placeholder="Photo / Reference credits">
-
     <button type="submit">Upload Spot</button>
   </form>
 </section>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ────────────────────────────────────────────────
+// Slug generation helper (added)
+function createSlug(title) {
+  if (!title) return 'spot-' + Date.now();
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')           // spaces → -
+    .replace(/[^\w\-]+/g, '')       // remove special chars
+    .replace(/\-\-+/g, '-')         // multiple - → one
+    .replace(/^-+/, '')             // trim leading -
+    .replace(/-+$/, '');            // trim trailing -
+}
+// ────────────────────────────────────────────────
+
 const sb = supabase.createClient(
   "https://bhktkjegansxplpdtack.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
-
 const form = document.getElementById('uploadForm');
 const fileInput = document.getElementById('fileInput');
 const mediaPreview = document.getElementById('mediaPreview');
 const safetyInput = document.getElementById('safety');
 const stars = document.querySelectorAll('#safetyStars span');
 let selectedFiles = [];
-
 // Star rating
 stars.forEach(star => {
   star.addEventListener('click', () => {
@@ -369,7 +352,6 @@ stars.forEach(star => {
     }
   });
 });
-
 // Preview selected files
 fileInput.addEventListener('change', () => {
   const newFiles = Array.from(fileInput.files);
@@ -404,33 +386,26 @@ fileInput.addEventListener('change', () => {
   });
   fileInput.value = '';
 });
-
 // Improved geocoding with required headers
 // Geocode with multiple attempts + city/state/country priority
 async function geocodeAddress(name, place, city, state, country) {
   const attempts = [];
-
   // Attempt 1: city + state + country (highest priority)
   if (city) {
     const q = [city, state, country].filter(Boolean).join(', ');
     attempts.push(q);
   }
-
   // Attempt 2: full address
   const fullQ = [city, state, country, place, name].filter(Boolean).join(', ');
   if (fullQ && !attempts.includes(fullQ)) attempts.push(fullQ);
-
   // Attempt 3: just city + country
   if (city && country) {
     const simpleQ = [city, country].join(', ');
     if (!attempts.includes(simpleQ)) attempts.push(simpleQ);
   }
-
   for (const query of attempts) {
     if (!query) continue;
-
     console.log(`Trying geocoding query: "${query}"`);
-
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1`, {
         headers: {
@@ -439,11 +414,9 @@ async function geocodeAddress(name, place, city, state, country) {
           'Accept': 'application/json'
         }
       });
-
       if (response.ok) {
         const data = await response.json();
         console.log(`Response for "${query}":`, data);
-
         if (data && data.length > 0) {
           const lat = parseFloat(data[0].lat);
           const lng = parseFloat(data[0].lon);
@@ -457,17 +430,14 @@ async function geocodeAddress(name, place, city, state, country) {
       console.error(`Error for "${query}":`, err);
     }
   }
-
   // All attempts failed
   const suggested = [city, state, country].filter(Boolean).join(', ');
   alert(`Could not find exact location for "${name || place || 'the spot'}".\n\nTry a more specific city + country (e.g., "${suggested || 'Hyderabad, Telangana, India'}").\nMap pin will be skipped for now.`);
   return { lat: null, lng: null };
 }
-
 // Form submit
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
     alert('Please log in first!');
@@ -481,25 +451,20 @@ form.addEventListener('submit', async (e) => {
     alert('Please select safety rating');
     return;
   }
-
   const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
-
   // Address fields
   const name = document.getElementById('name').value.trim();
   const place = document.getElementById('place').value.trim();
   const city = document.getElementById('city').value.trim();
   const state = document.getElementById('state').value.trim();
   const country = document.getElementById('country').value.trim();
-
   // Auto geocode with priority on city/state/country
   const { lat, lng } = await geocodeAddress(name, place, city, state, country);
-
   try {
     const mediaUrls = [];
     for (const file of selectedFiles) {
       const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const uploadUrl = `${WORKER_URL}/upload/${filename}`;
-
       const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
@@ -507,12 +472,10 @@ form.addEventListener('submit', async (e) => {
           'Content-Type': file.type || 'application/octet-stream'
         }
       });
-
       if (!uploadRes.ok) {
         const errText = await uploadRes.text();
         throw new Error(`Upload failed: ${errText}`);
       }
-
       const publicUrl = `${WORKER_URL}/file/${filename}`;
       mediaUrls.push({
         url: publicUrl,
@@ -520,11 +483,19 @@ form.addEventListener('submit', async (e) => {
       });
     }
 
-    // Save with lat/lng
+    // NEW: Generate unique slug
+    const spotId = crypto.randomUUID(); // or let Supabase generate
+    const slugBase = createSlug(name);
+    const shortId = spotId.slice(0, 8);
+    const slug = `${slugBase}-${shortId}`;
+
+    // Save with slug
     const { error } = await sb.from('spots').insert([{
+      id: spotId,
       user_id: session.user.id,
       username: session.user.user_metadata?.username || session.user.email.split('@')[0],
       name: name,
+      slug: slug,                  // ← saved here
       place: place,
       city: city,
       state: state || null,
@@ -542,7 +513,6 @@ form.addEventListener('submit', async (e) => {
       lat: lat,
       lng: lng
     }]);
-
     if (error) {
       alert('Save failed: ' + error.message);
     } else {
@@ -552,6 +522,9 @@ form.addEventListener('submit', async (e) => {
       mediaPreview.innerHTML = '';
       stars.forEach(s => s.classList.remove('selected'));
       safetyInput.value = '';
+
+      // NEW: Redirect to clean URL
+      window.location.href = `/spot/${slug}`;
     }
   } catch (err) {
     console.error(err);
@@ -560,17 +533,4 @@ form.addEventListener('submit', async (e) => {
 });
 </script>
 </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
-
-

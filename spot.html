@@ -308,7 +308,6 @@
     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
   </a>
 </nav>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const sb = supabase.createClient(
@@ -318,30 +317,39 @@ const sb = supabase.createClient(
 const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
 // ────────────────────────────────────────────────
-// Safely read slug or id from URL
+// Robust URL parsing for slug and id
 // ────────────────────────────────────────────────
 let slug = null;
 let spotId = null;
 
-// Clean path detection (handles /spot/slug, /spot.html/slug, trailing slash)
-const path = window.location.pathname.replace(/\/+$/, ''); // remove trailing slash
-const pathParts = path.split('/').filter(Boolean);
+console.log('Full URL:', window.location.href);
+console.log('Pathname:', window.location.pathname);
+
+// Clean path (remove trailing slash, handle /spot.html)
+let cleanPath = window.location.pathname.replace(/\/+$/, '');
+if (cleanPath.endsWith('.html')) {
+  cleanPath = cleanPath.replace(/\.html$/, '');
+}
+const pathParts = cleanPath.split('/').filter(part => part.trim() !== '');
+
+console.log('Clean path parts:', pathParts);
+
 if (pathParts.length >= 2 && ['spot', 'spot.html'].includes(pathParts[0].toLowerCase())) {
   slug = pathParts[1];
-  console.log('Detected slug from path:', slug);
+  console.log('Detected slug:', slug);
 }
 
 // Old ?id= param
 const urlParams = new URLSearchParams(window.location.search);
 spotId = urlParams.get('id');
 if (spotId) {
-  console.log('Detected old ID:', spotId);
+  console.log('Detected ID from query:', spotId);
 }
 
-// Redirect old ?id= to clean slug if possible
+// If old ?id= → try redirect to slug
 if (spotId && !slug) {
   (async () => {
-    console.log('Trying to redirect old ID to slug...');
+    console.log('Redirect check: trying to find slug for ID', spotId);
     const { data, error } = await sb
       .from('spots')
       .select('slug')
@@ -353,25 +361,67 @@ if (spotId && !slug) {
     }
 
     if (data && data.slug) {
-      console.log('Redirecting to:', `/spot/${data.slug}`);
+      console.log('Found slug - redirecting to:', `/spot/${data.slug}`);
       window.location.replace(`/spot/${data.slug}`);
+      return;
     } else {
-      console.log('No slug found - loading by ID');
+      console.log('No slug found for this ID - loading by ID');
       loadSpot(spotId, null);
     }
   })();
 }
 
-// If neither slug nor id → show error
+// Final check - if no identifier at all
 if (!slug && !spotId) {
+  console.warn('No slug or ID detected in URL');
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
 } else {
-  console.log('Loading spot - slug:', slug, 'id:', spotId);
+  console.log('Proceeding to load spot - slug:', slug, 'id:', spotId);
   loadSpot(spotId, slug);
 }
 
 // ────────────────────────────────────────────────
-// Original loadSpot and rest (unchanged)
+// Load spot function (with debug)
+// ────────────────────────────────────────────────
+async function loadSpot(id, slugParam) {
+  let query = sb.from('spots').select('*');
+
+  if (slugParam) {
+    console.log('Querying Supabase by slug:', slugParam);
+    query = query.eq('slug', slugParam);
+  } else if (id) {
+    console.log('Querying Supabase by id:', id);
+    query = query.eq('id', id);
+  } else {
+    console.error('loadSpot called without id or slug');
+    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Invalid spot request</h1>';
+    return;
+  }
+
+  const { data, error } = await query.single();
+
+  if (error) {
+    console.error('Supabase fetch failed:', error.message);
+    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Error loading spot: ' + error.message + '</h1>';
+    return;
+  }
+
+  if (!data) {
+    console.warn('No spot returned from Supabase');
+    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Spot not found</h1>';
+    return;
+  }
+
+  console.log('Spot successfully loaded:', data.name);
+  currentSpot = data;
+  currentIndex = 0;
+
+  await loadRelatedSpots();
+  renderCard(currentSpot);
+}
+
+// ────────────────────────────────────────────────
+// Your original functions below (unchanged)
 // ────────────────────────────────────────────────
 let currentSpot = null;
 let relatedSpots = [];
@@ -379,39 +429,6 @@ let currentIndex = 0;
 
 const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
 const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
-
-async function loadSpot(id, slugParam) {
-  let query = sb.from('spots').select('*');
-
-  if (slugParam) {
-    console.log('Fetching by slug:', slugParam);
-    query = query.eq('slug', slugParam);
-  } else if (id) {
-    console.log('Fetching by id:', id);
-    query = query.eq('id', id);
-  }
-
-  const { data, error } = await query.single();
-
-  if (error) {
-    console.error('Supabase error:', error.message);
-    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Error loading spot: ' + error.message + '</h1>';
-    return;
-  }
-
-  if (!data) {
-    console.warn('No spot data returned');
-    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Spot not found</h1>';
-    return;
-  }
-
-  console.log('Spot loaded:', data.name);
-  currentSpot = data;
-  currentIndex = 0;
-
-  await loadRelatedSpots();
-  renderCard(currentSpot);
-}
 
 async function loadRelatedSpots() {
   if (!currentSpot || !currentSpot.category_id || !currentSpot.emotion_id || !currentSpot.city) return;
@@ -429,10 +446,6 @@ async function loadRelatedSpots() {
 
 function renderCard(spot) {
   const card = document.getElementById('spotCard');
-  if (!card) {
-    console.warn('spotCard element not found - likely page was replaced');
-    return;
-  }
   // Hero media
   const heroEl = document.getElementById('heroMedia');
   let mediaList = [];
@@ -533,12 +546,12 @@ async function setupDestinyButton(spotId) {
   };
 }
 // ────────────────────────────────────────────────
-// SWIPE LOGIC - FULL CARD WITH ALL DETAILS
+// SWIPE LOGIC - with guard
 // ────────────────────────────────────────────────
 function initSwipe() {
   const card = document.getElementById('spotCard');
   if (!card) {
-    console.warn('spotCard not found - skipping swipe init');
+    console.log('spotCard element not found - skipping swipe init');
     return;
   }
   let isDragging = false;
@@ -576,16 +589,18 @@ function initSwipe() {
   card.addEventListener('touchstart', handleStart, { passive: false });
   document.addEventListener('touchmove', handleMove, { passive: false });
   document.addEventListener('touchend', handleEnd);
-  document.getElementById('prevBtn').onclick = () => changeSpot(-1);
-  document.getElementById('nextBtn').onclick = () => changeSpot(1);
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  if (prevBtn) prevBtn.onclick = () => changeSpot(-1);
+  if (nextBtn) nextBtn.onclick = () => changeSpot(1);
 }
 function changeSpot(dir) {
+  const card = document.getElementById('spotCard');
+  if (!card) return;
   const newIndex = currentIndex + dir;
   if (newIndex < 0 || newIndex >= relatedSpots.length) return;
   currentIndex = newIndex;
   const nextSpot = relatedSpots[newIndex];
-  const card = document.getElementById('spotCard');
-  if (!card) return;
   card.style.transition = 'all 0.5s ease';
   card.style.opacity = '0';
   card.style.transform = `translateX(${dir * 80}px)`;
@@ -595,10 +610,11 @@ function changeSpot(dir) {
     card.style.transform = 'translateX(0)';
   }, 500);
 }
-window.addEventListener('load', () => {
-  console.log('Page loaded - initializing swipe if card exists');
-  initSwipe();
-});
+// Start swipe only if card exists
+window.addEventListener('load', initSwipe);
 </script>
 </body>
 </html>
+</body>
+</html>
+

@@ -314,6 +314,7 @@
     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
   </a>
 </nav>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const sb = supabase.createClient(
@@ -322,68 +323,102 @@ const sb = supabase.createClient(
 );
 const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
-// Global variables
-let currentSpot = null;
-let relatedSpots = [];
-let currentIndex = 0;
-
-// Category & Emotion mappings
-const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
-const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
-
 // ────────────────────────────────────────────────
-// Read slug from URL (clean path support)
+// Read slug or id from URL (clean & safe)
 // ────────────────────────────────────────────────
 let slug = null;
 let spotId = null;
 
-// Check clean URL path first (e.g. /spot/srs-hill-708c72d7)
-const pathParts = window.location.pathname.split('/');
-if (pathParts.length > 2 && pathParts[1] === 'spot') {
-  slug = pathParts[2]; // srs-hill-708c72d7
+// 1. Clean path: /spot/your-slug-here
+const pathParts = window.location.pathname.split('/').filter(Boolean); // remove empty parts
+if (pathParts.length >= 2 && pathParts[0].toLowerCase() === 'spot') {
+  slug = pathParts[1];
+  console.log('Detected slug from path:', slug);
 }
 
-// Fallback to old ?id= param
+// 2. Old query param ?id=
 const urlParams = new URLSearchParams(window.location.search);
 spotId = urlParams.get('id');
-
-if (!slug && !spotId) {
-  document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
-} else {
-  loadSpot(spotId, slug);
+if (spotId) {
+  console.log('Detected old ID from query:', spotId);
 }
 
+// 3. If old ?id= link → redirect to slug (if slug exists)
+if (spotId && !slug) {
+  (async () => {
+    console.log('Attempting redirect from old ?id= to slug...');
+    const { data, error } = await sb
+      .from('spots')
+      .select('slug')
+      .eq('id', spotId)
+      .single();
+
+    if (error) console.error('Redirect fetch error:', error.message);
+
+    if (data && data.slug) {
+      console.log('Redirecting to:', `/spot/${data.slug}`);
+      window.location.replace(`/spot/${data.slug}`);
+    } else {
+      console.log('No slug found → loading by ID');
+      loadSpot(spotId, null);
+    }
+  })();
+  // Don't continue - wait for redirect
+}
+
+// 4. If neither → error
+if (!slug && !spotId) {
+  document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
+  return;
+}
+
+// 5. Load spot
+console.log('Loading spot - slug:', slug, 'id:', spotId);
+loadSpot(spotId, slug);
+
 // ────────────────────────────────────────────────
-// Load spot by ID or slug
+// Original loadSpot, loadRelatedSpots, renderCard, etc. (unchanged)
 // ────────────────────────────────────────────────
-async function loadSpot(id, slug) {
+let currentSpot = null;
+let relatedSpots = [];
+let currentIndex = 0;
+
+const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
+const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
+
+async function loadSpot(id, slugParam) {
   let query = sb.from('spots').select('*');
 
-  if (slug) {
-    // Prefer slug if available
-    query = query.eq('slug', slug);
+  if (slugParam) {
+    console.log('Querying by slug:', slugParam);
+    query = query.eq('slug', slugParam);
   } else if (id) {
+    console.log('Querying by id:', id);
     query = query.eq('id', id);
   }
 
   const { data, error } = await query.single();
 
-  if (error || !data) {
+  if (error) {
+    console.error('Supabase error:', error.message);
+    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Error loading spot: ' + error.message + '</h1>';
+    return;
+  }
+
+  if (!data) {
+    console.warn('No spot data returned');
     document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Spot not found</h1>';
     return;
   }
 
+  console.log('Spot loaded:', data.name);
   currentSpot = data;
   currentIndex = 0;
 
-  // Load similar spots
   await loadRelatedSpots();
-
-  // Initial render
   renderCard(currentSpot);
 }
 
-// Rest of your original code (loadRelatedSpots, renderCard, setupDestinyButton, initSwipe, changeSpot) remains 100% unchanged
 async function loadRelatedSpots() {
   if (!currentSpot || !currentSpot.category_id || !currentSpot.emotion_id || !currentSpot.city) return;
   const { data, error } = await sb
@@ -396,9 +431,11 @@ async function loadRelatedSpots() {
     return;
   }
   relatedSpots = data;
+  console.log('Loaded ' + relatedSpots.length + ' related spots');
 }
 
 function renderCard(spot) {
+  console.log('Rendering card for:', spot.name);
   const card = document.getElementById('spotCard');
   // Hero media
   const heroEl = document.getElementById('heroMedia');
@@ -468,7 +505,6 @@ function renderCard(spot) {
   document.querySelector('.user').onclick = () => {
     window.location.href = `Profile.html?user=${username}`;
   };
-  // Destiny button
   setupDestinyButton(spot.id);
 }
 async function setupDestinyButton(spotId) {
@@ -509,7 +545,6 @@ function initSwipe() {
   let startX = 0;
   let direction = 0;
   const handleStart = (e) => {
-    // Allow clicks on buttons and thumbs
     if (e.target.closest('#destinyBtn') || e.target.closest('.thumb') || e.target.closest('.user')) {
       return;
     }
@@ -534,16 +569,13 @@ function initSwipe() {
       else changeSpot(1); // right swipe → next
     }
   };
-  // Mouse events
   card.addEventListener('mousedown', handleStart);
   document.addEventListener('mousemove', handleMove);
   document.addEventListener('mouseup', handleEnd);
   document.addEventListener('mouseleave', handleEnd);
-  // Touch events
   card.addEventListener('touchstart', handleStart, { passive: false });
   document.addEventListener('touchmove', handleMove, { passive: false });
   document.addEventListener('touchend', handleEnd);
-  // Arrows
   document.getElementById('prevBtn').onclick = () => changeSpot(-1);
   document.getElementById('nextBtn').onclick = () => changeSpot(1);
 }
@@ -562,7 +594,6 @@ function changeSpot(dir) {
     card.style.transform = 'translateX(0)';
   }, 500);
 }
-// Start swipe after page load
 window.addEventListener('load', initSwipe);
 </script>
 </body>

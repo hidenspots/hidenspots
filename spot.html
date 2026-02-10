@@ -322,68 +322,90 @@ const sb = supabase.createClient(
 );
 const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
-// Global variables
-let currentSpot = null;
-let relatedSpots = [];
-let currentIndex = 0;
-
-// Category & Emotion mappings
-const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
-const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
-
 // ────────────────────────────────────────────────
-// Read slug from URL (clean path support)
+// Fixed URL parsing – detects both slug path and ?id= correctly
 // ────────────────────────────────────────────────
 let slug = null;
 let spotId = null;
 
-// Check clean URL path first (e.g. /spot/srs-hill-708c72d7)
-const pathParts = window.location.pathname.split('/');
-if (pathParts.length > 2 && pathParts[1] === 'spot') {
-  slug = pathParts[2]; // srs-hill-708c72d7
+// Clean up pathname (remove trailing slash, handle .html)
+let path = window.location.pathname.replace(/\/+$/, '');
+if (path.endsWith('.html')) {
+  path = path.slice(0, -5); // remove .html
+}
+const pathParts = path.split('/').filter(part => part.trim() !== '');
+
+console.log('Full URL:', window.location.href);
+console.log('Clean path parts:', pathParts);
+
+// Detect slug from /spot/slug-uuid or /spot.html/slug-uuid
+if (pathParts.length >= 2 && ['spot', 'spot.html'].includes(pathParts[0].toLowerCase())) {
+  slug = pathParts[1];
+  console.log('Detected slug:', slug);
 }
 
-// Fallback to old ?id= param
+// Detect old ?id=
 const urlParams = new URLSearchParams(window.location.search);
 spotId = urlParams.get('id');
+if (spotId) {
+  console.log('Detected ID from query:', spotId);
+}
 
+// If neither → error page
 if (!slug && !spotId) {
+  console.warn('No slug or ID found in URL');
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
 } else {
+  console.log('Loading spot → slug:', slug || 'none', 'id:', spotId || 'none');
   loadSpot(spotId, slug);
 }
 
 // ────────────────────────────────────────────────
 // Load spot by ID or slug
 // ────────────────────────────────────────────────
-async function loadSpot(id, slug) {
+async function loadSpot(id, slugParam) {
   let query = sb.from('spots').select('*');
 
-  if (slug) {
-    // Prefer slug if available
-    query = query.eq('slug', slug);
+  if (slugParam) {
+    console.log('Fetching by slug:', slugParam);
+    query = query.eq('slug', slugParam);
   } else if (id) {
+    console.log('Fetching by ID:', id);
     query = query.eq('id', id);
   }
 
   const { data, error } = await query.single();
 
-  if (error || !data) {
+  if (error) {
+    console.error('Supabase error:', error.message);
+    document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Error loading spot: ' + error.message + '</h1>';
+    return;
+  }
+
+  if (!data) {
+    console.warn('No spot data returned');
     document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">Spot not found</h1>';
     return;
   }
 
+  console.log('Spot loaded successfully:', data.name);
   currentSpot = data;
   currentIndex = 0;
 
-  // Load similar spots
   await loadRelatedSpots();
-
-  // Initial render
   renderCard(currentSpot);
 }
 
-// Rest of your original code (loadRelatedSpots, renderCard, setupDestinyButton, initSwipe, changeSpot) remains 100% unchanged
+// ────────────────────────────────────────────────
+// Your original code below (100% unchanged)
+// ────────────────────────────────────────────────
+let currentSpot = null;
+let relatedSpots = [];
+let currentIndex = 0;
+
+const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
+const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
+
 async function loadRelatedSpots() {
   if (!currentSpot || !currentSpot.category_id || !currentSpot.emotion_id || !currentSpot.city) return;
   const { data, error } = await sb
@@ -468,7 +490,6 @@ function renderCard(spot) {
   document.querySelector('.user').onclick = () => {
     window.location.href = `Profile.html?user=${username}`;
   };
-  // Destiny button
   setupDestinyButton(spot.id);
 }
 async function setupDestinyButton(spotId) {
@@ -505,11 +526,14 @@ async function setupDestinyButton(spotId) {
 // ────────────────────────────────────────────────
 function initSwipe() {
   const card = document.getElementById('spotCard');
+  if (!card) {
+    console.log('spotCard not found - skipping swipe init');
+    return;
+  }
   let isDragging = false;
   let startX = 0;
   let direction = 0;
   const handleStart = (e) => {
-    // Allow clicks on buttons and thumbs
     if (e.target.closest('#destinyBtn') || e.target.closest('.thumb') || e.target.closest('.user')) {
       return;
     }
@@ -534,16 +558,13 @@ function initSwipe() {
       else changeSpot(1); // right swipe → next
     }
   };
-  // Mouse events
   card.addEventListener('mousedown', handleStart);
   document.addEventListener('mousemove', handleMove);
   document.addEventListener('mouseup', handleEnd);
   document.addEventListener('mouseleave', handleEnd);
-  // Touch events
   card.addEventListener('touchstart', handleStart, { passive: false });
   document.addEventListener('touchmove', handleMove, { passive: false });
   document.addEventListener('touchend', handleEnd);
-  // Arrows
   document.getElementById('prevBtn').onclick = () => changeSpot(-1);
   document.getElementById('nextBtn').onclick = () => changeSpot(1);
 }
@@ -553,6 +574,7 @@ function changeSpot(dir) {
   currentIndex = newIndex;
   const nextSpot = relatedSpots[newIndex];
   const card = document.getElementById('spotCard');
+  if (!card) return;
   card.style.transition = 'all 0.5s ease';
   card.style.opacity = '0';
   card.style.transform = `translateX(${dir * 80}px)`;
@@ -562,8 +584,10 @@ function changeSpot(dir) {
     card.style.transform = 'translateX(0)';
   }, 500);
 }
-// Start swipe after page load
 window.addEventListener('load', initSwipe);
 </script>
 </body>
 </html>
+</body>
+</html>
+

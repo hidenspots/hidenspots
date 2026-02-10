@@ -325,41 +325,72 @@ const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 // ────────────────────────────────────────────────
 // Fixed URL parsing – detects both slug path and ?id= correctly
 // ────────────────────────────────────────────────
+// ────────────────────────────────────────────────
+// Robust URL parsing – works with both /spot/slug and /spot?id=
+// ────────────────────────────────────────────────
 let slug = null;
 let spotId = null;
 
-// Clean up pathname (remove trailing slash, handle .html)
-let path = window.location.pathname.replace(/\/+$/, '');
+// 1. Clean up pathname (remove trailing slash, handle .html)
+let path = window.location.pathname.replace(/\/+$/, ''); // remove trailing /
 if (path.endsWith('.html')) {
   path = path.slice(0, -5); // remove .html
 }
+
+// 2. Split into parts, remove empty entries
 const pathParts = path.split('/').filter(part => part.trim() !== '');
 
 console.log('Full URL:', window.location.href);
-console.log('Clean path parts:', pathParts);
+console.log('Clean pathname:', path);
+console.log('Path parts:', pathParts);
 
-// Detect slug from /spot/slug-uuid or /spot.html/slug-uuid
+// 3. Detect slug from /spot/slug or /spot.html/slug
 if (pathParts.length >= 2 && ['spot', 'spot.html'].includes(pathParts[0].toLowerCase())) {
   slug = pathParts[1];
-  console.log('Detected slug:', slug);
+  console.log('Detected slug from path:', slug);
 }
 
-// Detect old ?id=
+// 4. Detect old ?id= query param
 const urlParams = new URLSearchParams(window.location.search);
 spotId = urlParams.get('id');
 if (spotId) {
-  console.log('Detected ID from query:', spotId);
+  console.log('Detected old ID from ?id=:', spotId);
 }
 
-// If neither → error page
+// 5. If old ?id= link → try to redirect to slug (if slug exists)
+if (spotId && !slug) {
+  (async () => {
+    console.log('Redirect check: looking for slug for ID', spotId);
+    const { data, error } = await sb
+      .from('spots')
+      .select('slug')
+      .eq('id', spotId)
+      .single();
+
+    if (error) {
+      console.error('Redirect fetch error:', error.message);
+    }
+
+    if (data && data.slug) {
+      console.log('Found slug! Redirecting to:', `/spot/${data.slug}`);
+      window.location.replace(`/spot/${data.slug}`);
+    } else {
+      console.log('No slug found in DB → loading by ID');
+      loadSpot(spotId, null);
+    }
+  })();
+}
+
+// 6. If no identifier at all → show error
 if (!slug && !spotId) {
-  console.warn('No slug or ID found in URL');
+  console.warn('No slug or ID detected – showing error message');
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
-} else {
-  console.log('Loading spot → slug:', slug || 'none', 'id:', spotId || 'none');
-  loadSpot(spotId, slug);
+  return;
 }
 
+// 7. Load the spot
+console.log('Proceeding to load spot – slug:', slug || 'none', 'id:', spotId || 'none');
+loadSpot(spotId, slug);
 // ────────────────────────────────────────────────
 // Load spot by ID or slug
 // ────────────────────────────────────────────────
@@ -590,5 +621,6 @@ window.addEventListener('load', initSwipe);
 
 </body>
 </html>
+
 
 

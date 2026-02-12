@@ -319,15 +319,15 @@ header{
 // ────────────────────────────────────────────────
 // Slug generation helper (added)
 function createSlug(title) {
-  if (!title) return 'spot-' + Date.now();
+  if (!title) return 'spot-' + Date.now().toString(36); // fallback
+
   return title
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '-')           // spaces → -
-    .replace(/[^\w\-]+/g, '')       // remove special chars
-    .replace(/\-\-+/g, '-')         // multiple - → one
-    .replace(/^-+/, '')             // trim leading -
-    .replace(/-+$/, '');            // trim trailing -
+    .replace(/[^a-z0-9-]/g, '')     // keep only letters, numbers, hyphen
+    .replace(/-+/g, '-')            // multiple hyphens → one
+    .replace(/^-+|-+$/g, '');       // trim leading/trailing hyphens
 }
 // ────────────────────────────────────────────────
 
@@ -484,62 +484,31 @@ form.addEventListener('submit', async (e) => {
     }
 
     // Generate unique slug
-    const spotId = crypto.randomUUID();
-    const slugBase = createSlug(name);
-    const shortId = spotId.slice(0, 8);
-    const slug = `${slugBase}-${shortId}`;
+   // Generate unique slug
+const spotId = crypto.randomUUID();
+const slugBase = createSlug(name);
+const shortId = spotId.slice(0, 8); // e.g. a1de9f54
+const slug = slugBase ? `${slugBase}-${shortId}` : `spot-${shortId}`;
 
-    // Save with slug
-    const { error } = await sb.from('spots').insert([{
-      id: spotId,
-      user_id: session.user.id,
-      username: session.user.user_metadata?.username || session.user.email.split('@')[0],
-      name: name,
-      slug: slug,
-      place: place,
-      city: city,
-      state: state || null,
-      country: country,
-      emotion_id: parseInt(document.getElementById('emotion').value),
-      category_id: parseInt(document.getElementById('category').value),
-      story: document.getElementById('story').value.trim(),
-      safety_rating: parseInt(safetyInput.value),
-      best_time: document.getElementById('besttime').value.trim(),
-      tips: document.getElementById('tips').value.trim(),
-      hashtags: document.getElementById('hashtags').value.trim(),
-      credits: document.getElementById('credits').value.trim(),
-      media_urls: mediaUrls,
-      media_url: mediaUrls[0]?.url || null,
-      lat: lat,
-      lng: lng
-    }]);
+// Save to Supabase (your existing insert code)
+const { error } = await sb.from('spots').insert([{
+  id: spotId,
+  // ... your other fields ...
+  slug: slug,
+  // ...
+}]);
 
-    if (error) {
-      alert('Save failed: ' + error.message);
-    } else {
-      alert('Hidden gem uploaded successfully! 🎉\n\nRedirecting to your new spot...');
+if (!error) {
+  alert('Hidden gem uploaded successfully! 🎉\n\nRedirecting to your new spot...');
+  form.reset();
+  // ... reset code ...
 
-      // Reset form AFTER alert (prevents reset before user sees message)
-      form.reset();
-      selectedFiles = [];
-      mediaPreview.innerHTML = '';
-      stars.forEach(s => s.classList.remove('selected'));
-      safetyInput.value = '';
-
-      // Force redirect after short delay (gives alert time to be seen)
-      setTimeout(() => {
-        window.location.href = `/spot/${slug}`;
-        // Alternative: go to Explore page instead
-        // window.location.href = '/Explore.html';
-      }, 1500);  // 1.5 seconds delay - adjust if needed
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Upload failed: ' + err.message);
-  }
-});
-   
+  setTimeout(() => {
+    window.location.href = `/spot/${slug}`;
+  }, 1500);
+}
 </script>
 </body>
 </html>
+
 

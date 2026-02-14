@@ -333,7 +333,7 @@ const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'
 const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
 
 // ────────────────────────────────────────────────
-// Clean & reliable slug detection (supports /spot/slug and /spot?id=)
+// Clean & reliable slug detection for /spot/slug format
 // ────────────────────────────────────────────────
 let slug = null;
 let spotId = null;
@@ -358,7 +358,7 @@ if (spotId) {
   console.log('Detected ID from query:', spotId);
 }
 
-// Optional: Auto-upgrade old ?id= to clean slug (uncomment if you want)
+// Optional: Auto-upgrade old ?id= links to clean slug (uncomment if you want)
 // if (spotId && !slug) {
 //   (async () => {
 //     const { data } = await sb.from('spots').select('slug').eq('id', spotId).single();
@@ -369,7 +369,7 @@ if (spotId) {
 //       loadSpot(spotId, null);
 //     }
 //   })();
-//   return;
+//   return; // stop here to avoid double load
 // }
 
 // Load spot – prefer slug if present, else id

@@ -1,5 +1,3 @@
-main home >>  lil edited 
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -9,7 +7,6 @@ main home >>  lil edited
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-DWS0BB3H70');
 </script>
 <meta charset="UTF-8" />
@@ -58,18 +55,16 @@ header{
   color: #fff;
   opacity: 0.9;
 }
-
 .category:hover {
   background: rgba(255,255,255,.15);
   transform: scale(1.05);
   box-shadow: 0 0 15px rgba(255,216,141,.3);
 }
-
 .category.active {
   background: linear-gradient(90deg, #ffd88d, #19547b);
   color: #0c0f18;
   font-weight: 600;
-  transform: scale(1.08);          /* Slightly bigger when active */
+  transform: scale(1.08); /* Slightly bigger when active */
   box-shadow: 0 0 20px rgba(255,216,141,.5); /* Nice glow */
   border-color: transparent;
 }
@@ -77,7 +72,7 @@ header{
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;                    /* Increased horizontal/vertical gap between cards */
+  gap: 2rem; /* Increased horizontal/vertical gap between cards */
   padding: 2rem 2rem 8rem 2rem; /* More top/bottom padding, especially bottom to clear nav */
 }
 .card {
@@ -89,17 +84,13 @@ header{
   margin-bottom: 1rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
 .card:hover {
-  transform: translateY(-10px);          /* Lifts the card up 10px */
+  transform: translateY(-10px); /* Lifts the card up 10px */
   box-shadow: 0 20px 50px rgba(0,0,0,.5); /* Stronger shadow + glow */
 }
-
 .card:hover .card-media img {
-  transform: scale(1.08);                /* Subtle zoom on image */
+  transform: scale(1.08); /* Subtle zoom on image */
 }
-
-
 .card-media{position:relative;height:220px;overflow:hidden;}
 .card-media img{width:100%;height:100%;object-fit:cover;transition:0.4s ease;}
 .card-media:hover img{transform:scale(1.05);filter:brightness(.85);}
@@ -108,7 +99,6 @@ header{
 .card-title{font-size: 1.1rem;
   margin-bottom: 0.4rem;
   color:#ffd88d;}
-
 .card-sub{font-size: 0.95rem;
   opacity: 0.85;}
 /* Meta row */
@@ -121,56 +111,51 @@ header{
 /* Added hover for username */
 .meta-right{display:flex;align-items:center;gap:.5rem;}
 .follow {
-  padding: 0.45rem 1.2rem;           /* Bigger tap area */
+  padding: 0.45rem 1.2rem; /* Bigger tap area */
   border-radius: 30px;
   border: 1px solid rgba(255,255,255,.25);
   background: rgba(255,255,255,.08);
   color: #fff;
-  font-size: 0.95rem;                /* Slightly larger text */
-  font-weight: 500;                  /* Bolder */
+  font-size: 0.95rem; /* Slightly larger text */
+  font-weight: 500; /* Bolder */
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
 .follow:hover,
 .follow:active {
   background: linear-gradient(90deg, #ffd88d, #ffb347);
   color: #0c0f18;
   border-color: transparent;
-  transform: scale(1.05);            /* Subtle grow on hover/tap */
+  transform: scale(1.05); /* Subtle grow on hover/tap */
 }
-
-
 .menu{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);cursor:pointer}
 .menu:after{content:"⋯";font-size:18px;line-height:0;opacity:.85}
 .heart {
-  font-size: 28px;                   /* Much bigger – easier to tap */
+  font-size: 28px; /* Much bigger – easier to tap */
   cursor: pointer;
   transition: transform 0.3s ease, color 0.3s ease;
-  color: rgba(255,255,255,.7);       /* Inactive state */
+  color: rgba(255,255,255,.7); /* Inactive state */
 }
-
-.heart.active {                       /* We'll add .active class in JS later if needed */
-  color: #ff4d4d;                    /* Bright red when saved */
-  transform: scale(1.2);             /* Slight pop */
+.heart.active { /* We'll add .active class in JS later if needed */
+  color: #ff4d4d; /* Bright red when saved */
+  transform: scale(1.2); /* Slight pop */
 }
-
 .heart:hover,
 .heart:active {
-  transform: scale(1.3);             /* Grow on hover/tap */
+  transform: scale(1.3); /* Grow on hover/tap */
 }
 /* Story snippet */
 .card-story{padding: 0 1.2rem 1.2rem;}
 .story-text {
-  font-size: 0.98rem;               /* Slightly larger – much easier to read */
-  line-height: 1.65;                /* More breathing room between lines */
-  opacity: 0.92;                    /* Slightly better contrast */
+  font-size: 0.98rem; /* Slightly larger – much easier to read */
+  line-height: 1.65; /* More breathing room between lines */
+  opacity: 0.92; /* Slightly better contrast */
   display: -webkit-box;
-  -webkit-line-clamp: 3;            /* Show 3 lines instead of 2 – more story visible */
+  -webkit-line-clamp: 3; /* Show 3 lines instead of 2 – more story visible */
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-bottom: 0.8rem;            /* Extra space before Read more */
-  padding: 0 0.4rem;                /* Tiny left/right padding for clean alignment */
+  margin-bottom: 0.8rem; /* Extra space before Read more */
+  padding: 0 0.4rem; /* Tiny left/right padding for clean alignment */
 }
 .read-more {
   display: inline-block;
@@ -184,7 +169,6 @@ header{
   text-decoration: none;
   transition: all 0.3s ease;
 }
-
 .read-more:hover,
 .read-more:focus {
   background: rgba(255,216,141,0.25);
@@ -209,71 +193,52 @@ header{
   .floating-btn{bottom:90px;right:22px}
   .nav-bar{gap:2rem;padding:.9rem 1.6rem}
 }
-
-
-
-
-
-
-
 /* Skeleton loading placeholders */
 .skeleton-card {
   background: #141824;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 12px 32px rgba(0,0,0,.35);
-  height: 420px;                    /* Approx card height – adjust if needed */
+  height: 420px; /* Approx card height – adjust if needed */
   animation: pulse 1.5s infinite ease-in-out;
 }
-
 .skeleton-media {
   height: 240px;
   background: linear-gradient(90deg, #1a1f2e 0%, #22273a 50%, #1a1f2e 100%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite linear;
 }
-
 .skeleton-text {
   height: 20px;
   margin: 1rem 1.2rem;
   background: #22273a;
   border-radius: 4px;
 }
-
 .skeleton-meta {
   display: flex;
   justify-content: space-between;
   padding: 0 1.2rem 1rem;
 }
-
 .skeleton-avatar {
   width: 28px;
   height: 28px;
   border-radius: 50%;
   background: #22273a;
 }
-
 .skeleton-username {
   width: 100px;
   height: 16px;
   background: #22273a;
   border-radius: 4px;
 }
-
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
 }
-
-
-
-
-
 </style>
 </head>
 <body>
@@ -329,7 +294,11 @@ header{
     <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </a>
   <a href="Explore.html" class="nav-icon" title="Destiny List" aria-label="Destiny List">
-    <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5" fill="none"/><path d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z" fill="currentColor"/></svg>
+    <svg viewBox="0 0 24 24">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5" fill="none"/>
+      <path d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z" fill="currentColor"/>
+    </svg>
   </a>
   <a href="Profile.html" class="nav-icon" title="Profile" aria-label="Profile">
     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -343,9 +312,7 @@ const sb = supabase.createClient(
   "https://bhktkjegansxplpdtack.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
-
 const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
-
 const slideEls = document.querySelectorAll('.hero-slide');
 const themeEl = document.getElementById('heroTheme');
 const titleEl = document.getElementById('heroTitle');
@@ -353,9 +320,7 @@ const subEl = document.getElementById('heroSub');
 const ctaBtn = document.getElementById('heroCta');
 let heroSpots = [];
 let heroIdx = 0;
-
 let currentUser = null;
-
 // Avatar helper - R2 first, fallback to UI-Avatars
 function getAvatarUrl(username) {
   if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=80';
@@ -363,7 +328,6 @@ function getAvatarUrl(username) {
   const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=FFD88D&color=0c0f18&size=80`;
   return r2Avatar + `?fallback=${encodeURIComponent(fallback)}`; // simple fallback via onerror in img tag
 }
-
 // Load 4 random spots for hero slideshow
 async function loadHeroSlides() {
   const { data: spots } = await sb
@@ -371,40 +335,31 @@ async function loadHeroSlides() {
     .select('id, name, place, city, story, media_urls, media_url, category_id')
     .order('created_at', { ascending: false })
     .limit(12);
-
   if (!spots || spots.length === 0) return;
-
   heroSpots = spots.sort(() => 0.5 - Math.random()).slice(0, 4);
-
   heroSpots.forEach((spot, i) => {
     const firstMedia = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/1200x800/141824/FFD88D?text=No+Image';
     slideEls[i].style.backgroundImage = `url('${firstMedia}')`;
   });
-
   renderHero(0);
 }
-
 // Render current hero slide
 function renderHero(i) {
   const spot = heroSpots[i];
   if (!spot) return;
-
   slideEls.forEach(s => s.classList.remove('active'));
   slideEls[i].classList.add('active');
-
   const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant', 8:'Nature'};
   themeEl.textContent = categoryNames[spot.category_id] || 'Hidden Gem';
   titleEl.textContent = spot.name;
   subEl.textContent = spot.story?.slice(0, 120) + '...' || 'Discover this hidden place...';
   ctaBtn.onclick = () => window.location.href = `spot.html?id=${spot.id}`;
 }
-
 // Auto change hero every 5.2 seconds
 setInterval(() => {
   heroIdx = (heroIdx + 1) % heroSpots.length;
   renderHero(heroIdx);
 }, 5200);
-
 // Init
 async function init() {
   const { data: { user } } = await sb.auth.getUser();
@@ -412,11 +367,9 @@ async function init() {
   await loadHeroSlides();
   await loadSpots();
 }
-
 // Load all spots for the main grid
 async function loadSpots() {
-
-const grid = document.getElementById('grid');
+  const grid = document.getElementById('grid');
   grid.innerHTML = `
     <div class="skeleton-card"></div>
     <div class="skeleton-card"></div>
@@ -424,17 +377,14 @@ const grid = document.getElementById('grid');
     <div class="skeleton-card"></div>
     <div class="skeleton-card"></div>
   `;
-
   const { data: spots, error } = await sb
     .from('spots')
-    .select('id, name, place, city, story, media_urls, media_url, username, category_id, emotion_id')
+    .select('id, name, place, city, story, media_urls, media_url, username, category_id, emotion_id, slug') // ← ADDED slug here
     .order('created_at', { ascending: false });
-
   if (error || !spots || spots.length === 0) {
     document.getElementById('grid').innerHTML = '<p style="text-align:center;padding:50px;opacity:0.7;">No hidden spots yet.</p>';
     return;
   }
-
   // Get saved spots for heart icon
   let savedSpotIds = [];
   if (currentUser) {
@@ -444,16 +394,15 @@ const grid = document.getElementById('grid');
       .eq('user_id', currentUser.id);
     if (saves) savedSpotIds = saves.map(s => s.spot_id);
   }
-
   const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
   const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
-
   const html = spots.map(spot => {
     const firstImage = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/300x220/141824/FFD88D?text=No+Image';
     const avatarUrl = getAvatarUrl(spot.username);
     const isSaved = savedSpotIds.includes(spot.id);
     const heartIcon = isSaved ? '❤️' : '♡';
-
+    // Use slug if exists, else fallback to id
+    const linkUrl = spot.slug ? `/spot?slug=${spot.slug}` : `/spot?id=${spot.id}`;
     return `
     <article class="card">
       <div class="card-media">
@@ -477,20 +426,17 @@ const grid = document.getElementById('grid');
         </div>
       </div>
       <div class="card-story">
-  <p class="story-text">${spot.story || 'No story shared.'}</p>
-  <a class="read-more" href="/spot.html?id=${spot.id}">Read more</a>
-</div>
+        <p class="story-text">${spot.story || 'No story shared.'}</p>
+        <a class="read-more" href="${linkUrl}">Read more</a>
+      </div>
     </article>`;
   }).join('');
-
   document.getElementById('grid').innerHTML = html;
 }
-
 // Navigate to profile
 function goToProfile(username) {
   if (username) window.location.href = `Profile.html?user=${username}`;
 }
-
 // Follow toggle (placeholder — you can implement later)
 async function toggleFollow(username, button) {
   if (!currentUser) {
@@ -499,7 +445,6 @@ async function toggleFollow(username, button) {
   }
   button.textContent = button.textContent === 'Follow' ? 'Following' : 'Follow';
 }
-
 // Destiny save toggle
 async function toggleDestiny(spotId, button) {
   if (!currentUser) {
@@ -512,7 +457,6 @@ async function toggleDestiny(spotId, button) {
     .eq('user_id', currentUser.id)
     .eq('spot_id', spotId)
     .maybeSingle();
-
   if (existing) {
     await sb.from('destiny_saves').delete().eq('id', existing.id);
     button.textContent = '♡';
@@ -521,10 +465,7 @@ async function toggleDestiny(spotId, button) {
     button.textContent = '❤️';
   }
 }
-
 init();
-
-
 // Make category chips stay active when clicked
 document.querySelectorAll('.category').forEach(chip => {
   chip.addEventListener('click', () => {
@@ -533,15 +474,6 @@ document.querySelectorAll('.category').forEach(chip => {
     // You can add your filter/search logic here later if needed
   });
 });
-
-
 </script>
 </body>
-
 </html>
-
-
-
-  
-
-

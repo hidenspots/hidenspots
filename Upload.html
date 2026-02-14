@@ -511,19 +511,24 @@ form.addEventListener('submit', async (e) => {
       lat: lat,
       lng: lng
     }]);
-    if (error) {
-      alert('Save failed: ' + error.message);
-    } else {
-      alert('Hidden gem uploaded successfully! 🎉\n\nRedirecting to your new spot...');
-      form.reset();
-      selectedFiles = [];
-      mediaPreview.innerHTML = '';
-      stars.forEach(s => s.classList.remove('selected'));
-      safetyInput.value = '';
-      // Redirect to clean slug URL
-      setTimeout(() => {
-       window.location.href = `/spot.html?s=${slug}`;
-      }, 1500);
+    // After successful insert
+if (error) {
+  alert('Save failed: ' + error.message);
+} else {
+  alert('Hidden gem uploaded successfully! 🎉\n\nRedirecting to your new spot...');
+
+  form.reset();
+  selectedFiles = [];
+  mediaPreview.innerHTML = '';
+  stars.forEach(s => s.classList.remove('selected'));
+  safetyInput.value = '';
+
+  // Your slug is already created earlier (furore-fjord-4e2ad257)
+  // Just redirect
+  setTimeout(() => {
+    window.location.href = `/spot.html?slug=${slug}`;
+  }, 1500);
+
     }
   } catch (err) {
     console.error(err);
@@ -533,4 +538,5 @@ form.addEventListener('submit', async (e) => {
 </script>
 </body>
 </html>
+
 

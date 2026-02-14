@@ -335,49 +335,36 @@ const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'
 // ────────────────────────────────────────────────
 // Clean & reliable slug detection for /spot/slug format
 // ────────────────────────────────────────────────
+// ────────────────────────────────────────────────
+// Support ?slug=... and ?id=... (clean path later)
+// ────────────────────────────────────────────────
 let slug = null;
 let spotId = null;
 
-// Clean path (remove trailing slash and .html if present)
-let cleanPath = window.location.pathname.replace(/\/+$/, '');
-if (cleanPath.endsWith('.html')) {
-  cleanPath = cleanPath.slice(0, -5);
-}
-const pathParts = cleanPath.split('/').filter(p => p.trim());
-
-// Detect slug if path is /spot/slug-xxx or /spot.html/slug-xxx
-if (pathParts.length >= 2 && ['spot', 'spot.html'].includes(pathParts[0].toLowerCase())) {
-  slug = pathParts[1];
-  console.log('Detected slug from path:', slug);
-}
-
-// Detect old ?id= query param
 const urlParams = new URLSearchParams(window.location.search);
+
+// Read slug from ?slug= (main method now)
+slug = urlParams.get('slug');
+if (slug) {
+  console.log('Detected slug from ?slug=:', slug);
+}
+
+// Fallback to old ?id=
 spotId = urlParams.get('id');
 if (spotId) {
-  console.log('Detected ID from query:', spotId);
+  console.log('Detected ID from ?id=:', spotId);
 }
 
-// Optional: Auto-upgrade old ?id= links to clean slug (uncomment if you want)
-// if (spotId && !slug) {
-//   (async () => {
-//     const { data } = await sb.from('spots').select('slug').eq('id', spotId).single();
-//     if (data && data.slug) {
-//       console.log('Redirecting old ID to clean slug:', data.slug);
-//       window.location.replace(`/spot/${data.slug}`);
-//     } else {
-//       loadSpot(spotId, null);
-//     }
-//   })();
-//   return; // stop here to avoid double load
+// Optional: future path-based slug (when rewrite works)
+// const pathParts = window.location.pathname.split('/').filter(p => p);
+// if (pathParts.length >= 2 && pathParts[0] === 'spot') {
+//   slug = slug || pathParts[1];
 // }
 
-// Load spot – prefer slug if present, else id
+// Load
 if (!slug && !spotId) {
-  console.log('No slug or ID detected');
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
 } else {
-  console.log('Loading spot - slug:', slug || 'none', 'id:', spotId || 'none');
   loadSpot(spotId, slug);
 }
 
@@ -585,3 +572,4 @@ window.addEventListener('load', initSwipe);
 </script>
 </body>
 </html>
+

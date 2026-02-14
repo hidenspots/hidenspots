@@ -333,11 +333,7 @@ const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'
 const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
 
 // ────────────────────────────────────────────────
-// Minimal & safe slug + id detection – keeps your original working
-// ────────────────────────────────────────────────
-// Safe slug + id detection – keeps original ?id= working
-// ────────────────────────────────────────────────
-// Safe slug + id detection – original ?id= always works
+// Clean & reliable slug detection (supports /spot/slug and /spot?id=)
 // ────────────────────────────────────────────────
 let slug = null;
 let spotId = null;
@@ -349,27 +345,44 @@ if (cleanPath.endsWith('.html')) {
 }
 const pathParts = cleanPath.split('/').filter(p => p.trim());
 
-// Detect slug if URL is /spot/slug-xxx or /spot.html/slug-xxx
+// Detect slug if path is /spot/slug-xxx or /spot.html/slug-xxx
 if (pathParts.length >= 2 && ['spot', 'spot.html'].includes(pathParts[0].toLowerCase())) {
   slug = pathParts[1];
   console.log('Detected slug from path:', slug);
 }
 
-// Always detect ?id=
+// Detect old ?id= query param
 const urlParams = new URLSearchParams(window.location.search);
 spotId = urlParams.get('id');
 if (spotId) {
   console.log('Detected ID from query:', spotId);
 }
 
+// Optional: Auto-upgrade old ?id= to clean slug (uncomment if you want)
+// if (spotId && !slug) {
+//   (async () => {
+//     const { data } = await sb.from('spots').select('slug').eq('id', spotId).single();
+//     if (data && data.slug) {
+//       console.log('Redirecting old ID to clean slug:', data.slug);
+//       window.location.replace(`/spot/${data.slug}`);
+//     } else {
+//       loadSpot(spotId, null);
+//     }
+//   })();
+//   return;
+// }
+
 // Load spot – prefer slug if present, else id
 if (!slug && !spotId) {
+  console.log('No slug or ID detected');
   document.body.innerHTML = '<h1 style="text-align:center;margin-top:100px;">No spot selected</h1>';
 } else {
+  console.log('Loading spot - slug:', slug || 'none', 'id:', spotId || 'none');
   loadSpot(spotId, slug);
 }
+
 // ────────────────────────────────────────────────
-// Your original loadSpot, renderCard, etc. – unchanged
+// Your original loadSpot and rest – unchanged
 // ────────────────────────────────────────────────
 async function loadSpot(id, slugParam) {
   let query = sb.from('spots').select('*');
@@ -572,5 +585,3 @@ window.addEventListener('load', initSwipe);
 </script>
 </body>
 </html>
-
-

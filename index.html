@@ -16,8 +16,8 @@
   <meta name="description" content="Discover hidden gems, secret places, offbeat locations, and underrated travel spots in India and worldwide. Explore solo safety, cinematic destinations, and more on Hiden Spots.">
 
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+
   <style>
-    /* === YOUR ORIGINAL STYLES (UNCHANGED) === */
     *{margin:0;padding:0;box-sizing:border-box}
     html,body{height:100%;width:100%;font-family:'Playfair Display',serif;background:#0c0f18;color:#fff;overflow-x:hidden;scroll-behavior:smooth}
     @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
@@ -31,6 +31,27 @@
     .brand svg{width:36px;height:36px;flex:0 0 36px}
     .brand span{font-size:1.5rem;letter-spacing:3px}
     .brand:hover{color:#ffd88d;transition:.35s}
+    .auth-actions{display:flex;gap:.5rem}
+    .auth-btn{
+      padding:.5rem 1rem;border-radius:999px;border:1px solid rgba(255,255,255,.25);
+      background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:.95rem;
+    }
+    .primary{background:linear-gradient(90deg,#ffd88d,#ffb347);color:#0c0f18;font-weight:600}
+    .user-menu{position:relative}
+    .avatar{
+      width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);
+      border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;
+      cursor:pointer;color:#ffd88d;font-weight:600
+    }
+    .menu-pop{
+      position:absolute;right:0;top:120%;background:#121624;border:1px solid rgba(255,255,255,.12);
+      border-radius:12px;display:none;min-width:160px;overflow:hidden;z-index:100;
+      box-shadow:0 8px 24px rgba(0,0,0,.4)
+    }
+    .menu-pop a,.menu-pop button{
+      display:block;width:100%;padding:.7rem 1rem;background:none;border:0;color:#fff;text-align:left;cursor:pointer
+    }
+    .menu-pop a:hover,.menu-pop button:hover{background:rgba(255,255,255,.08)}
     .hero{margin-top:84px;height:70vh;position:relative;overflow:hidden;border-radius:20px;margin-inline:3%;animation:fadeUp 1.2s ease-out both;}
     .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s ease-in-out;}
     .hero-slide.active{opacity:1;}
@@ -278,7 +299,6 @@
   <div class="category" data-filter="Family">Family</div>
   <div class="category" data-filter="Restaurant">Restaurant</div>
   <div class="category" data-filter="Nature">Nature</div>
-  <!-- Add more categories if needed -->
 </div>
 
 <section class="grid" id="grid"></section>
@@ -358,9 +378,7 @@ async function loadSpots() {
   }
 
   allSpots = spots;
-
-  // Show all initially
-  renderGrid(allSpots);
+  renderGrid(allSpots); // Show all initially
 }
 
 // Render grid cards
@@ -403,7 +421,7 @@ function renderGrid(spotsToShow) {
   grid.innerHTML = html;
 }
 
-// Filter on chip click
+// Category filter
 categoryChips.addEventListener('click', (e) => {
   const chip = e.target.closest('.category');
   if (!chip) return;
@@ -424,7 +442,7 @@ categoryChips.addEventListener('click', (e) => {
   }
 });
 
-// Follow functionality
+// Follow toggle
 async function toggleFollow(username, button) {
   if (!currentUser) {
     alert('Please login to follow users');
@@ -439,7 +457,7 @@ async function toggleFollow(username, button) {
       await sb.from('follows')
         .delete()
         .eq('follower_id', currentUser.id)
-        .eq('following_id', username); // assuming username is used as identifier – adjust if needed
+        .eq('following_id', username);
       button.textContent = 'Follow';
       button.classList.remove('following');
     } else {
@@ -457,16 +475,27 @@ async function toggleFollow(username, button) {
   }
 }
 
-// Rest of your original scripts (loadHeroSlides, renderHero, init, loadSpots, etc.) go here...
-// ... paste the rest of your script from the previous Mainhome.html code ...
+// Avatar helper
+function getAvatarUrl(username) {
+  if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=80';
+  return `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/file/avatars/${username}-avatar.jpg`;
+}
 
+// Rest of your original code (hero slideshow, init, loadSpots, etc.) remains here
+// Paste your original hero slideshow + init code below this line
 // For example:
-async function loadHeroSlides() { /* your original code */ }
-function renderHero(i) { /* your original code */ }
-// etc.
+const slideEls = document.querySelectorAll('.hero-slide');
+const themeEl = document.getElementById('heroTheme');
+const titleEl = document.getElementById('heroTitle');
+const subEl = document.getElementById('heroSub');
+const ctaBtn = document.getElementById('heroCta');
+let heroSpots = [];
+let heroIdx = 0;
 
+// ... your original loadHeroSlides, renderHero, init, loadSpots, toggleDestiny, goToProfile functions ...
+
+// Call init at the end
 init();
-
 </script>
 </body>
 </html>

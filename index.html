@@ -250,6 +250,26 @@ header{
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
 }
+  .backdrop{
+  position:fixed;inset:0;display:none;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(6px);
+  align-items:center;justify-content:center;z-index:50
+}
+.auth{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:1.2rem;
+  width:320px
+}
+.auth input{
+  width:100%;margin:.4rem 0;padding:.6rem;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--border);
+  border-radius:8px;color:#fff
+}
+.error{color:#ff9a9a;font-size:.9rem}
 </style>
 </head>
 <body>
@@ -263,6 +283,19 @@ header{
     </svg>
     <span>Hiden Spots</span>
   </a>
+  <div class="auth-actions" id="authActions">
+    <button id="openLogin">Login</button>
+    <button class="primary" id="openSignup">Signup</button>
+  </div>
+
+  <div class="user-menu" id="userMenu" style="display:none">
+    <div class="avatar" id="avatarBtn">U</div>
+    <div class="menu-pop" id="menuPop">
+      <a href="about.html">About</a>
+    
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </div>
 </header>
 <!-- HERO -->
 <section class="hero" id="hero">
@@ -488,6 +521,7 @@ document.querySelectorAll('.category').forEach(chip => {
 </script>
 </body>
 </html>
+
 
 
 

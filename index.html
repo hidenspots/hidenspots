@@ -18,7 +18,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
-    /* === YOUR ORIGINAL STYLES – UNCHANGED === */
     *{margin:0;padding:0;box-sizing:border-box}
     html,body{height:100%;width:100%;font-family:'Playfair Display',serif;background:#0c0f18;color:#fff;overflow-x:hidden;scroll-behavior:smooth}
     @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
@@ -50,6 +49,7 @@
     .category{padding:0.6rem 1.4rem;border-radius:30px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);white-space:nowrap;font-size:0.98rem;cursor:pointer;transition:all 0.3s ease;color:#fff;opacity:0.9;}
     .category:hover{background:rgba(255,255,255,.15);transform:scale(1.05);box-shadow:0 0 15px rgba(255,216,141,.3);}
     .category.active{background:linear-gradient(90deg,#ffd88d,#19547b);color:#0c0f18;font-weight:600;transform:scale(1.08);box-shadow:0 0 20px rgba(255,216,141,.5);border-color:transparent;}
+    .filters-section{margin-top:1rem;padding:0 2.5rem;display:flex;gap:1rem;flex-wrap:wrap;}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2rem;padding:2rem 2rem 8rem 2rem;}
     .card{background:#141824;border-radius:20px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,.35);animation:fadeUp .8s ease both;margin-bottom:1rem;transition:transform 0.3s ease,box-shadow 0.3s ease;}
     .card:hover{transform:translateY(-10px);box-shadow:0 20px 50px rgba(0,0,0,.5);}
@@ -94,84 +94,98 @@
     .skeleton-username{width:100px;height:16px;background:#22273a;border-radius:4px;}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
+    .backdrop{position:fixed;inset:0;display:none;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);align-items:center;justify-content:center;z-index:50}
+    .auth{background:#121624;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:1.2rem;width:320px}
+    .auth input{width:100%;margin:.4rem 0;padding:.6rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff}
+    .error{color:#ff9a9a;font-size:.9rem}
   </style>
 </head>
 <body>
+  <!-- Header -->
+  <header>
+    <a href="index.html" class="brand">
+      <svg width="34" viewBox="0 0 48 48">
+        <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+        <path d="M24 10 L28 24 L24 38 L20 24 Z" fill="rgba(255,216,155,0.9)"/>
+        <circle cx="24" cy="24" r="2.6" fill="#fff"/>
+      </svg>
+      <span>Hiden Spots</span>
+    </a>
 
-<header>
-  <a href="index.html" class="brand">
-    <svg width="34" viewBox="0 0 48 48">
-      <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
-      <path d="M24 10 L28 24 L24 38 L20 24 Z" fill="rgba(255,216,155,0.9)"/>
-      <circle cx="24" cy="24" r="2.6" fill="#fff"/>
-    </svg>
-    <span>Hiden Spots</span>
-  </a>
-
-  <div class="auth-actions" id="authActions">
-    <button class="auth-btn" id="openLogin">Login</button>
-    <button class="auth-btn primary" id="openSignup">Signup</button>
-  </div>
-
-  <div class="user-menu" id="userMenu" style="display:none">
-    <div class="avatar" id="avatarBtn">U</div>
-    <div class="menu-pop" id="menuPop">
-      <a href="about.html">About</a>
-      <button id="logoutBtn">Logout</button>
+    <div class="auth-actions" id="authActions">
+      <button class="auth-btn" id="openLogin">Login</button>
+      <button class="auth-btn primary" id="openSignup">Signup</button>
     </div>
+
+    <div class="user-menu" id="userMenu" style="display:none">
+      <div class="avatar" id="avatarBtn">U</div>
+      <div class="menu-pop" id="menuPop">
+        <a href="about.html">About</a>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-slide active"></div>
+    <div class="hero-slide"></div>
+    <div class="hero-slide"></div>
+    <div class="hero-slide"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-text">
+      <div class="hero-kicker" id="heroTheme"></div>
+      <h1 class="hero-title" id="heroTitle"></h1>
+      <p class="hero-sub" id="heroSub"></p>
+      <button class="hero-cta" id="heroCta">View Location</button>
+    </div>
+  </section>
+
+  <!-- Categories (for travelers) -->
+  <div class="categories" id="categoryChips">
+    <div class="category active" data-filter="all" data-type="category">All</div>
+    <div class="category" data-filter="Adventure" data-type="category">Adventure</div>
+    <div class="category" data-filter="Spiritual" data-type="category">Spiritual</div>
+    <div class="category" data-filter="Solo" data-type="category">Solo</div>
+    <div class="category" data-filter="Nature" data-type="category">Nature</div>
+    <div class="category" data-filter="Family" data-type="category">Family</div>
   </div>
-</header>
 
-<section class="hero" id="hero">
-  <div class="hero-slide active"></div>
-  <div class="hero-slide"></div>
-  <div class="hero-slide"></div>
-  <div class="hero-slide"></div>
-  <div class="hero-overlay"></div>
-  <div class="hero-text">
-    <div class="hero-kicker" id="heroTheme"></div>
-    <h1 class="hero-title" id="heroTitle"></h1>
-    <p class="hero-sub" id="heroSub"></p>
-    <button class="hero-cta" id="heroCta">View Location</button>
+  <!-- Emotions (important for travelers) -->
+  <div class="categories" id="emotionChips" style="margin-top:0.5rem;">
+    <div class="category" data-filter="Peaceful" data-type="emotion">Peaceful</div>
+    <div class="category" data-filter="Romantic" data-type="emotion">Romantic</div>
+    <div class="category" data-filter="Relaxation" data-type="emotion">Relaxation</div>
+    <div class="category" data-filter="Energetic" data-type="emotion">Energetic</div>
   </div>
-</section>
 
-<div class="categories" id="categoryChips">
-  <div class="category active" data-filter="all">All</div>
-  <div class="category" data-filter="Adventure">Adventure</div>
-  <div class="category" data-filter="Spiritual">Spiritual</div>
-  <div class="category" data-filter="Historical">Historical</div>
-  <div class="category" data-filter="Horror">Horror</div>
-  <div class="category" data-filter="Solo">Solo</div>
-  <div class="category" data-filter="Family">Family</div>
-  <div class="category" data-filter="Restaurant">Restaurant</div>
-  <div class="category" data-filter="Nature">Nature</div>
-</div>
+  <!-- Grid -->
+  <section class="grid" id="grid"></section>
 
-<section class="grid" id="grid"></section>
+  <!-- Floating Add -->
+  <button class="floating-btn" onclick="window.location.href='Upload.html'" title="Add Destination">+</button>
 
-<button class="floating-btn" onclick="window.location.href='Upload.html'" title="Add Destination">+</button>
-
-<nav class="nav-bar" aria-label="Primary">
-  <a href="index.html" class="nav-icon" title="Home" aria-label="Home">
-    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-  </a>
-  <a href="Search.html" class="nav-icon" title="Search" aria-label="Search">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-  </a>
-  <a href="Upload.html" class="nav-icon" title="Create" aria-label="Create">
-    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  </a>
-  <a href="Explore.html" class="nav-icon" title="Destiny List" aria-label="Destiny List">
-    <svg viewBox="0 0 24 24">
-      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-      <circle cx="12" cy="9" r="2.5" fill="none"/>
-      <path d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z" fill="currentColor"/>
-    </svg>
-  </a>
-  <a href="Profile.html" class="nav-icon" title="Profile" aria-label="Profile">
-    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-  </a>
+  <!-- Nav Bar -->
+  <nav class="nav-bar" aria-label="Primary">
+    <a href="index.html" class="nav-icon" title="Home" aria-label="Home">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </a>
+    <a href="Search.html" class="nav-icon" title="Search" aria-label="Search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </a>
+    <a href="Upload.html" class="nav-icon" title="Create" aria-label="Create">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </a>
+    <a href="Explore.html" class="nav-icon" title="Destiny List" aria-label="Destiny List">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+        <circle cx="12" cy="9" r="2.5" fill="none"/>
+        <path d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z" fill="currentColor"/>
+      </svg>
+    </a>
+    <a href="Profile.html" class="nav-icon" title="Profile" aria-label="Profile">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </a>
 </nav>
 
 <!-- Auth Modal -->
@@ -198,12 +212,13 @@ const sb = supabase.createClient(
 );
 
 // ────────────────────────────────────────────────
-// GLOBAL VARIABLES
+ // GLOBAL VARIABLES
 // ────────────────────────────────────────────────
 let currentUser = null;
 let allSpots = [];
 const grid = document.getElementById('grid');
 const categoryChips = document.getElementById('categoryChips');
+const emotionChips = document.getElementById('emotionChips');
 
 // Auth elements
 const authActions = document.getElementById('authActions');
@@ -233,15 +248,7 @@ let heroSpots = [];
 let heroIdx = 0;
 
 // ────────────────────────────────────────────────
-// AVATAR HELPER
-// ────────────────────────────────────────────────
-function getAvatarUrl(username) {
-  if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=80';
-  return `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/file/avatars/${username}-avatar.jpg`;
-}
-
-// ────────────────────────────────────────────────
-// AUTH UI & LOGIC
+ // AUTH UI & LOGIC
 // ────────────────────────────────────────────────
 function updateUI(session) {
   currentUser = session?.user ?? null;
@@ -326,55 +333,15 @@ sb.auth.onAuthStateChange((_, session) => {
 sb.auth.getSession().then(({ data }) => updateUI(data.session));
 
 // ────────────────────────────────────────────────
-// HERO SLIDESHOW
+// AVATAR HELPER
 // ────────────────────────────────────────────────
-async function loadHeroSlides() {
-  try {
-    const { data: spots, error } = await sb
-      .from('spots')
-      .select('id, name, place, city, story, media_urls, media_url, category_id, slug')
-      .order('created_at', { ascending: false })
-      .limit(12);
-
-    if (error) throw error;
-    if (!spots?.length) return;
-
-    heroSpots = spots.sort(() => 0.5 - Math.random()).slice(0, 4);
-
-    heroSpots.forEach((spot, i) => {
-      const firstMedia = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/1200x800/141824/FFD88D?text=No+Image';
-      slideEls[i].style.backgroundImage = `url('${firstMedia}')`;
-    });
-
-    renderHero(0);
-  } catch (err) {
-    console.error('Hero load error:', err);
-  }
+function getAvatarUrl(username) {
+  if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=80';
+  return `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/file/avatars/${username}-avatar.jpg`;
 }
 
-function renderHero(i) {
-  const spot = heroSpots[i];
-  if (!spot) return;
-
-  slideEls.forEach(s => s.classList.remove('active'));
-  slideEls[i].classList.add('active');
-
-  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'};
-  themeEl.textContent = categoryNames[spot.category_id] || 'Hidden Gem';
-  titleEl.textContent = spot.name;
-  subEl.textContent = spot.story?.slice(0, 120) + '...' || 'Discover this hidden place...';
-
-  const linkUrl = spot.slug ? `/spot?slug=${spot.slug}` : `/spot?id=${spot.id}`;
-  ctaBtn.onclick = () => window.location.href = linkUrl;
-}
-
-setInterval(() => {
-  heroIdx = (heroIdx + 1) % heroSpots.length;
-  renderHero(heroIdx);
-}, 5200);
-
 // ────────────────────────────────────────────────
-// SPOTS GRID + FILTERS + FOLLOW
+ // LOAD SPOTS
 // ────────────────────────────────────────────────
 async function loadSpots() {
   grid.innerHTML = `
@@ -403,12 +370,38 @@ async function loadSpots() {
   }
 }
 
-function renderGrid(spotsToShow) {
+// ────────────────────────────────────────────────
+// RENDER GRID
+// ────────────────────────────────────────────────
+async function renderGrid(spotsToShow) {
   const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'};
+  const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
+
+  // Get saved spots and follows if logged in
+  let savedSpotIds = [];
+  let followedUsers = [];
+  if (currentUser) {
+    const { data: saves } = await sb
+      .from('destiny_saves')
+      .select('spot_id')
+      .eq('user_id', currentUser.id);
+    savedSpotIds = saves ? saves.map(s => s.spot_id) : [];
+
+    const { data: follows } = await sb
+      .from('follows')
+      .select('following_id')
+      .eq('follower_id', currentUser.id);
+    followedUsers = follows ? follows.map(f => f.following_id) : [];
+  }
 
   const html = spotsToShow.map(spot => {
     const firstImage = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/300x220/141824/FFD88D?text=No+Image';
+    const isSaved = savedSpotIds.includes(spot.id);
+    const heartIcon = isSaved ? '❤️' : '♡';
     const linkUrl = spot.slug ? `/spot?slug=${spot.slug}` : `/spot?id=${spot.id}`;
+    const isFollowing = followedUsers.includes(spot.username);
+    const followText = isFollowing ? 'Following' : 'Follow';
+    const followClass = isFollowing ? 'following' : '';
 
     return `
     <article class="card">
@@ -428,8 +421,8 @@ function renderGrid(spotsToShow) {
           <span class="username" onclick="goToProfile('${spot.username}')">@${spot.username || 'traveller'}</span>
         </div>
         <div class="meta-right">
-          <button class="follow" data-username="${spot.username}" onclick="toggleFollow('${spot.username}', this)">Follow</button>
-          <div class="heart" onclick="toggleDestiny('${spot.id}', this)">♡</div>
+          <button class="follow ${followClass}" onclick="toggleFollow('${spot.username}', this)">${followText}</button>
+          <div class="heart ${isSaved ? 'active' : ''}" onclick="toggleDestiny('${spot.id}', this)">${heartIcon}</div>
         </div>
       </div>
       <div class="card-story">
@@ -442,31 +435,47 @@ function renderGrid(spotsToShow) {
   grid.innerHTML = html;
 }
 
-// Filter logic
-categoryChips.addEventListener('click', (e) => {
-  const chip = e.target.closest('.category');
-  if (!chip) return;
+// ────────────────────────────────────────────────
+// FILTER LOGIC
+// ────────────────────────────────────────────────
+function setupFilters() {
+  const allChips = [...categoryChips.querySelectorAll('.category'), ...emotionChips.querySelectorAll('.category')];
 
-  document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
-  chip.classList.add('active');
+  allChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      allChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
 
-  const filter = chip.dataset.filter;
+      const filter = chip.dataset.filter;
+      const type = chip.dataset.type;
 
-  if (filter === 'all') {
-    renderGrid(allSpots);
-  } else {
-    const filtered = allSpots.filter(spot => {
-      const catName = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'}[spot.category_id];
-      return catName === filter;
+      if (filter === 'all') {
+        renderGrid(allSpots);
+        return;
+      }
+
+      const filtered = allSpots.filter(spot => {
+        if (type === 'category') {
+          const catName = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'}[spot.category_id];
+          return catName === filter;
+        } else { // emotion
+          const emotionName = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'}[spot.emotion_id];
+          return emotionName === filter;
+        }
+      });
+
+      renderGrid(filtered);
     });
-    renderGrid(filtered);
-  }
-});
+  });
+}
 
-// Follow toggle
+// ────────────────────────────────────────────────
+// FOLLOW TOGGLE
+// ────────────────────────────────────────────────
 async function toggleFollow(username, button) {
   if (!currentUser) {
-    alert('Please login to follow users');
+    authError.textContent = 'Please login to follow users';
+    openLogin.click();
     return;
   }
 
@@ -474,52 +483,56 @@ async function toggleFollow(username, button) {
 
   try {
     if (isFollowing) {
-      await sb.from('follows')
-        .delete()
-        .eq('follower_id', currentUser.id)
-        .eq('following_id', username);
+      await sb.from('follows').delete().eq('follower_id', currentUser.id).eq('following_id', username);
       button.textContent = 'Follow';
       button.classList.remove('following');
     } else {
-      await sb.from('follows').insert({
-        follower_id: currentUser.id,
-        following_id: username
-      });
+      await sb.from('follows').insert({ follower_id: currentUser.id, following_id: username });
       button.textContent = 'Following';
       button.classList.add('following');
     }
   } catch (err) {
     console.error('Follow error:', err);
-    alert('Failed to update follow status. Try again.');
+    authError.textContent = 'Failed to update follow status. Try again.';
   }
 }
 
-// Placeholder functions (add your real logic if needed)
+// ────────────────────────────────────────────────
+// OTHER FUNCTIONS
+// ────────────────────────────────────────────────
 function goToProfile(username) {
   if (username) window.location.href = `Profile.html?user=${username}`;
 }
 
-function toggleDestiny(spotId, button) {
-  alert('Destiny save feature coming soon!');
-  // Your real destiny toggle code here
-}
-
-// ────────────────────────────────────────────────
-// INITIALIZATION – MUST BE LAST
-// ────────────────────────────────────────────────
-async function init() {
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    updateUI(session);
-
-    await loadHeroSlides();
-    await loadSpots();
-  } catch (err) {
-    console.error('Initialization failed:', err);
+async function toggleDestiny(spotId, button) {
+  if (!currentUser) {
+    alert('Login required');
+    return;
+  }
+  const isSaved = button.classList.contains('active');
+  if (isSaved) {
+    const { data: existing } = await sb.from('destiny_saves').select('id').eq('user_id', currentUser.id).eq('spot_id', spotId).maybeSingle();
+    if (existing) {
+      await sb.from('destiny_saves').delete().eq('id', existing.id);
+    }
+    button.textContent = '♡';
+    button.classList.remove('active');
+  } else {
+    await sb.from('destiny_saves').insert({ user_id: currentUser.id, spot_id: spotId });
+    button.textContent = '❤️';
+    button.classList.add('active');
   }
 }
 
-// Run init when page is ready
+// ────────────────────────────────────────────────
+// INITIALIZATION
+// ────────────────────────────────────────────────
+async function init() {
+  await loadSpots();
+  await loadHeroSlides();
+  setupFilters();
+}
+
 document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>

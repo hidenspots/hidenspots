@@ -23,473 +23,471 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500&display=swap" rel="stylesheet">
 
+
 <style>
-:root{
-  --bg:#0b0f19; --panel:#121624; --glass:rgba(255,255,255,.06);
-  --border:rgba(255,255,255,.12); --gold:#FFD88D; --teal:#19547B;
-}
 *{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:'Playfair Display',serif;
-  background:var(--bg);
-  color:#fff;
-  overflow-x:hidden;
+html,body{height:100%;width:100%;font-family:'Playfair Display',serif;background:#0c0f18;color:#fff;overflow-x:hidden;scroll-behavior:smooth}
+/* Anim */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+/* HEADER */
+header{
+  position:fixed;top:0;left:0;width:100%;z-index:50;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1.1rem 3rem;background:rgba(10,12,20,.3);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.1);
 }
-
-
-/* Background */
-.image-background{position:fixed;inset:0}
-.background-image{
-  position:absolute;inset:0;background-size:cover;background-position:center;
-  opacity:0;transition:opacity 1.5s
+.brand{display:flex;align-items:center;gap:.7rem;color:#fff;text-decoration:none}
+.brand svg{width:36px;height:36px;flex:0 0 36px}
+.brand span{font-size:1.5rem;letter-spacing:3px}
+.brand:hover{color:#ffd88d;transition:.35s}
+/* HERO with themed frames */
+.hero{margin-top:84px;height:70vh;position:relative;overflow:hidden;border-radius:20px;margin-inline:3%;animation:fadeUp 1.2s ease-out both;}
+.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s ease-in-out;}
+.hero-slide.active{opacity:1;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(12,15,25,.9) 0%,rgba(12,15,25,.4) 60%,transparent 100%);z-index:1;}
+.hero-text{position:absolute;bottom:2.6rem;left:2.6rem;z-index:2;max-width:560px}
+.hero-kicker{font-size:.9rem;letter-spacing:2px;opacity:.85;text-transform:uppercase;margin-bottom:.35rem}
+.hero-title{font-size:2.4rem;margin-bottom:.6rem;color:#ffd88d;line-height:1.15}
+.hero-sub{opacity:.9;font-size:1.06rem;line-height:1.5}
+.hero-cta{margin-top:1rem;padding:.6rem 1.5rem;font-size:1rem;border:none;border-radius:40px;background:linear-gradient(90deg,#ffd88d,#ffb347);color:#0c0f18;font-weight:600;cursor:pointer;transition:.28s;}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 0 10px rgba(255,216,141,.4)}
+/* CATEGORY RIBBON */
+.categories{display:flex;overflow-x:auto;gap:1rem;padding:1.1rem 2.5rem;margin-top:1rem;scrollbar-width:none;}
+.categories::-webkit-scrollbar{display:none;}
+.category {
+  padding: 0.6rem 1.4rem;
+  border-radius: 30px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  white-space: nowrap;
+  font-size: 0.98rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #fff;
+  opacity: 0.9;
 }
-.background-image.active{opacity:1}
-.image-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45)}
-
-/* Header */
-.header{
-  position:relative;z-index:10;
-  padding:1rem 1.5rem;
-  display:flex;justify-content:space-between;align-items:center
+.category:hover {
+  background: rgba(255,255,255,.15);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255,216,141,.3);
 }
-.logo{display:flex;align-items:center;gap:.8rem;text-decoration:none;color:#fff}
-  .logo svg{width:44px;height:44px;transition:.4s}
-  .logo svg:hover{filter:drop-shadow(0 0 10px rgba(255,216,155,.5))}
-.auth-actions{display:flex;gap:.5rem}
-button{
-  cursor:pointer;border-radius:999px;
-  padding:.5rem 1rem;border:1px solid var(--border);
-  background:var(--glass);color:#fff
+.category.active {
+  background: linear-gradient(90deg, #ffd88d, #19547b);
+  color: #0c0f18;
+  font-weight: 600;
+  transform: scale(1.08); /* Slightly bigger when active */
+  box-shadow: 0 0 20px rgba(255,216,141,.5); /* Nice glow */
+  border-color: transparent;
 }
-.primary{background:linear-gradient(90deg,var(--gold),var(--teal));color:#000}
-
-/* User menu */
-.user-menu{position:relative}
-.avatar{
-  width:36px;height:36px;border-radius:50%;
-  background:var(--glass);border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem; /* Increased horizontal/vertical gap between cards */
+  padding: 2rem 2rem 8rem 2rem; /* More top/bottom padding, especially bottom to clear nav */
 }
-.menu-pop{
-  position:absolute;right:0;top:120%;
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  display:none;min-width:180px;overflow:hidden
+.card {
+  background: #141824;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0,0,0,.35);
+  animation: fadeUp .8s ease both;
+  margin-bottom: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.menu-pop a,.menu-pop button{
-  display:block;width:100%;padding:.7rem .9rem;
-  background:none;border:0;color:#fff;text-align:left
+.card:hover {
+  transform: translateY(-10px); /* Lifts the card up 10px */
+  box-shadow: 0 20px 50px rgba(0,0,0,.5); /* Stronger shadow + glow */
 }
-
- .center-content{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 2rem;animation:fu 1.2s ease-out .1s both}
-  @keyframes fu{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-
-.menu-pop a:hover,.menu-pop button:hover{background:rgba(255,255,255,.08)}
- .explore-text{
-    font-size:clamp(2rem,6vw,6rem);
-    font-weight:300; letter-spacing:4px;
-    line-height:1.1;
-    margin-bottom:1.25rem;
-    color:rgba(255,255,255,.95)
-  }
-  .animated-words{
-    height:clamp(2.5rem,7vw,7rem);
-    display:flex; align-items:center; justify-content:center;
-    position:relative;
-    margin-top:.15rem;
-    margin-bottom:2rem;
-  }
-  .word{
-    position:absolute;
-    font-size:clamp(1.8rem,5vw,5rem);
-    font-weight:400;
-    letter-spacing:1px;
-    white-space:nowrap;
-    background:linear-gradient(135deg,var(--gold),var(--teal));
-    -webkit-background-clip:text; background-clip:text;
-    -webkit-text-fill-color:transparent;
-    opacity:0; transform:translateY(30px);
-    animation:w 15s infinite;
-  }
-  .word:nth-child(1){animation-delay:0s}
-  .word:nth-child(2){animation-delay:3s}
-  .word:nth-child(3){animation-delay:6s}
-  .word:nth-child(4){animation-delay:9s}
-  .word:nth-child(5){animation-delay:12s}
-  @keyframes w{
-    0%,100%{opacity:0;transform:translateY(30px) scale(.95)}
-    5%,15% {opacity:1;transform:translateY(0) scale(1)}
-    20%,100%{opacity:0;transform:translateY(-30px) scale(.95)}
-  }
-  .tagline{font-size:1.15rem; font-style:italic; opacity:.85; margin-top:1rem;}
-  
-  .bottom-section{padding:0 1.6rem 2rem;display:flex;justify-content:flex-start;align-items:flex-end;animation:fu 1.2s ease-out .2s both}
-  .bottom-left{display:flex;flex-direction:column;gap:1rem}
-  .country-label{font-size:.95rem;text-transform:uppercase;opacity:.85;letter-spacing:1.5px}
-  .stats-grid{display:grid;grid-template-columns:repeat(2,auto);column-gap:3rem;row-gap:.8rem}
-  .stat-item{font-size:.9rem;opacity:.78;display:flex;align-items:center;gap:.5rem}
- /* Nav bar */
-  .nav-bar{
-  background:rgba(255,255,255,.05);
-  backdrop-filter:blur(25px);
-  border-radius:60px;
-  padding:1rem 2.5rem;
-  border:1px solid rgba(255,255,255,.12);
-
-  position:fixed;
-  left:50%;
-  bottom: calc(1.5rem + env(safe-area-inset-bottom));
-  transform:translateX(-50%);
-
-  display:flex;
-  gap:3rem;
-  box-shadow:0 8px 30px rgba(0,0,0,.25);
-  z-index:30;
+.card:hover .card-media img {
+  transform: scale(1.08); /* Subtle zoom on image */
 }
-  
-  .nav-icon{color:rgba(255,255,255,.7);transition:.4s}
-  .nav-icon:hover{color:var(--gold);transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
-  .nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
-
-  @media (prefers-reduced-motion: reduce){
-    .word{animation:none;opacity:1;position:static;display:block;margin:.15rem 0}
-    .animated-words{height:auto}
-  }
-  @media (max-width:768px){
-    .header{padding:1rem 1.2rem}
-    .bottom-section{padding:0 1.2rem 1.6rem}
-    .nav-bar{gap:2rem;padding:.9rem 1.6rem}
-    .stats-grid{column-gap:1.5rem}
-    .word{font-size:clamp(1.6rem,5.2vw,3.2rem)}
-  }
-/* Auth modal */
-.backdrop{
-  position:fixed;inset:0;display:none;
-  background:rgba(0,0,0,.55);
-  backdrop-filter:blur(6px);
-  align-items:center;justify-content:center;z-index:50
+.card-media{position:relative;height:220px;overflow:hidden;}
+.card-media img{width:100%;height:100%;object-fit:cover;transition:0.4s ease;}
+.card-media:hover img{transform:scale(1.05);filter:brightness(.85);}
+.card-badge{position:absolute;left:.75rem;bottom:.75rem;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);padding:.28rem .55rem;border-radius:20px;font-size:.8rem;letter-spacing:.5px;border:1px solid rgba(255,255,255,.12);color:#ffd88d}
+.card-info{padding:1.2rem 1.2rem 0.8rem;border-top:1px solid rgba(255,255,255,.06);}
+.card-title{font-size: 1.1rem;
+  margin-bottom: 0.4rem;
+  color:#ffd88d;}
+.card-sub{font-size: 0.95rem;
+  opacity: 0.85;}
+/* Meta row */
+.card-meta{display:flex;align-items:center;justify-content:space-between;padding: 0.8rem 1.2rem;
+  gap: 0.8rem;border-top:1px solid rgba(255,255,255,.06);}
+.meta-left{display:flex;align-items:center;gap:.6rem;}
+.avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.2)}
+.username{font-size:.9rem;opacity:.9;cursor:pointer;color:#ffd88d} /* Made clickable */
+.username:hover{text-decoration:underline}
+/* Added hover for username */
+.meta-right{display:flex;align-items:center;gap:.5rem;}
+.follow {
+  padding: 0.45rem 1.2rem; /* Bigger tap area */
+  border-radius: 30px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  font-size: 0.95rem; /* Slightly larger text */
+  font-weight: 500; /* Bolder */
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
-.auth{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:1.2rem;
-  width:320px
+.follow:hover,
+.follow:active {
+  background: linear-gradient(90deg, #ffd88d, #ffb347);
+  color: #0c0f18;
+  border-color: transparent;
+  transform: scale(1.05); /* Subtle grow on hover/tap */
 }
-.auth input{
-  width:100%;margin:.4rem 0;padding:.6rem;
-  background:rgba(255,255,255,.06);
-  border:1px solid var(--border);
-  border-radius:8px;color:#fff
+.menu{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);cursor:pointer}
+.menu:after{content:"⋯";font-size:18px;line-height:0;opacity:.85}
+.heart {
+  font-size: 28px; /* Much bigger – easier to tap */
+  cursor: pointer;
+  transition: transform 0.3s ease, color 0.3s ease;
+  color: rgba(255,255,255,.7); /* Inactive state */
 }
-.error{color:#ff9a9a;font-size:.9rem}
+.heart.active { /* We'll add .active class in JS later if needed */
+  color: #ff4d4d; /* Bright red when saved */
+  transform: scale(1.2); /* Slight pop */
+}
+.heart:hover,
+.heart:active {
+  transform: scale(1.3); /* Grow on hover/tap */
+}
+/* Story snippet */
+.card-story{padding: 0 1.2rem 1.2rem;}
+.story-text {
+  font-size: 0.98rem; /* Slightly larger – much easier to read */
+  line-height: 1.65; /* More breathing room between lines */
+  opacity: 0.92; /* Slightly better contrast */
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Show 3 lines instead of 2 – more story visible */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 0.8rem; /* Extra space before Read more */
+  padding: 0 0.4rem; /* Tiny left/right padding for clean alignment */
+}
+.read-more {
+  display: inline-block;
+  margin-top: 0.8rem;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.92rem;
+  color: #ffd88d;
+  background: rgba(255,216,141,0.12);
+  border: 1px solid rgba(255,216,141,0.3);
+  border-radius: 30px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.read-more:hover,
+.read-more:focus {
+  background: rgba(255,216,141,0.25);
+  transform: translateY(-2px);
+}
+/* FLOAT + NAV */
+.floating-btn{position:fixed;bottom:100px;right:50px;background:linear-gradient(135deg,#ffd88d,#ffb347);border:none;border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#0c0f18;cursor:pointer;box-shadow:0 0 15px rgba(255,216,141,.4);transition:.4s;z-index:60}
+.floating-btn:hover{transform:scale(1.05) rotate(10deg)}
+.nav-bar{background:rgba(255,255,255,.05);backdrop-filter:blur(25px);border-radius:60px;padding:1rem 2.5rem;border:1px solid rgba(255,255,255,.12);position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;gap:3rem;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:80}
+.nav-icon{color:rgba(255,255,255,.7);transition:.4s}
+.nav-icon:hover{color:#FFD88D;transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
+.nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
+@media(max-width:900px){
+  .hero{height:58vh}
+  .hero-title{font-size:2rem}
+  .hero-sub{font-size:1rem}
+}
+@media(max-width:768px){
+  header{padding:1rem 1.5rem}
+  .hero-text{left:1.2rem;right:1.2rem}
+  .grid{padding:1rem 1rem 6.5rem}
+  .floating-btn{bottom:90px;right:22px}
+  .nav-bar{gap:2rem;padding:.9rem 1.6rem}
+}
+/* Skeleton loading placeholders */
+.skeleton-card {
+  background: #141824;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0,0,0,.35);
+  height: 420px; /* Approx card height – adjust if needed */
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.skeleton-media {
+  height: 240px;
+  background: linear-gradient(90deg, #1a1f2e 0%, #22273a 50%, #1a1f2e 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
+.skeleton-text {
+  height: 20px;
+  margin: 1rem 1.2rem;
+  background: #22273a;
+  border-radius: 4px;
+}
+.skeleton-meta {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 1.2rem 1rem;
+}
+.skeleton-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #22273a;
+}
+.skeleton-username {
+  width: 100px;
+  height: 16px;
+  background: #22273a;
+  border-radius: 4px;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
 </style>
 </head>
-
 <body>
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NQC9N5CZ"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-<!-- BACKGROUND -->
-<div class="image-background">
-  <div class="background-image active"></div>
-  <div class="background-image"></div>
-  <div class="background-image"></div>
-  <div class="background-image"></div>
-  <div class="background-image"></div>
-  <div class="image-overlay"></div>
-</div>
-
-<header class="header">
-    
-  <a class="logo" href="#home" aria-label="Hiden Spots Home">
-      <svg viewBox="0 0 48 48" aria-hidden="true">
-        <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"/>
-        <path d="M24 10 L28 24 L24 38 L20 24 Z" fill="rgba(255,216,155,0.85)"/>
-        <circle cx="24" cy="24" r="2.6" fill="#ffffff"/>
-      </svg>
-      <span style="letter-spacing:6px">Hiden Spots</span>
-    </a>
-
-
-  <div class="auth-actions" id="authActions">
-    <button id="openLogin">Login</button>
-    <button class="primary" id="openSignup">Signup</button>
-  </div>
-
-  <div class="user-menu" id="userMenu" style="display:none">
-    <div class="avatar" id="avatarBtn">U</div>
-    <div class="menu-pop" id="menuPop">
-      <a href="about.html">About</a>
-    
-      <button id="logoutBtn">Logout</button>
-    </div>
-  </div>
-  
+<!-- Header with compass + Paledius -->
+<header>
+  <a href="index.html" class="brand">
+    <svg width="34" viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+      <path d="M24 10 L28 24 L24 38 L20 24 Z" fill="rgba(255,216,155,0.9)"/>
+      <circle cx="24" cy="24" r="2.6" fill="#fff"/>
+    </svg>
+    <span>Hiden Spots</span>
+  </a>
 </header>
-<div class="main-container">
-    <main class="center-content">
-<h1 class="explore-text">Explore :</h1>
-    <div class="animated-words" aria-live="polite">
-      <span class="word">Hidden Gems</span>
-      <span class="word">New Destinies</span>
-      <span class="word">Untold Journeys</span>
-      <span class="word">Unknown Horizons</span>
-      <span class="word">And Beyond…</span>
-    </div>
-    <p class="tagline">“Because not all destinations are on the map.”</p>
-    </main>
-       <div class="bottom-section">
-      <div class="bottom-left">
-        <div class="country-label">🇮🇳 World’s First Hidden Places Exploring Site</div>
-        <div class="stats-grid" role="list">
-          <div class="stat-item" role="listitem">🧭 200,000+ Travelers</div>
-          <div class="stat-item" role="listitem">🌄 100+ Hidden Destinies</div>
-          <div class="stat-item" role="listitem">🗺️ 10,000+ Places Discovered</div>
-          <div class="stat-item" role="listitem">🌍 Growing Every Day</div>
-        </div>
-      </div>
-       </div>
-      <nav class="nav-bar" aria-label="Primary">
-      <a href="Mainhome.html" class="nav-icon" title="Home" aria-label="Home">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </a>
-      <a href="Search.html" class="nav-icon" title="Search" aria-label="Search">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      </a>
-      <a href="Upload.html" class="nav-icon" title="Create" aria-label="Create">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </a>
-      <!-- Destiny List Icon -->
-      <a href="Explore.html" class="nav-icon" title="Destiny List" aria-label="Destiny List">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-        <circle cx="12" cy="9" r="2.5" fill="none"/>
-        <path d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z" fill="currentColor"/>
-      </svg>
-    </a>
-    <a href="Profile.html" class="nav-icon" title="Profile" aria-label="Profile">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    </a>
-  </nav>
-
-<!-- AUTH MODAL -->
-<div class="backdrop" id="authModal">
-  <div class="auth">
-    <h3 id="authTitle">Login</h3>
-    <div class="error" id="authError"></div>
-    <input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-
-<!-- Username (only for signup) -->
-<input id="username" placeholder="Username" style="display:none">
-
-<button class="primary" id="submitAuth">Continue</button>
-
-    <button id="switchMode" style="margin-top:.5rem">Switch to Signup</button>
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-slide active"></div>
+  <div class="hero-slide"></div>
+  <div class="hero-slide"></div>
+  <div class="hero-slide"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-text">
+    <div class="hero-kicker" id="heroTheme"></div>
+    <h1 class="hero-title" id="heroTitle"></h1>
+    <p class="hero-sub" id="heroSub"></p>
+    <button class="hero-cta" id="heroCta">View Location</button>
   </div>
+</section>
+<!-- Categories -->
+<div class="categories">
+  <div class="category active">🌄 Mountains</div>
+  <div class="category">💧 Waterfalls</div>
+  <div class="category">🌅 Beaches</div>
+  <div class="category">🌲 Forests</div>
+  <div class="category">🏕️ Camping</div>
+  <div class="category">🛕 Culture</div>
+  <div class="category">🏞️ Lakes</div>
+  <div class="category">🧭 Nearby</div>
 </div>
+<!-- Discovery Grid -->
+<section class="grid" id="grid"></section>
+<!-- Floating Add -->
+<button class="floating-btn" onclick="window.location.href='Upload.html'" title="Add Destination">+</button>
+<!-- Sticky Nav -->
+<nav class="nav-bar" aria-label="Primary">
+  <a href="Mainhome.html" class="nav-icon" title="Home" aria-label="Home">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </a>
+  <a href="Search.html" class="nav-icon" title="Search" aria-label="Search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  </a>
+  <a href="Upload.html" class="nav-icon" title="Create" aria-label="Create">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </a>
+  <a href="Explore.html" class="nav-icon" title="Destiny List" aria-label="Destiny List">
+    <svg viewBox="0 0 24 24">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5" fill="none"/>
+      <path d="M12 6l.9 1.8 2 .3-1.5 1.5.35 2.1L12 11l-1.75.7.35-2.1-1.5-1.5 2-.3L12 6z" fill="currentColor"/>
+    </svg>
+  </a>
+  <a href="Profile.html" class="nav-icon" title="Profile" aria-label="Profile">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </a>
+</nav>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-/* ================= SUPABASE ================= */
 const sb = supabase.createClient(
   "https://bhktkjegansxplpdtack.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
-
-/* ================= ELEMENTS ================= */
-const authActions = document.getElementById('authActions');
-const userMenu = document.getElementById('userMenu');
-const avatarBtn = document.getElementById('avatarBtn');
-const menuPop = document.getElementById('menuPop');
-const logoutBtn = document.getElementById('logoutBtn');
-
-const authModal = document.getElementById('authModal');
-const openLogin = document.getElementById('openLogin');
-const openSignup = document.getElementById('openSignup');
-const submitAuth = document.getElementById('submitAuth');
-const switchMode = document.getElementById('switchMode');
-const authTitle = document.getElementById('authTitle');
-const authError = document.getElementById('authError');
-
-const email = document.getElementById('email');
-const password = document.getElementById('password');
-const username = document.getElementById('username');
-
-
-let mode = 'login';
-
-/* ================= UI ================= */
-function updateUI(session){
-  if(session){
-    authActions.style.display='none';
-    userMenu.style.display='block';
-    avatarBtn.textContent=session.user.email[0].toUpperCase();
-  }else{
-    authActions.style.display='flex';
-    userMenu.style.display='none';
-  }
+const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
+const slideEls = document.querySelectorAll('.hero-slide');
+const themeEl = document.getElementById('heroTheme');
+const titleEl = document.getElementById('heroTitle');
+const subEl = document.getElementById('heroSub');
+const ctaBtn = document.getElementById('heroCta');
+let heroSpots = [];
+let heroIdx = 0;
+let currentUser = null;
+// Avatar helper - R2 first, fallback to UI-Avatars
+function getAvatarUrl(username) {
+  if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=80';
+  const r2Avatar = `${WORKER_URL}/file/avatars/${username}-avatar.jpg`;
+  const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=FFD88D&color=0c0f18&size=80`;
+  return r2Avatar + `?fallback=${encodeURIComponent(fallback)}`; // simple fallback via onerror in img tag
 }
-
-/* ================= AUTH MODAL ================= */
-openLogin.onclick=()=>{mode='login';openAuth()}
-openSignup.onclick=()=>{mode='signup';openAuth()}
-
-function openAuth(){
-  authTitle.textContent = mode === 'login' ? 'Login' : 'Signup';
-  switchMode.textContent = mode === 'login' ? 'Switch to Signup' : 'Switch to Login';
-  authError.textContent = '';
-  authModal.style.display = 'flex';
-
-  // Username field only for signup
-  username.style.display = mode === 'signup' ? 'block' : 'none';
-}
-
-
-switchMode.onclick=()=>{
-  mode=mode==='login'?'signup':'login';
-  openAuth();
-}
-
-/* ================= AUTH ================= */
-submitAuth.onclick = async () => {
-  const e = email.value.trim();
-  const p = password.value.trim();
-  const u = username.value.trim();
-
-  if (!e || !p || (mode === 'signup' && !u)) {
-    authError.textContent = 'All fields are required';
-    return;
-  }
-
-  let res;
-
-  if (mode === 'login') {
-    res = await sb.auth.signInWithPassword({
-      email: e,
-      password: p
-    });
-  } else {
-    res = await sb.auth.signUp({
-      email: e,
-      password: p,
-      options: {
-        data: {
-          username: u,
-          full_name: u
-        }
-      }
-    });
-  }
-
-  if (res.error) {
-    authError.textContent = res.error.message;
-    return;
-  }
-
-  authModal.style.display = 'none';
-};
-
-
-/* ================= MENU UX (FIXED) ================= */
-avatarBtn.onclick=(e)=>{
-  e.stopPropagation();
-  menuPop.style.display=menuPop.style.display==='block'?'none':'block';
-};
-menuPop.onclick=e=>e.stopPropagation();
-document.addEventListener('click',()=>menuPop.style.display='none');
-
-/* ================= LOGOUT (FIXED) ================= */
-logoutBtn.onclick=async(e)=>{
-  e.stopPropagation();
-  await sb.auth.signOut();
-};
-
-/* ================= AUTH LISTENER ================= */
-sb.auth.onAuthStateChange((_e,session)=>{
-  updateUI(session);
-  menuPop.style.display='none';
-});
-
-/* ================= RESTORE SESSION ================= */
-sb.auth.getSession().then(({data})=>updateUI(data.session));
-
-/* ================= SLIDESHOW ================= */
-const imgs=[
-  "https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1920",
-  "https://images.pexels.com/photos/4737484/pexels-photo-4737484.jpeg?auto=compress&cs=tinysrgb&w=1920",
-  "https://images.pexels.com/photos/248771/pexels-photo-248771.jpeg?auto=compress&cs=tinysrgb&w=1920",
-   "https://images.pexels.com/photos/248797/pexels-photo-248797.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop",
-    "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80"
-];
-const slides=document.querySelectorAll('.background-image');
-imgs.forEach((s,i)=>slides[i].style.backgroundImage=`url(${s})`);
-let i=0;
-setInterval(()=>{
-  slides[i].classList.remove('active');
-  i=(i+1)%slides.length;
-  slides[i].classList.add('active');
-},5000);
-</script>
-<!-- Trigger div - keep at bottom of content -->
-<div id="scroll-trigger" style="height: 600px; width: 100%;"></div>
-
-<script>
-// Flags
-let observerActive = false;
-let navigated = false;
-
-// Function to start observing
-function activateObserver() {
-  if (observerActive || navigated) return;
-  observerActive = true;
-
-  console.log('Observer activated after initial scroll - waiting for bottom');
-
-  const trigger = document.getElementById('scroll-trigger');
-  if (!trigger) {
-    console.log('Trigger not found');
-    return;
-  }
-
-  const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !navigated) {
-      console.log('Bottom reached - navigating to Search.html');
-      navigated = true;
-      observer.disconnect();
-      window.location.href = 'Search.html';
-    }
-  }, {
-    rootMargin: '0px 0px 1200px 0px', // Trigger when 1200px before end
-    threshold: 0.1 // 10% visible
+// Load 4 random spots for hero slideshow
+async function loadHeroSlides() {
+  const { data: spots } = await sb
+    .from('spots')
+    .select('id, name, place, city, story, media_urls, media_url, category_id')
+    .order('created_at', { ascending: false })
+    .limit(12);
+  if (!spots || spots.length === 0) return;
+  heroSpots = spots.sort(() => 0.5 - Math.random()).slice(0, 4);
+  heroSpots.forEach((spot, i) => {
+    const firstMedia = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/1200x800/141824/FFD88D?text=No+Image';
+    slideEls[i].style.backgroundImage = `url('${firstMedia}')`;
   });
-
-  observer.observe(trigger);
+  renderHero(0);
 }
-
-// Wait for real scrolling (200px from top)
-window.addEventListener('scroll', () => {
-  if (!observerActive && window.scrollY > 200) { // Adjust 200 to 400 if needed
-    console.log('Real scrolling detected (200px) - starting observer');
-    activateObserver();
+// Render current hero slide
+function renderHero(i) {
+  const spot = heroSpots[i];
+  if (!spot) return;
+  slideEls.forEach(s => s.classList.remove('active'));
+  slideEls[i].classList.add('active');
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant', 8:'Nature'};
+  themeEl.textContent = categoryNames[spot.category_id] || 'Hidden Gem';
+  titleEl.textContent = spot.name;
+  subEl.textContent = spot.story?.slice(0, 120) + '...' || 'Discover this hidden place...';
+  ctaBtn.onclick = () => window.location.href = `spot.html?id=${spot.id}`;
+}
+// Auto change hero every 5.2 seconds
+setInterval(() => {
+  heroIdx = (heroIdx + 1) % heroSpots.length;
+  renderHero(heroIdx);
+}, 5200);
+// Init
+async function init() {
+  const { data: { user } } = await sb.auth.getUser();
+  currentUser = user;
+  await loadHeroSlides();
+  await loadSpots();
+}
+// Load all spots for the main grid
+async function loadSpots() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = `
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  `;
+  const { data: spots, error } = await sb
+    .from('spots')
+    .select('id, name, place, city, story, media_urls, media_url, username, category_id, emotion_id, slug') // ← ADDED slug here
+    .order('created_at', { ascending: false });
+  if (error || !spots || spots.length === 0) {
+    document.getElementById('grid').innerHTML = '<p style="text-align:center;padding:50px;opacity:0.7;">No hidden spots yet.</p>';
+    return;
   }
-}, { passive: true });
-
-// Fallback delay: start after 2 seconds if no scroll, but only if scrolled a bit
-setTimeout(() => {
-  if (!observerActive && window.scrollY > 100) {
-    console.log('Fallback: starting observer after delay + minimal scroll');
-    activateObserver();
+  // Get saved spots for heart icon
+  let savedSpotIds = [];
+  if (currentUser) {
+    const { data: saves } = await sb
+      .from('destiny_saves')
+      .select('spot_id')
+      .eq('user_id', currentUser.id);
+    if (saves) savedSpotIds = saves.map(s => s.spot_id);
   }
-}, 2000);
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant'};
+  const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
+  const html = spots.map(spot => {
+    const firstImage = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/300x220/141824/FFD88D?text=No+Image';
+    const avatarUrl = getAvatarUrl(spot.username);
+    const isSaved = savedSpotIds.includes(spot.id);
+    const heartIcon = isSaved ? '❤️' : '♡';
+    // Use slug if exists, else fallback to id
+    const linkUrl = spot.slug ? `/spot?slug=${spot.slug}` : `/spot?id=${spot.id}`;
+    return `
+    <article class="card">
+      <div class="card-media">
+        <img src="${firstImage}" alt="${spot.name}"
+             onerror="this.src='https://via.placeholder.com/300x220/141824/FFD88D?text=No+Image'">
+        <span class="card-badge">${spot.city} • ${categoryNames[spot.category_id] || 'Other'}</span>
+      </div>
+      <div class="card-info">
+        <h3 class="card-title">${spot.name}</h3>
+        <p class="card-sub">${spot.place}, ${spot.city}</p>
+      </div>
+      <div class="card-meta">
+        <div class="meta-left">
+          <img class="avatar" src="${avatarUrl}" alt=""
+               onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(spot.username || 'User')}&background=FFD88D&color=0c0f18&size=80'">
+          <span class="username" onclick="goToProfile('${spot.username}')">@${spot.username || 'traveller'}</span>
+        </div>
+        <div class="meta-right">
+          <button class="follow" onclick="toggleFollow('${spot.username}', this)">Follow</button>
+          <div class="heart" onclick="toggleDestiny('${spot.id}', this)">${heartIcon}</div>
+        </div>
+      </div>
+      <div class="card-story">
+        <p class="story-text">${spot.story || 'No story shared.'}</p>
+        <a class="read-more" href="${linkUrl}">Read more</a>
+      </div>
+    </article>`;
+  }).join('');
+  document.getElementById('grid').innerHTML = html;
+}
+// Navigate to profile
+function goToProfile(username) {
+  if (username) window.location.href = `Profile.html?user=${username}`;
+}
+// Follow toggle (placeholder — you can implement later)
+async function toggleFollow(username, button) {
+  if (!currentUser) {
+    alert('Login required');
+    return;
+  }
+  button.textContent = button.textContent === 'Follow' ? 'Following' : 'Follow';
+}
+// Destiny save toggle
+async function toggleDestiny(spotId, button) {
+  if (!currentUser) {
+    alert('Login required');
+    return;
+  }
+  const { data: existing } = await sb
+    .from('destiny_saves')
+    .select('id')
+    .eq('user_id', currentUser.id)
+    .eq('spot_id', spotId)
+    .maybeSingle();
+  if (existing) {
+    await sb.from('destiny_saves').delete().eq('id', existing.id);
+    button.textContent = '♡';
+  } else {
+    await sb.from('destiny_saves').insert({ user_id: currentUser.id, spot_id: spotId });
+    button.textContent = '❤️';
+  }
+}
+init();
+// Make category chips stay active when clicked
+document.querySelectorAll('.category').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    // You can add your filter/search logic here later if needed
+  });
+});
 </script>
 </body>
 </html>
-
-
 
 
 

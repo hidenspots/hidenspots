@@ -270,6 +270,24 @@ header{
   border-radius:8px;color:#fff
 }
 .error{color:#ff9a9a;font-size:.9rem}
+  .user-menu{position:relative}
+.avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--glass);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center
+}
+.menu-pop{
+  position:absolute;right:0;top:120%;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  display:none;min-width:180px;overflow:hidden
+}
+.menu-pop a,.menu-pop button{
+  display:block;width:100%;padding:.7rem .9rem;
+  background:none;border:0;color:#fff;text-align:left
+}
+
 </style>
 </head>
 <body>
@@ -521,6 +539,7 @@ document.querySelectorAll('.category').forEach(chip => {
 </script>
 </body>
 </html>
+
 
 
 

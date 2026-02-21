@@ -1,294 +1,247 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-NQC9N5CZ');</script>
-<!-- End Google Tag Manager -->
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DWS0BB3H70"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWS0BB3H70"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-DWS0BB3H70');
+  </script>
 
-  gtag('config', 'G-DWS0BB3H70');
-</script>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Hiden Spots – Cinematic Travel Discovery</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500&display=swap" rel="stylesheet">
-
-
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;width:100%;font-family:'Playfair Display',serif;background:#0c0f18;color:#fff;overflow-x:hidden;scroll-behavior:smooth}
-/* Anim */
-@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-/* HEADER */
-header{
-  position:fixed;top:0;left:0;width:100%;z-index:50;
-  display:flex;justify-content:space-between;align-items:center;
-  padding:1.1rem 3rem;background:rgba(10,12,20,.3);backdrop-filter:blur(12px);
-  border-bottom:1px solid rgba(255,255,255,.1);
-}
-.brand{display:flex;align-items:center;gap:.7rem;color:#fff;text-decoration:none}
-.brand svg{width:36px;height:36px;flex:0 0 36px}
-.brand span{font-size:1.5rem;letter-spacing:3px}
-.brand:hover{color:#ffd88d;transition:.35s}
-/* HERO with themed frames */
-.hero{margin-top:84px;height:70vh;position:relative;overflow:hidden;border-radius:20px;margin-inline:3%;animation:fadeUp 1.2s ease-out both;}
-.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s ease-in-out;}
-.hero-slide.active{opacity:1;}
-.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(12,15,25,.9) 0%,rgba(12,15,25,.4) 60%,transparent 100%);z-index:1;}
-.hero-text{position:absolute;bottom:2.6rem;left:2.6rem;z-index:2;max-width:560px}
-.hero-kicker{font-size:.9rem;letter-spacing:2px;opacity:.85;text-transform:uppercase;margin-bottom:.35rem}
-.hero-title{font-size:2.4rem;margin-bottom:.6rem;color:#ffd88d;line-height:1.15}
-.hero-sub{opacity:.9;font-size:1.06rem;line-height:1.5}
-.hero-cta{margin-top:1rem;padding:.6rem 1.5rem;font-size:1rem;border:none;border-radius:40px;background:linear-gradient(90deg,#ffd88d,#ffb347);color:#0c0f18;font-weight:600;cursor:pointer;transition:.28s;}
-.hero-cta:hover{transform:translateY(-2px);box-shadow:0 0 10px rgba(255,216,141,.4)}
-/* CATEGORY RIBBON */
-.categories{display:flex;overflow-x:auto;gap:1rem;padding:1.1rem 2.5rem;margin-top:1rem;scrollbar-width:none;}
-.categories::-webkit-scrollbar{display:none;}
-.category {
-  padding: 0.6rem 1.4rem;
-  border-radius: 30px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.15);
-  white-space: nowrap;
-  font-size: 0.98rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: #fff;
-  opacity: 0.9;
-}
-.category:hover {
-  background: rgba(255,255,255,.15);
-  transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(255,216,141,.3);
-}
-.category.active {
-  background: linear-gradient(90deg, #ffd88d, #19547b);
-  color: #0c0f18;
-  font-weight: 600;
-  transform: scale(1.08); /* Slightly bigger when active */
-  box-shadow: 0 0 20px rgba(255,216,141,.5); /* Nice glow */
-  border-color: transparent;
-}
-/* GRID */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem; /* Increased horizontal/vertical gap between cards */
-  padding: 2rem 2rem 8rem 2rem; /* More top/bottom padding, especially bottom to clear nav */
-}
-.card {
-  background: #141824;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 12px 32px rgba(0,0,0,.35);
-  animation: fadeUp .8s ease both;
-  margin-bottom: 1rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.card:hover {
-  transform: translateY(-10px); /* Lifts the card up 10px */
-  box-shadow: 0 20px 50px rgba(0,0,0,.5); /* Stronger shadow + glow */
-}
-.card:hover .card-media img {
-  transform: scale(1.08); /* Subtle zoom on image */
-}
-.card-media{position:relative;height:220px;overflow:hidden;}
-.card-media img{width:100%;height:100%;object-fit:cover;transition:0.4s ease;}
-.card-media:hover img{transform:scale(1.05);filter:brightness(.85);}
-.card-badge{position:absolute;left:.75rem;bottom:.75rem;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);padding:.28rem .55rem;border-radius:20px;font-size:.8rem;letter-spacing:.5px;border:1px solid rgba(255,255,255,.12);color:#ffd88d}
-.card-info{padding:1.2rem 1.2rem 0.8rem;border-top:1px solid rgba(255,255,255,.06);}
-.card-title{font-size: 1.1rem;
-  margin-bottom: 0.4rem;
-  color:#ffd88d;}
-.card-sub{font-size: 0.95rem;
-  opacity: 0.85;}
-/* Meta row */
-.card-meta{display:flex;align-items:center;justify-content:space-between;padding: 0.8rem 1.2rem;
-  gap: 0.8rem;border-top:1px solid rgba(255,255,255,.06);}
-.meta-left{display:flex;align-items:center;gap:.6rem;}
-.avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.2)}
-.username{font-size:.9rem;opacity:.9;cursor:pointer;color:#ffd88d} /* Made clickable */
-.username:hover{text-decoration:underline}
-/* Added hover for username */
-.meta-right{display:flex;align-items:center;gap:.5rem;}
-.follow {
-  padding: 0.45rem 1.2rem; /* Bigger tap area */
-  border-radius: 30px;
-  border: 1px solid rgba(255,255,255,.25);
-  background: rgba(255,255,255,.08);
-  color: #fff;
-  font-size: 0.95rem; /* Slightly larger text */
-  font-weight: 500; /* Bolder */
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.follow:hover,
-.follow:active {
-  background: linear-gradient(90deg, #ffd88d, #ffb347);
-  color: #0c0f18;
-  border-color: transparent;
-  transform: scale(1.05); /* Subtle grow on hover/tap */
-}
-.menu{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);cursor:pointer}
-.menu:after{content:"⋯";font-size:18px;line-height:0;opacity:.85}
-.heart {
-  font-size: 28px; /* Much bigger – easier to tap */
-  cursor: pointer;
-  transition: transform 0.3s ease, color 0.3s ease;
-  color: rgba(255,255,255,.7); /* Inactive state */
-}
-.heart.active { /* We'll add .active class in JS later if needed */
-  color: #ff4d4d; /* Bright red when saved */
-  transform: scale(1.2); /* Slight pop */
-}
-.heart:hover,
-.heart:active {
-  transform: scale(1.3); /* Grow on hover/tap */
-}
-/* Story snippet */
-.card-story{padding: 0 1.2rem 1.2rem;}
-.story-text {
-  font-size: 0.98rem; /* Slightly larger – much easier to read */
-  line-height: 1.65; /* More breathing room between lines */
-  opacity: 0.92; /* Slightly better contrast */
-  display: -webkit-box;
-  -webkit-line-clamp: 3; /* Show 3 lines instead of 2 – more story visible */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 0.8rem; /* Extra space before Read more */
-  padding: 0 0.4rem; /* Tiny left/right padding for clean alignment */
-}
-.read-more {
-  display: inline-block;
-  margin-top: 0.8rem;
-  padding: 0.45rem 1.1rem;
-  font-size: 0.92rem;
-  color: #ffd88d;
-  background: rgba(255,216,141,0.12);
-  border: 1px solid rgba(255,216,141,0.3);
-  border-radius: 30px;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-.read-more:hover,
-.read-more:focus {
-  background: rgba(255,216,141,0.25);
-  transform: translateY(-2px);
-}
-/* FLOAT + NAV */
-.floating-btn{position:fixed;bottom:100px;right:50px;background:linear-gradient(135deg,#ffd88d,#ffb347);border:none;border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#0c0f18;cursor:pointer;box-shadow:0 0 15px rgba(255,216,141,.4);transition:.4s;z-index:60}
-.floating-btn:hover{transform:scale(1.05) rotate(10deg)}
-.nav-bar{background:rgba(255,255,255,.05);backdrop-filter:blur(25px);border-radius:60px;padding:1rem 2.5rem;border:1px solid rgba(255,255,255,.12);position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;gap:3rem;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:80}
-.nav-icon{color:rgba(255,255,255,.7);transition:.4s}
-.nav-icon:hover{color:#FFD88D;transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
-.nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
-@media(max-width:900px){
-  .hero{height:58vh}
-  .hero-title{font-size:2rem}
-  .hero-sub{font-size:1rem}
-}
-@media(max-width:768px){
-  header{padding:1rem 1.5rem}
-  .hero-text{left:1.2rem;right:1.2rem}
-  .grid{padding:1rem 1rem 6.5rem}
-  .floating-btn{bottom:90px;right:22px}
-  .nav-bar{gap:2rem;padding:.9rem 1.6rem}
-}
-/* Skeleton loading placeholders */
-.skeleton-card {
-  background: #141824;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 12px 32px rgba(0,0,0,.35);
-  height: 420px; /* Approx card height – adjust if needed */
-  animation: pulse 1.5s infinite ease-in-out;
-}
-.skeleton-media {
-  height: 240px;
-  background: linear-gradient(90deg, #1a1f2e 0%, #22273a 50%, #1a1f2e 100%);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite linear;
-}
-.skeleton-text {
-  height: 20px;
-  margin: 1rem 1.2rem;
-  background: #22273a;
-  border-radius: 4px;
-}
-.skeleton-meta {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 1.2rem 1rem;
-}
-.skeleton-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #22273a;
-}
-.skeleton-username {
-  width: 100px;
-  height: 16px;
-  background: #22273a;
-  border-radius: 4px;
-}
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-  .backdrop{
-  position:fixed;inset:0;display:none;
-  background:rgba(0,0,0,.55);
-  backdrop-filter:blur(6px);
-  align-items:center;justify-content:center;z-index:50
-}
-.auth{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:1.2rem;
-  width:320px
-}
-.auth input{
-  width:100%;margin:.4rem 0;padding:.6rem;
-  background:rgba(255,255,255,.06);
-  border:1px solid var(--border);
-  border-radius:8px;color:#fff
-}
-.error{color:#ff9a9a;font-size:.9rem}
-  .user-menu{position:relative}
-.avatar{
-  width:36px;height:36px;border-radius:50%;
-  background:var(--glass);border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center
-}
-.menu-pop{
-  position:absolute;right:0;top:120%;
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  display:none;min-width:180px;overflow:hidden
-}
-.menu-pop a,.menu-pop button{
-  display:block;width:100%;padding:.7rem .9rem;
-  background:none;border:0;color:#fff;text-align:left
-}
-
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <!-- Keep your original title for ranking continuity -->
+  <title>Hiden Spots – Home • Discover Hidden Places</title>
+  
+  <!-- Meta description – very important for CTR in SERP -->
+  <meta name="description" content="Discover hidden gems, secret places, offbeat locations, and underrated travel spots in India and worldwide. Explore solo safety, cinematic destinations, and more on Hiden Spots.">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;width:100%;font-family:'Playfair Display',serif;background:#0c0f18;color:#fff;overflow-x:hidden;scroll-behavior:smooth}
+    /* Anim */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    /* HEADER */
+    header{
+      position:fixed;top:0;left:0;width:100%;z-index:50;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:1.1rem 3rem;background:rgba(10,12,20,.3);backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(255,255,255,.1);
+    }
+    .brand{display:flex;align-items:center;gap:.7rem;color:#fff;text-decoration:none}
+    .brand svg{width:36px;height:36px;flex:0 0 36px}
+    .brand span{font-size:1.5rem;letter-spacing:3px}
+    .brand:hover{color:#ffd88d;transition:.35s}
+    /* HERO with themed frames */
+    .hero{margin-top:84px;height:70vh;position:relative;overflow:hidden;border-radius:20px;margin-inline:3%;animation:fadeUp 1.2s ease-out both;}
+    .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s ease-in-out;}
+    .hero-slide.active{opacity:1;}
+    .hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(12,15,25,.9) 0%,rgba(12,15,25,.4) 60%,transparent 100%);z-index:1;}
+    .hero-text{position:absolute;bottom:2.6rem;left:2.6rem;z-index:2;max-width:560px}
+    .hero-kicker{font-size:.9rem;letter-spacing:2px;opacity:.85;text-transform:uppercase;margin-bottom:.35rem}
+    .hero-title{font-size:2.4rem;margin-bottom:.6rem;color:#ffd88d;line-height:1.15}
+    .hero-sub{opacity:.9;font-size:1.06rem;line-height:1.5}
+    .hero-cta{margin-top:1rem;padding:.6rem 1.5rem;font-size:1rem;border:none;border-radius:40px;background:linear-gradient(90deg,#ffd88d,#ffb347);color:#0c0f18;font-weight:600;cursor:pointer;transition:.28s;}
+    .hero-cta:hover{transform:translateY(-2px);box-shadow:0 0 10px rgba(255,216,141,.4)}
+    /* CATEGORY RIBBON */
+    .categories{display:flex;overflow-x:auto;gap:1rem;padding:1.1rem 2.5rem;margin-top:1rem;scrollbar-width:none;}
+    .categories::-webkit-scrollbar{display:none;}
+    .category {
+      padding: 0.6rem 1.4rem;
+      border-radius: 30px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      white-space: nowrap;
+      font-size: 0.98rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #fff;
+      opacity: 0.9;
+    }
+    .category:hover {
+      background: rgba(255,255,255,.15);
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(255,216,141,.3);
+    }
+    .category.active {
+      background: linear-gradient(90deg, #ffd88d, #19547b);
+      color: #0c0f18;
+      font-weight: 600;
+      transform: scale(1.08);
+      box-shadow: 0 0 20px rgba(255,216,141,.5);
+      border-color: transparent;
+    }
+    /* GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 2rem;
+      padding: 2rem 2rem 8rem 2rem;
+    }
+    .card {
+      background: #141824;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 12px 32px rgba(0,0,0,.35);
+      animation: fadeUp .8s ease both;
+      margin-bottom: 1rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 50px rgba(0,0,0,.5);
+    }
+    .card:hover .card-media img {
+      transform: scale(1.08);
+    }
+    .card-media{position:relative;height:220px;overflow:hidden;}
+    .card-media img{width:100%;height:100%;object-fit:cover;transition:0.4s ease;}
+    .card-media:hover img{transform:scale(1.05);filter:brightness(.85);}
+    .card-badge{position:absolute;left:.75rem;bottom:.75rem;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);padding:.28rem .55rem;border-radius:20px;font-size:.8rem;letter-spacing:.5px;border:1px solid rgba(255,255,255,.12);color:#ffd88d}
+    .card-info{padding:1.2rem 1.2rem 0.8rem;border-top:1px solid rgba(255,255,255,.06);}
+    .card-title{font-size: 1.1rem;margin-bottom: 0.4rem;color:#ffd88d;}
+    .card-sub{font-size: 0.95rem;opacity: 0.85;}
+    /* Meta row */
+    .card-meta{display:flex;align-items:center;justify-content:space-between;padding: 0.8rem 1.2rem;gap: 0.8rem;border-top:1px solid rgba(255,255,255,.06);}
+    .meta-left{display:flex;align-items:center;gap:.6rem;}
+    .avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.2)}
+    .username{font-size:.9rem;opacity:.9;cursor:pointer;color:#ffd88d}
+    .username:hover{text-decoration:underline}
+    .meta-right{display:flex;align-items:center;gap:.5rem;}
+    .follow {
+      padding: 0.45rem 1.2rem;
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .follow:hover,
+    .follow:active {
+      background: linear-gradient(90deg, #ffd88d, #ffb347);
+      color: #0c0f18;
+      border-color: transparent;
+      transform: scale(1.05);
+    }
+    .menu{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);cursor:pointer}
+    .menu:after{content:"⋯";font-size:18px;line-height:0;opacity:.85}
+    .heart {
+      font-size: 28px;
+      cursor: pointer;
+      transition: transform 0.3s ease, color 0.3s ease;
+      color: rgba(255,255,255,.7);
+    }
+    .heart.active {
+      color: #ff4d4d;
+      transform: scale(1.2);
+    }
+    .heart:hover,
+    .heart:active {
+      transform: scale(1.3);
+    }
+    /* Story snippet */
+    .card-story{padding: 0 1.2rem 1.2rem;}
+    .story-text {
+      font-size: 0.98rem;
+      line-height: 1.65;
+      opacity: 0.92;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 0.8rem;
+      padding: 0 0.4rem;
+    }
+    .read-more {
+      display: inline-block;
+      margin-top: 0.8rem;
+      padding: 0.45rem 1.1rem;
+      font-size: 0.92rem;
+      color: #ffd88d;
+      background: rgba(255,216,141,0.12);
+      border: 1px solid rgba(255,216,141,0.3);
+      border-radius: 30px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    .read-more:hover,
+    .read-more:focus {
+      background: rgba(255,216,141,0.25);
+      transform: translateY(-2px);
+    }
+    /* FLOAT + NAV */
+    .floating-btn{position:fixed;bottom:100px;right:50px;background:linear-gradient(135deg,#ffd88d,#ffb347);border:none;border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#0c0f18;cursor:pointer;box-shadow:0 0 15px rgba(255,216,141,.4);transition:.4s;z-index:60}
+    .floating-btn:hover{transform:scale(1.05) rotate(10deg)}
+    .nav-bar{background:rgba(255,255,255,.05);backdrop-filter:blur(25px);border-radius:60px;padding:1rem 2.5rem;border:1px solid rgba(255,255,255,.12);position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;gap:3rem;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:80}
+    .nav-icon{color:rgba(255,255,255,.7);transition:.4s}
+    .nav-icon:hover{color:#FFD88D;transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
+    .nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
+    @media(max-width:900px){
+      .hero{height:58vh}
+      .hero-title{font-size:2rem}
+      .hero-sub{font-size:1rem}
+    }
+    @media(max-width:768px){
+      header{padding:1rem 1.5rem}
+      .hero-text{left:1.2rem;right:1.2rem}
+      .grid{padding:1rem 1rem 6.5rem}
+      .floating-btn{bottom:90px;right:22px}
+      .nav-bar{gap:2rem;padding:.9rem 1.6rem}
+    }
+    /* Skeleton loading placeholders */
+    .skeleton-card {
+      background: #141824;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 12px 32px rgba(0,0,0,.35);
+      height: 420px;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    .skeleton-media {
+      height: 240px;
+      background: linear-gradient(90deg, #1a1f2e 0%, #22273a 50%, #1a1f2e 100%);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite linear;
+    }
+    .skeleton-text {
+      height: 20px;
+      margin: 1rem 1.2rem;
+      background: #22273a;
+      border-radius: 4px;
+    }
+    .skeleton-meta {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 1.2rem 1rem;
+    }
+    .skeleton-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #22273a;
+    }
+    .skeleton-username {
+      width: 100px;
+      height: 16px;
+      background: #22273a;
+      border-radius: 4px;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  </style>
 </head>
 <body>
 <!-- Header with compass + Paledius -->
@@ -301,19 +254,6 @@ header{
     </svg>
     <span>Hiden Spots</span>
   </a>
-  <div class="auth-actions" id="authActions">
-    <button id="openLogin">Login</button>
-    <button class="primary" id="openSignup">Signup</button>
-  </div>
-
-  <div class="user-menu" id="userMenu" style="display:none">
-    <div class="avatar" id="avatarBtn">U</div>
-    <div class="menu-pop" id="menuPop">
-      <a href="about.html">About</a>
-    
-      <button id="logoutBtn">Logout</button>
-    </div>
-  </div>
 </header>
 <!-- HERO -->
 <section class="hero" id="hero">
@@ -346,7 +286,7 @@ header{
 <button class="floating-btn" onclick="window.location.href='Upload.html'" title="Add Destination">+</button>
 <!-- Sticky Nav -->
 <nav class="nav-bar" aria-label="Primary">
-  <a href="Mainhome.html" class="nav-icon" title="Home" aria-label="Home">
+  <a href="index.html" class="nav-icon" title="Home" aria-label="Home">
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
   </a>
   <a href="Search.html" class="nav-icon" title="Search" aria-label="Search">
@@ -374,7 +314,8 @@ const sb = supabase.createClient(
   "https://bhktkjegansxplpdtack.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
-const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev'; // Your Worker URL
+const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
+
 const slideEls = document.querySelectorAll('.hero-slide');
 const themeEl = document.getElementById('heroTheme');
 const titleEl = document.getElementById('heroTitle');
@@ -383,18 +324,18 @@ const ctaBtn = document.getElementById('heroCta');
 let heroSpots = [];
 let heroIdx = 0;
 let currentUser = null;
-// Avatar helper - R2 first, fallback to UI-Avatars
+
 function getAvatarUrl(username) {
   if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=80';
   const r2Avatar = `${WORKER_URL}/file/avatars/${username}-avatar.jpg`;
   const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=FFD88D&color=0c0f18&size=80`;
-  return r2Avatar + `?fallback=${encodeURIComponent(fallback)}`; // simple fallback via onerror in img tag
+  return r2Avatar + `?fallback=${encodeURIComponent(fallback)}`;
 }
-// Load 4 random spots for hero slideshow
+
 async function loadHeroSlides() {
   const { data: spots } = await sb
     .from('spots')
-    .select('id, name, place, city, story, media_urls, media_url, category_id')
+    .select('id, name, place, city, story, media_urls, media_url, category_id, slug')
     .order('created_at', { ascending: false })
     .limit(12);
   if (!spots || spots.length === 0) return;
@@ -405,31 +346,32 @@ async function loadHeroSlides() {
   });
   renderHero(0);
 }
-// Render current hero slide
+
 function renderHero(i) {
   const spot = heroSpots[i];
   if (!spot) return;
   slideEls.forEach(s => s.classList.remove('active'));
   slideEls[i].classList.add('active');
-  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant', 8:'Nature'};
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'};
   themeEl.textContent = categoryNames[spot.category_id] || 'Hidden Gem';
   titleEl.textContent = spot.name;
   subEl.textContent = spot.story?.slice(0, 120) + '...' || 'Discover this hidden place...';
-  ctaBtn.onclick = () => window.location.href = `spot.html?id=${spot.id}`;
+  const linkUrl = spot.slug ? `/spot?slug=${spot.slug}` : `/spot?id=${spot.id}`;
+  ctaBtn.onclick = () => window.location.href = linkUrl;
 }
-// Auto change hero every 5.2 seconds
+
 setInterval(() => {
   heroIdx = (heroIdx + 1) % heroSpots.length;
   renderHero(heroIdx);
 }, 5200);
-// Init
+
 async function init() {
   const { data: { user } } = await sb.auth.getUser();
   currentUser = user;
   await loadHeroSlides();
   await loadSpots();
 }
-// Load all spots for the main grid
+
 async function loadSpots() {
   const grid = document.getElementById('grid');
   grid.innerHTML = `
@@ -441,13 +383,12 @@ async function loadSpots() {
   `;
   const { data: spots, error } = await sb
     .from('spots')
-    .select('id, name, place, city, story, media_urls, media_url, username, category_id, emotion_id, slug') // ← ADDED slug here
+    .select('id, name, place, city, story, media_urls, media_url, username, category_id, emotion_id, slug')
     .order('created_at', { ascending: false });
   if (error || !spots || spots.length === 0) {
     document.getElementById('grid').innerHTML = '<p style="text-align:center;padding:50px;opacity:0.7;">No hidden spots yet.</p>';
     return;
   }
-  // Get saved spots for heart icon
   let savedSpotIds = [];
   if (currentUser) {
     const { data: saves } = await sb
@@ -463,7 +404,6 @@ async function loadSpots() {
     const avatarUrl = getAvatarUrl(spot.username);
     const isSaved = savedSpotIds.includes(spot.id);
     const heartIcon = isSaved ? '❤️' : '♡';
-    // Use slug if exists, else fallback to id
     const linkUrl = spot.slug ? `/spot?slug=${spot.slug}` : `/spot?id=${spot.id}`;
     return `
     <article class="card">
@@ -495,11 +435,11 @@ async function loadSpots() {
   }).join('');
   document.getElementById('grid').innerHTML = html;
 }
-// Navigate to profile
+
 function goToProfile(username) {
   if (username) window.location.href = `Profile.html?user=${username}`;
 }
-// Follow toggle (placeholder — you can implement later)
+
 async function toggleFollow(username, button) {
   if (!currentUser) {
     alert('Login required');
@@ -507,7 +447,7 @@ async function toggleFollow(username, button) {
   }
   button.textContent = button.textContent === 'Follow' ? 'Following' : 'Follow';
 }
-// Destiny save toggle
+
 async function toggleDestiny(spotId, button) {
   if (!currentUser) {
     alert('Login required');
@@ -527,30 +467,15 @@ async function toggleDestiny(spotId, button) {
     button.textContent = '❤️';
   }
 }
+
 init();
-// Make category chips stay active when clicked
+
 document.querySelectorAll('.category').forEach(chip => {
   chip.addEventListener('click', () => {
     document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
-    // You can add your filter/search logic here later if needed
   });
 });
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

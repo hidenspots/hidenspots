@@ -93,9 +93,9 @@
     .skeleton-username{width:100px;height:16px;background:#22273a;border-radius:4px;}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
-    /* Auth Modal Styles */
-    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:1000;}
-    .auth{background:#121624;border-radius:16px;padding:2rem;width:360px;max-width:90vw;box-shadow:0 10px 40px rgba(0,0,0,.6);}
+    /* Auth Modal - positioned below header */
+    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding-top:120px;z-index:1000;overflow-y:auto;}
+    .auth{background:#121624;border-radius:16px;padding:2rem;width:360px;max-width:90vw;box-shadow:0 10px 40px rgba(0,0,0,.6);margin-top:20px;}
     .auth h3{margin-bottom:1.5rem;text-align:center;color:#ffd88d;}
     .auth input{width:100%;padding:0.9rem;margin:0.6rem 0;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.05);color:#fff;font-size:1rem;}
     .auth input:focus{outline:none;border-color:#ffd88d;}
@@ -133,7 +133,7 @@
   </div>
 </header>
 
-<!-- Hero Section -->
+<!-- Hero - unchanged -->
 <section class="hero" id="hero">
   <div class="hero-slide active"></div>
   <div class="hero-slide"></div>
@@ -153,18 +153,21 @@
   <div class="category active" data-filter="all">All</div>
   <div class="category" data-filter="Adventure">Adventure</div>
   <div class="category" data-filter="Spiritual">Spiritual</div>
+  <div class="category" data-filter="Historical">Historical</div>
+  <div class="category" data-filter="Horror">Horror</div>
   <div class="category" data-filter="Solo">Solo</div>
-  <div class="category" data-filter="Nature">Nature</div>
   <div class="category" data-filter="Family">Family</div>
+  <div class="category" data-filter="Restaurant">Restaurant</div>
+  <div class="category" data-filter="Nature">Nature</div>
 </div>
 
 <!-- Grid -->
 <section class="grid" id="grid"></section>
 
-<!-- Floating Button -->
+<!-- Floating Add -->
 <button class="floating-btn" onclick="window.location.href='Upload.html'" title="Add Destination">+</button>
 
-<!-- Nav Bar -->
+<!-- Nav -->
 <nav class="nav-bar" aria-label="Primary">
   <a href="index.html" class="nav-icon" title="Home" aria-label="Home">
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -187,7 +190,7 @@
   </a>
 </nav>
 
-<!-- Auth Modal -->
+<!-- Auth Modal - positioned below header -->
 <div class="backdrop" id="authModal">
   <div class="auth">
     <h3 id="authTitle">Login</h3>
@@ -208,9 +211,7 @@ const sb = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
 
-// ────────────────────────────────────────────────
 // GLOBAL VARIABLES
-// ────────────────────────────────────────────────
 let currentUser = null;
 let allSpots = [];
 const grid = document.getElementById('grid');
@@ -234,9 +235,7 @@ const passwordInput = document.getElementById('password');
 const usernameInput = document.getElementById('username');
 let authMode = 'login';
 
-// ────────────────────────────────────────────────
-// AUTH LOGIC – FIXED & WORKING
-// ────────────────────────────────────────────────
+// Auth UI & Logic
 function updateUI(session) {
   currentUser = session?.user ?? null;
   if (session) {
@@ -294,9 +293,8 @@ submitAuth.onclick = async () => {
       return;
     }
 
-    authError.textContent = 'Success! Redirecting...';
-    authModal.style.display = 'none';
-    setTimeout(() => location.reload(), 1500); // refresh to show logged-in UI
+    authError.textContent = 'Success! Refreshing...';
+    setTimeout(() => location.reload(), 1200);
   } catch (err) {
     authError.textContent = 'Something went wrong. Try again.';
     console.error('Auth error:', err);
@@ -317,33 +315,27 @@ logoutBtn.onclick = async (e) => {
   location.reload();
 };
 
-// Auth state listener
 sb.auth.onAuthStateChange((_, session) => {
   updateUI(session);
   menuPop.style.display = 'none';
 });
 
-// Restore session
 sb.auth.getSession().then(({ data }) => updateUI(data.session));
 
-// ────────────────────────────────────────────────
 // AVATAR HELPER
-// ────────────────────────────────────────────────
 function getAvatarUrl(username) {
   if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=80';
   return `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/file/avatars/${username}-avatar.jpg`;
 }
 
-// ────────────────────────────────────────────────
-// HERO SLIDESHOW
-// ────────────────────────────────────────────────
+// HERO SLIDESHOW - UNCHANGED
 async function loadHeroSlides() {
   try {
     const { data: spots } = await sb
       .from('spots')
       .select('id, name, place, city, story, media_urls, media_url, category_id, slug')
       .order('created_at', { ascending: false })
-      .limit(4);
+      .limit(12);
 
     if (!spots?.length) return;
 
@@ -353,13 +345,11 @@ async function loadHeroSlides() {
       slides[i].style.backgroundImage = `url(${url})`;
     });
   } catch (e) {
-    console.error('Hero error:', e);
+    console.error('Hero load error:', e);
   }
 }
 
-// ────────────────────────────────────────────────
-// LOAD SPOTS + FOLLOW STATUS
-// ────────────────────────────────────────────────
+// LOAD SPOTS
 async function loadSpots() {
   grid.innerHTML = '<div class="skeleton-card"></div>'.repeat(5);
 
@@ -383,9 +373,7 @@ async function loadSpots() {
   }
 }
 
-// ────────────────────────────────────────────────
-// RENDER GRID WITH FOLLOW STATUS
-// ────────────────────────────────────────────────
+// RENDER GRID
 async function renderGrid(spotsToShow) {
   let followedUsers = [];
   if (currentUser) {
@@ -438,9 +426,7 @@ async function renderGrid(spotsToShow) {
   grid.innerHTML = html;
 }
 
-// ────────────────────────────────────────────────
 // FOLLOW TOGGLE
-// ────────────────────────────────────────────────
 async function toggleFollow(username, button) {
   if (!currentUser) {
     alert('Please login to follow users');
@@ -472,9 +458,7 @@ async function toggleFollow(username, button) {
   }
 }
 
-// ────────────────────────────────────────────────
 // FILTER LOGIC
-// ────────────────────────────────────────────────
 categoryChips.addEventListener('click', (e) => {
   const chip = e.target.closest('.category');
   if (!chip) return;
@@ -495,9 +479,7 @@ categoryChips.addEventListener('click', (e) => {
   }
 });
 
-// ────────────────────────────────────────────────
 // INIT
-// ────────────────────────────────────────────────
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
   updateUI(session);

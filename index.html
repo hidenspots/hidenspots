@@ -18,6 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
+    /* === YOUR ORIGINAL STYLES – UNCHANGED === */
     *{margin:0;padding:0;box-sizing:border-box}
     html,body{height:100%;width:100%;font-family:'Playfair Display',serif;background:#0c0f18;color:#fff;overflow-x:hidden;scroll-behavior:smooth}
     @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
@@ -139,9 +140,12 @@
   <div class="category active" data-filter="all">All</div>
   <div class="category" data-filter="Adventure">Adventure</div>
   <div class="category" data-filter="Spiritual">Spiritual</div>
+  <div class="category" data-filter="Historical">Historical</div>
+  <div class="category" data-filter="Horror">Horror</div>
   <div class="category" data-filter="Solo">Solo</div>
-  <div class="category" data-filter="Nature">Nature</div>
   <div class="category" data-filter="Family">Family</div>
+  <div class="category" data-filter="Restaurant">Restaurant</div>
+  <div class="category" data-filter="Nature">Nature</div>
 </div>
 
 <section class="grid" id="grid"></section>
@@ -170,21 +174,66 @@
   </a>
 </nav>
 
+<!-- Auth Modal -->
+<div class="backdrop" id="authModal" style="display:none">
+  <div class="auth">
+    <h3 id="authTitle">Login</h3>
+    <div class="error" id="authError"></div>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <input id="username" placeholder="Username" style="display:none">
+    <button class="primary" id="submitAuth">Continue</button>
+    <button id="switchMode" style="margin-top:.5rem">Switch to Signup</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ────────────────────────────────────────────────
 // SUPABASE CLIENT
+// ────────────────────────────────────────────────
 const sb = supabase.createClient(
   "https://bhktkjegansxplpdtack.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
 
-// GLOBALS
+// ────────────────────────────────────────────────
+// GLOBAL VARIABLES
+// ────────────────────────────────────────────────
 let currentUser = null;
 let allSpots = [];
 const grid = document.getElementById('grid');
+const categoryChips = document.getElementById('categoryChips');
+
+// Auth elements
+const authActions = document.getElementById('authActions');
+const userMenu = document.getElementById('userMenu');
+const avatarBtn = document.getElementById('avatarBtn');
+const menuPop = document.getElementById('menuPop');
+const logoutBtn = document.getElementById('logoutBtn');
+const authModal = document.getElementById('authModal');
+const openLogin = document.getElementById('openLogin');
+const openSignup = document.getElementById('openSignup');
+const submitAuth = document.getElementById('submitAuth');
+const switchMode = document.getElementById('switchMode');
+const authTitle = document.getElementById('authTitle');
+const authError = document.getElementById('authError');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const usernameInput = document.getElementById('username');
+let authMode = 'login';
+
+// Hero elements
+const slideEls = document.querySelectorAll('.hero-slide');
+const themeEl = document.getElementById('heroTheme');
+const titleEl = document.getElementById('heroTitle');
+const subEl = document.getElementById('heroSub');
+const ctaBtn = document.getElementById('heroCta');
+let heroSpots = [];
+let heroIdx = 0;
 
 // ────────────────────────────────────────────────
-// AVATAR HELPER (FIXED - NOW DEFINED BEFORE USE)
+// AVATAR HELPER
 // ────────────────────────────────────────────────
 function getAvatarUrl(username) {
   if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=80';
@@ -192,42 +241,147 @@ function getAvatarUrl(username) {
 }
 
 // ────────────────────────────────────────────────
-// AUTH & UI
+// AUTH UI & LOGIC
 // ────────────────────────────────────────────────
-const authActions = document.getElementById('authActions');
-const userMenu = document.getElementById('userMenu');
-const avatarBtn = document.getElementById('avatarBtn');
-const menuPop = document.getElementById('menuPop');
-const logoutBtn = document.getElementById('logoutBtn');
-
 function updateUI(session) {
   currentUser = session?.user ?? null;
   if (session) {
     authActions.style.display = 'none';
     userMenu.style.display = 'block';
-    avatarBtn.textContent = session.user.email[0].toUpperCase();
+    avatarBtn.textContent = session.user.email?.[0]?.toUpperCase() || 'U';
   } else {
     authActions.style.display = 'flex';
     userMenu.style.display = 'none';
   }
 }
 
-sb.auth.onAuthStateChange((_, session) => {
-  updateUI(session);
-});
+openLogin.onclick = () => { authMode = 'login'; openAuthModal(); };
+openSignup.onclick = () => { authMode = 'signup'; openAuthModal(); };
 
-sb.auth.getSession().then(({ data }) => updateUI(data.session));
+function openAuthModal() {
+  authTitle.textContent = authMode === 'login' ? 'Login' : 'Signup';
+  switchMode.textContent = authMode === 'login' ? 'Switch to Signup' : 'Switch to Login';
+  authError.textContent = '';
+  usernameInput.style.display = authMode === 'signup' ? 'block' : 'none';
+  authModal.style.display = 'flex';
+}
 
-logoutBtn.onclick = async () => {
-  await sb.auth.signOut();
-  menuPop.style.display = 'none';
+switchMode.onclick = () => {
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  openAuthModal();
 };
 
+submitAuth.onclick = async () => {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
+  const username = usernameInput.value.trim();
+
+  if (!email || !password || (authMode === 'signup' && !username)) {
+    authError.textContent = 'All fields are required';
+    return;
+  }
+
+  let res;
+  if (authMode === 'login') {
+    res = await sb.auth.signInWithPassword({ email, password });
+  } else {
+    res = await sb.auth.signUp({
+      email,
+      password,
+      options: { data: { username, full_name: username } }
+    });
+  }
+
+  if (res.error) {
+    authError.textContent = res.error.message;
+    return;
+  }
+
+  authModal.style.display = 'none';
+  emailInput.value = '';
+  passwordInput.value = '';
+  usernameInput.value = '';
+};
+
+avatarBtn.onclick = (e) => {
+  e.stopPropagation();
+  menuPop.style.display = menuPop.style.display === 'block' ? 'none' : 'block';
+};
+
+menuPop.onclick = e => e.stopPropagation();
+document.addEventListener('click', () => menuPop.style.display = 'none');
+
+logoutBtn.onclick = async (e) => {
+  e.stopPropagation();
+  await sb.auth.signOut();
+};
+
+// Auth state listener
+sb.auth.onAuthStateChange((_, session) => {
+  updateUI(session);
+  menuPop.style.display = 'none';
+});
+
+// Restore session on load
+sb.auth.getSession().then(({ data }) => updateUI(data.session));
+
 // ────────────────────────────────────────────────
-// LOAD SPOTS + FOLLOW STATUS
+// HERO SLIDESHOW
+// ────────────────────────────────────────────────
+async function loadHeroSlides() {
+  try {
+    const { data: spots, error } = await sb
+      .from('spots')
+      .select('id, name, place, city, story, media_urls, media_url, category_id, slug')
+      .order('created_at', { ascending: false })
+      .limit(12);
+
+    if (error) throw error;
+    if (!spots?.length) return;
+
+    heroSpots = spots.sort(() => 0.5 - Math.random()).slice(0, 4);
+
+    heroSpots.forEach((spot, i) => {
+      const firstMedia = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/1200x800/141824/FFD88D?text=No+Image';
+      slideEls[i].style.backgroundImage = `url('${firstMedia}')`;
+    });
+
+    renderHero(0);
+  } catch (err) {
+    console.error('Hero load error:', err);
+  }
+}
+
+function renderHero(i) {
+  const spot = heroSpots[i];
+  if (!spot) return;
+
+  slideEls.forEach(s => s.classList.remove('active'));
+  slideEls[i].classList.add('active');
+
+  const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'};
+  themeEl.textContent = categoryNames[spot.category_id] || 'Hidden Gem';
+  titleEl.textContent = spot.name;
+  subEl.textContent = spot.story?.slice(0, 120) + '...' || 'Discover this hidden place...';
+
+  const linkUrl = spot.slug ? `/spot?slug=${spot.slug}` : `/spot?id=${spot.id}`;
+  ctaBtn.onclick = () => window.location.href = linkUrl;
+}
+
+setInterval(() => {
+  heroIdx = (heroIdx + 1) % heroSpots.length;
+  renderHero(heroIdx);
+}, 5200);
+
+// ────────────────────────────────────────────────
+// SPOTS GRID + FILTERS + FOLLOW
 // ────────────────────────────────────────────────
 async function loadSpots() {
-  grid.innerHTML = '<div class="skeleton-card"></div>'.repeat(5);
+  grid.innerHTML = `
+    <div class="skeleton-card"></div><div class="skeleton-card"></div>
+    <div class="skeleton-card"></div><div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  `;
 
   try {
     const { data: spots, error } = await sb
@@ -242,35 +396,19 @@ async function loadSpots() {
     }
 
     allSpots = spots;
-    await renderGrid(allSpots);
+    renderGrid(allSpots);
   } catch (err) {
-    console.error('Load spots error:', err);
-    grid.innerHTML = '<p style="text-align:center;padding:50px;opacity:0.7;">Error loading spots.</p>';
+    console.error('Spots load error:', err);
+    grid.innerHTML = '<p style="text-align:center;padding:50px;opacity:0.7;">Error loading spots. Please try again.</p>';
   }
 }
 
-// ────────────────────────────────────────────────
-// RENDER GRID WITH FOLLOW STATUS
-// ────────────────────────────────────────────────
-async function renderGrid(spotsToShow) {
-  let followedUsers = [];
-  if (currentUser) {
-    const { data } = await sb
-      .from('follows')
-      .select('following_id')
-      .eq('follower_id', currentUser.id);
-    followedUsers = data?.map(f => f.following_id) || [];
-  }
-
+function renderGrid(spotsToShow) {
   const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'};
-  const emotionNames = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'};
 
   const html = spotsToShow.map(spot => {
     const firstImage = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/300x220/141824/FFD88D?text=No+Image';
     const linkUrl = spot.slug ? `/spot?slug=${spot.slug}` : `/spot?id=${spot.id}`;
-    const isFollowing = followedUsers.includes(spot.username);
-    const followText = isFollowing ? 'Following' : 'Follow';
-    const followClass = isFollowing ? 'following' : '';
 
     return `
     <article class="card">
@@ -290,7 +428,7 @@ async function renderGrid(spotsToShow) {
           <span class="username" onclick="goToProfile('${spot.username}')">@${spot.username || 'traveller'}</span>
         </div>
         <div class="meta-right">
-          <button class="follow ${followClass}" onclick="toggleFollow('${spot.username}', this)">${followText}</button>
+          <button class="follow" data-username="${spot.username}" onclick="toggleFollow('${spot.username}', this)">Follow</button>
           <div class="heart" onclick="toggleDestiny('${spot.id}', this)">♡</div>
         </div>
       </div>
@@ -304,16 +442,35 @@ async function renderGrid(spotsToShow) {
   grid.innerHTML = html;
 }
 
-// ────────────────────────────────────────────────
-// FOLLOW TOGGLE
-// ────────────────────────────────────────────────
+// Filter logic
+categoryChips.addEventListener('click', (e) => {
+  const chip = e.target.closest('.category');
+  if (!chip) return;
+
+  document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+
+  const filter = chip.dataset.filter;
+
+  if (filter === 'all') {
+    renderGrid(allSpots);
+  } else {
+    const filtered = allSpots.filter(spot => {
+      const catName = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'}[spot.category_id];
+      return catName === filter;
+    });
+    renderGrid(filtered);
+  }
+});
+
+// Follow toggle
 async function toggleFollow(username, button) {
   if (!currentUser) {
     alert('Please login to follow users');
     return;
   }
 
-  const isFollowing = button.classList.contains('following');
+  const isFollowing = button.textContent === 'Following';
 
   try {
     if (isFollowing) {
@@ -337,39 +494,33 @@ async function toggleFollow(username, button) {
   }
 }
 
-// ────────────────────────────────────────────────
-// FILTERS (CATEGORY + EMOTION)
-// ────────────────────────────────────────────────
-const filterChips = document.querySelectorAll('.category');
-filterChips.forEach(chip => {
-  chip.addEventListener('click', async () => {
-    filterChips.forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-
-    const filter = chip.dataset.filter;
-    if (filter === 'all') {
-      await renderGrid(allSpots);
-      return;
-    }
-
-    const filtered = allSpots.filter(spot => {
-      const catName = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'}[spot.category_id];
-      const emoName = {1:'Peaceful',2:'Long Drive',3:'Romantic',4:'Spiritual',5:'Lonely',6:'Broken',7:'Relaxation',8:'Energetic'}[spot.emotion_id];
-      return catName === filter || emoName === filter;
-    });
-
-    await renderGrid(filtered);
-  });
-});
-
-// ────────────────────────────────────────────────
-// INIT - MUST BE LAST
-// ────────────────────────────────────────────────
-async function init() {
-  await loadSpots();
+// Placeholder functions (add your real logic if needed)
+function goToProfile(username) {
+  if (username) window.location.href = `Profile.html?user=${username}`;
 }
 
-init();
+function toggleDestiny(spotId, button) {
+  alert('Destiny save feature coming soon!');
+  // Your real destiny toggle code here
+}
+
+// ────────────────────────────────────────────────
+// INITIALIZATION – MUST BE LAST
+// ────────────────────────────────────────────────
+async function init() {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    updateUI(session);
+
+    await loadHeroSlides();
+    await loadSpots();
+  } catch (err) {
+    console.error('Initialization failed:', err);
+  }
+}
+
+// Run init when page is ready
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>

@@ -184,6 +184,14 @@ let allSpots = [];
 const grid = document.getElementById('grid');
 
 // ────────────────────────────────────────────────
+// AVATAR HELPER (FIXED - NOW DEFINED BEFORE USE)
+// ────────────────────────────────────────────────
+function getAvatarUrl(username) {
+  if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=80';
+  return `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/file/avatars/${username}-avatar.jpg`;
+}
+
+// ────────────────────────────────────────────────
 // AUTH & UI
 // ────────────────────────────────────────────────
 const authActions = document.getElementById('authActions');
@@ -297,7 +305,7 @@ async function renderGrid(spotsToShow) {
 }
 
 // ────────────────────────────────────────────────
-// FOLLOW TOGGLE (FIXED)
+// FOLLOW TOGGLE
 // ────────────────────────────────────────────────
 async function toggleFollow(username, button) {
   if (!currentUser) {
@@ -325,7 +333,7 @@ async function toggleFollow(username, button) {
     }
   } catch (err) {
     console.error('Follow error:', err);
-    alert('Failed to update follow. Please try again.');
+    alert('Failed to update follow status. Try again.');
   }
 }
 
@@ -355,41 +363,9 @@ filterChips.forEach(chip => {
 });
 
 // ────────────────────────────────────────────────
-// HERO SLIDESHOW (SIMPLIFIED)
-// ────────────────────────────────────────────────
-async function loadHeroSlides() {
-  try {
-    const { data: spots } = await sb
-      .from('spots')
-      .select('id, name, place, city, story, media_urls, media_url, category_id, slug')
-      .order('created_at', { ascending: false })
-      .limit(4);
-
-    if (!spots?.length) return;
-
-    const slides = document.querySelectorAll('.hero-slide');
-    spots.forEach((spot, i) => {
-      const url = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/1200x800/141824/FFD88D?text=Spot';
-      slides[i].style.backgroundImage = `url(${url})`;
-    });
-
-    // Simple auto-cycle (optional)
-    let idx = 0;
-    setInterval(() => {
-      slides.forEach(s => s.classList.remove('active'));
-      slides[idx].classList.add('active');
-      idx = (idx + 1) % slides.length;
-    }, 5000);
-  } catch (e) {
-    console.error('Hero error:', e);
-  }
-}
-
-// ────────────────────────────────────────────────
-// INIT
+// INIT - MUST BE LAST
 // ────────────────────────────────────────────────
 async function init() {
-  await loadHeroSlides();
   await loadSpots();
 }
 

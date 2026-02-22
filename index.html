@@ -210,6 +210,7 @@ const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
 // GLOBAL VARIABLES
 let currentUser = null;
+let userId = null;                    // ← fixed: real user.id from session
 let allSpots = [];
 const grid = document.getElementById('grid');
 const categoryChips = document.getElementById('categoryChips');
@@ -237,6 +238,8 @@ let authMode = 'login';
 // ────────────────────────────────────────────────
 function updateUI(session) {
   currentUser = session?.user ?? null;
+  userId = session?.user?.id ?? null;   // store real UUID
+
   if (session) {
     authActions.style.display = 'none';
     userMenu.style.display = 'block';
@@ -329,7 +332,7 @@ function getAvatarUrl(username) {
 }
 
 // ────────────────────────────────────────────────
-// HERO SLIDESHOW
+// HERO SLIDESHOW (unchanged - working)
 // ────────────────────────────────────────────────
 const slideEls = document.querySelectorAll('.hero-slide');
 const themeEl = document.getElementById('heroTheme');
@@ -346,19 +349,15 @@ async function loadHeroSlides() {
       .select('id, name, place, city, story, media_urls, media_url, category_id, slug')
       .order('created_at', { ascending: false })
       .limit(12);
-
     if (error || !spots?.length) {
       console.warn('No spots for hero');
       return;
     }
-
     heroSpots = spots.sort(() => 0.5 - Math.random()).slice(0, 4);
-
     heroSpots.forEach((spot, i) => {
       const url = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/1200x800/141824/FFD88D?text=Spot';
       slideEls[i].style.backgroundImage = `url('${url}')`;
     });
-
     renderHero(0);
   } catch (err) {
     console.error('Hero load failed:', err);
@@ -368,15 +367,12 @@ async function loadHeroSlides() {
 function renderHero(index) {
   const spot = heroSpots[index];
   if (!spot) return;
-
   slideEls.forEach(s => s.classList.remove('active'));
   slideEls[index].classList.add('active');
-
   const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'};
   themeEl.textContent = categoryNames[spot.category_id] || 'Hidden Gem';
   titleEl.textContent = spot.name || 'Untitled Spot';
   subEl.textContent = spot.story?.slice(0, 120) + (spot.story?.length > 120 ? '...' : '') || 'Discover this hidden place...';
-
   const linkUrl = spot.slug ? `/spot?slug=${spot.slug}` : `/spot?id=${spot.id}`;
   ctaBtn.onclick = () => window.location.href = linkUrl;
 }
@@ -387,9 +383,7 @@ setInterval(() => {
 }, 5200);
 
 // ────────────────────────────────────────────────
-// LOAD SPOTS & FILTERS
-// ────────────────────────────────────────────────
-// LOAD SPOTS & FOLLOW/DESTINY STATUS
+// LOAD SPOTS + FOLLOW + DESTINY STATUS
 // ────────────────────────────────────────────────
 async function loadSpots() {
   grid.innerHTML = '<div class="skeleton-card"></div>'.repeat(5);
@@ -408,40 +402,35 @@ async function loadSpots() {
 
     allSpots = spots;
 
-    // 1. Load destiny saves (hearts) - already working
     let savedSpotIds = [];
-    if (currentUser) {
+    let followedUsernames = [];
+
+    if (userId) {
+      // Destiny saves (hearts)
       const { data: saves } = await sb
         .from('destiny_saves')
         .select('spot_id')
-        .eq('user_id', currentUser.id);
+        .eq('user_id', userId);
       if (saves) savedSpotIds = saves.map(s => s.spot_id);
-    }
 
-    // 2. NEW: Load who the current user already follows
-    let followedUsernames = [];
-    if (currentUser) {
+      // Follow status
       const { data: follows } = await sb
         .from('follows')
         .select('following_id')
-        .eq('follower_id', currentUser.id);
-
-      if (follows) {
-        followedUsernames = follows.map(f => f.following_id);
-      }
+        .eq('follower_id', userId);
+      if (follows) followedUsernames = follows.map(f => f.following_id);
     }
 
-    // Pass both lists to renderGrid
     renderGrid(allSpots, savedSpotIds, followedUsernames);
 
   } catch (err) {
-    console.error('Load spots error:', err);
+    console.error('Load spots failed:', err);
     grid.innerHTML = '<p style="text-align:center;padding:50px;opacity:0.7;">Error loading spots.</p>';
   }
 }
 
 // ────────────────────────────────────────────────
-// RENDER CARDS – now with follow status
+// RENDER CARDS – correct follow state on load
 // ────────────────────────────────────────────────
 function renderGrid(spotsToShow, savedSpotIds = [], followedUsernames = []) {
   const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'};
@@ -454,7 +443,6 @@ function renderGrid(spotsToShow, savedSpotIds = [], followedUsernames = []) {
     const heartIcon = isSaved ? '❤️' : '♡';
     const heartClass = isSaved ? 'active' : '';
 
-    // NEW: Check if current user follows this spot's creator
     const isFollowing = followedUsernames.includes(spot.username);
     const followText = isFollowing ? 'Following' : 'Follow';
     const followClass = isFollowing ? 'following' : '';
@@ -492,9 +480,10 @@ function renderGrid(spotsToShow, savedSpotIds = [], followedUsernames = []) {
 }
 
 // ────────────────────────────────────────────────
-// FOLLOW BUTTON – WORKING FROM REFERENCE CODE
+// FOLLOW TOGGLE – persists and updates UI
+// ────────────────────────────────────────────────
 async function toggleFollow(username, button) {
-  if (!currentUser || !userId) {
+  if (!userId) {
     alert('Please login to follow users');
     return;
   }
@@ -503,7 +492,6 @@ async function toggleFollow(username, button) {
 
   try {
     if (isFollowing) {
-      // Unfollow
       await sb
         .from('follows')
         .delete()
@@ -513,7 +501,6 @@ async function toggleFollow(username, button) {
       button.textContent = 'Follow';
       button.classList.remove('following');
     } else {
-      // Follow
       await sb
         .from('follows')
         .insert({
@@ -525,16 +512,16 @@ async function toggleFollow(username, button) {
       button.classList.add('following');
     }
   } catch (err) {
-    console.error('Follow toggle failed:', err);
-    alert('Failed to update follow. Check console for details.');
+    console.error('Follow error:', err.message, err.details);
+    alert('Failed to update follow status. Check console.');
   }
 }
 
 // ────────────────────────────────────────────────
-// DESTINY SAVE (HEART) – WORKING FROM REFERENCE CODE
+// DESTINY TOGGLE (your working version)
 // ────────────────────────────────────────────────
 async function toggleDestiny(spotId, element) {
-  if (!currentUser) {
+  if (!userId) {
     alert('Please login to save to Destiny List');
     return;
   }
@@ -543,11 +530,10 @@ async function toggleDestiny(spotId, element) {
 
   try {
     if (isSaved) {
-      // Remove save
       const { data: existing } = await sb
         .from('destiny_saves')
         .select('id')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .eq('spot_id', spotId)
         .maybeSingle();
 
@@ -558,9 +544,8 @@ async function toggleDestiny(spotId, element) {
       element.classList.remove('active');
       element.innerHTML = '♡';
     } else {
-      // Save
       await sb.from('destiny_saves').insert({
-        user_id: currentUser.id,
+        user_id: userId,
         spot_id: spotId
       });
 
@@ -568,23 +553,20 @@ async function toggleDestiny(spotId, element) {
       element.innerHTML = '❤️';
     }
   } catch (err) {
-    console.error('Destiny save error:', err);
-    alert('Failed to save spot. Try again.');
+    console.error('Destiny error:', err);
+    alert('Failed to save spot.');
   }
 }
 
 // ────────────────────────────────────────────────
-// FILTERS
+// FILTERS (unchanged)
 // ────────────────────────────────────────────────
 categoryChips.addEventListener('click', (e) => {
   const chip = e.target.closest('.category');
   if (!chip) return;
-
   document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
   chip.classList.add('active');
-
   const filter = chip.dataset.filter;
-
   if (filter === 'all') {
     renderGrid(allSpots);
   } else {
@@ -607,7 +589,6 @@ function goToProfile(username) {
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
   updateUI(session);
-
   await loadHeroSlides();
   await loadSpots();
 }
@@ -616,6 +597,3 @@ document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
-
-
-

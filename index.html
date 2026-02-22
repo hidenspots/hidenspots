@@ -206,6 +206,7 @@ const sb = supabase.createClient(
   "https://bhktkjegansxplpdtack.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa3RramVnYW5zeHBscGR0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2OTE2NjQsImV4cCI6MjA4MTI2NzY2NH0.WlQTPkC6WBjaK_Guy0_XPGahR9oNYsbIHdaBn4WQspE"
 );
+const WORKER_URL = 'https://hiden-spots-r2-proxy.whynot555x7.workers.dev';
 
 // GLOBAL VARIABLES
 let currentUser = null;
@@ -231,7 +232,9 @@ const passwordInput = document.getElementById('password');
 const usernameInput = document.getElementById('username');
 let authMode = 'login';
 
-// Auth state & UI
+// ────────────────────────────────────────────────
+// AUTH & UI LOGIC
+// ────────────────────────────────────────────────
 function updateUI(session) {
   currentUser = session?.user ?? null;
   if (session) {
@@ -243,12 +246,13 @@ function updateUI(session) {
     userMenu.style.display = 'none';
   }
 }
+
 sb.auth.onAuthStateChange((_, session) => updateUI(session));
 sb.auth.getSession().then(({ data }) => updateUI(data.session));
 
-// Auth modal logic
 openLogin.onclick = () => { authMode = 'login'; openAuthModal(); };
 openSignup.onclick = () => { authMode = 'signup'; openAuthModal(); };
+
 function openAuthModal() {
   authTitle.textContent = authMode === 'login' ? 'Login' : 'Signup';
   switchMode.textContent = authMode === 'login' ? 'Switch to Signup' : 'Switch to Login';
@@ -256,19 +260,24 @@ function openAuthModal() {
   usernameInput.style.display = authMode === 'signup' ? 'block' : 'none';
   authModal.style.display = 'flex';
 }
+
 switchMode.onclick = () => {
   authMode = authMode === 'login' ? 'signup' : 'login';
   openAuthModal();
 };
+
 submitAuth.onclick = async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value.trim();
   const username = usernameInput.value.trim();
+
   if (!email || !password || (authMode === 'signup' && !username)) {
     authError.textContent = 'All fields are required';
     return;
   }
+
   authError.textContent = 'Processing...';
+
   let res;
   try {
     if (authMode === 'login') {
@@ -280,10 +289,12 @@ submitAuth.onclick = async () => {
         options: { data: { username, full_name: username } }
       });
     }
+
     if (res.error) {
       authError.textContent = res.error.message;
       return;
     }
+
     authError.textContent = 'Success!';
     setTimeout(() => {
       authModal.style.display = 'none';
@@ -294,22 +305,29 @@ submitAuth.onclick = async () => {
     console.error(err);
   }
 };
+
 avatarBtn.onclick = (e) => {
   e.stopPropagation();
   menuPop.style.display = menuPop.style.display === 'block' ? 'none' : 'block';
 };
+
 menuPop.onclick = e => e.stopPropagation();
 document.addEventListener('click', () => menuPop.style.display = 'none');
+
 logoutBtn.onclick = async (e) => {
   e.stopPropagation();
   await sb.auth.signOut();
   location.reload();
 };
+
+// ────────────────────────────────────────────────
 // AVATAR HELPER
+// ────────────────────────────────────────────────
 function getAvatarUrl(username) {
   if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=80';
   return `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/file/avatars/${username}-avatar.jpg`;
 }
+
 // ────────────────────────────────────────────────
 // HERO SLIDESHOW
 // ────────────────────────────────────────────────
@@ -387,19 +405,32 @@ async function loadSpots() {
     }
 
     allSpots = spots;
-    renderGrid(allSpots);
+
+    // Load saved destiny spots for heart icons
+    let savedSpotIds = [];
+    if (currentUser) {
+      const { data: saves } = await sb
+        .from('destiny_saves')
+        .select('spot_id')
+        .eq('user_id', currentUser.id);
+      if (saves) savedSpotIds = saves.map(s => s.spot_id);
+    }
+
+    renderGrid(allSpots, savedSpotIds);
   } catch (err) {
     console.error('Load spots error:', err);
     grid.innerHTML = '<p style="text-align:center;padding:50px;opacity:0.7;">Error loading spots. Please try again.</p>';
   }
 }
 
-function renderGrid(spotsToShow) {
+function renderGrid(spotsToShow, savedSpotIds = []) {
   const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'};
 
   const html = spotsToShow.map(spot => {
     const firstImage = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/300x220/141824/FFD88D?text=No+Image';
     const linkUrl = spot.slug ? `/spot?slug=${spot.slug}` : `/spot?id=${spot.id}`;
+    const isSaved = savedSpotIds.includes(spot.id);
+    const heartIcon = isSaved ? '❤️' : '♡';
 
     return `
     <article class="card">
@@ -420,7 +451,7 @@ function renderGrid(spotsToShow) {
         </div>
         <div class="meta-right">
           <button class="follow" onclick="toggleFollow('${spot.username}', this)">Follow</button>
-          <div class="heart" onclick="toggleDestiny('${spot.id}', this)">♡</div>
+          <div class="heart ${isSaved ? 'active' : ''}" onclick="toggleDestiny('${spot.id}', this)">${heartIcon}</div>
         </div>
       </div>
       <div class="card-story">
@@ -433,7 +464,95 @@ function renderGrid(spotsToShow) {
   grid.innerHTML = html;
 }
 
+// ────────────────────────────────────────────────
+// FOLLOW BUTTON – WORKING FROM REFERENCE CODE
+// ────────────────────────────────────────────────
+async function toggleFollow(username, button) {
+  if (!currentUser) {
+    alert('Please login to follow users');
+    return;
+  }
+
+  const isFollowing = button.classList.contains('following');
+
+  try {
+    if (isFollowing) {
+      // Unfollow
+      const { data: existing } = await sb
+        .from('follows')
+        .select('id')
+        .eq('follower_id', currentUser.id)
+        .eq('following_id', username)
+        .maybeSingle();
+
+      if (existing) {
+        await sb.from('follows').delete().eq('id', existing.id);
+      }
+
+      button.textContent = 'Follow';
+      button.classList.remove('following');
+    } else {
+      // Follow
+      await sb.from('follows').insert({
+        follower_id: currentUser.id,
+        following_id: username
+      });
+
+      button.textContent = 'Following';
+      button.classList.add('following');
+    }
+  } catch (err) {
+    console.error('Follow error:', err);
+    alert('Failed to update follow status. Try again.');
+  }
+}
+
+// ────────────────────────────────────────────────
+// DESTINY SAVE (HEART) – WORKING FROM REFERENCE CODE
+// ────────────────────────────────────────────────
+async function toggleDestiny(spotId, element) {
+  if (!currentUser) {
+    alert('Please login to save to Destiny List');
+    return;
+  }
+
+  const isSaved = element.classList.contains('active');
+
+  try {
+    if (isSaved) {
+      // Remove save
+      const { data: existing } = await sb
+        .from('destiny_saves')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('spot_id', spotId)
+        .maybeSingle();
+
+      if (existing) {
+        await sb.from('destiny_saves').delete().eq('id', existing.id);
+      }
+
+      element.classList.remove('active');
+      element.innerHTML = '♡';
+    } else {
+      // Save
+      await sb.from('destiny_saves').insert({
+        user_id: currentUser.id,
+        spot_id: spotId
+      });
+
+      element.classList.add('active');
+      element.innerHTML = '❤️';
+    }
+  } catch (err) {
+    console.error('Destiny save error:', err);
+    alert('Failed to save spot. Try again.');
+  }
+}
+
+// ────────────────────────────────────────────────
 // FILTERS
+// ────────────────────────────────────────────────
 categoryChips.addEventListener('click', (e) => {
   const chip = e.target.closest('.category');
   if (!chip) return;
@@ -454,47 +573,14 @@ categoryChips.addEventListener('click', (e) => {
   }
 });
 
-// FOLLOW TOGGLE
-async function toggleFollow(username, button) {
-  if (!currentUser) {
-    alert('Please login to follow users');
-    return;
-  }
-
-  const isFollowing = button.textContent === 'Following';
-
-  try {
-    if (isFollowing) {
-      await sb.from('follows')
-        .delete()
-        .eq('follower_id', currentUser.id)
-        .eq('following_id', username);
-      button.textContent = 'Follow';
-      button.classList.remove('following');
-    } else {
-      await sb.from('follows').insert({
-        follower_id: currentUser.id,
-        following_id: username
-      });
-      button.textContent = 'Following';
-      button.classList.add('following');
-    }
-  } catch (err) {
-    console.error('Follow error:', err);
-    alert('Failed to update follow status.');
-  }
-}
-
 // PLACEHOLDERS
 function goToProfile(username) {
   if (username) window.location.href = `Profile.html?user=${username}`;
 }
 
-function toggleDestiny(spotId, button) {
-  alert('Saved to Destiny List!');
-}
-
+// ────────────────────────────────────────────────
 // INIT
+// ────────────────────────────────────────────────
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
   updateUI(session);

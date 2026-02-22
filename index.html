@@ -389,6 +389,8 @@ setInterval(() => {
 // ────────────────────────────────────────────────
 // LOAD SPOTS & FILTERS
 // ────────────────────────────────────────────────
+// LOAD SPOTS & FOLLOW/DESTINY STATUS
+// ────────────────────────────────────────────────
 async function loadSpots() {
   grid.innerHTML = '<div class="skeleton-card"></div>'.repeat(5);
 
@@ -406,7 +408,7 @@ async function loadSpots() {
 
     allSpots = spots;
 
-    // Load saved destiny spots for heart icons
+    // 1. Load destiny saves (hearts) - already working
     let savedSpotIds = [];
     if (currentUser) {
       const { data: saves } = await sb
@@ -416,21 +418,46 @@ async function loadSpots() {
       if (saves) savedSpotIds = saves.map(s => s.spot_id);
     }
 
-    renderGrid(allSpots, savedSpotIds);
+    // 2. NEW: Load who the current user already follows
+    let followedUsernames = [];
+    if (currentUser) {
+      const { data: follows } = await sb
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', currentUser.id);
+
+      if (follows) {
+        followedUsernames = follows.map(f => f.following_id);
+      }
+    }
+
+    // Pass both lists to renderGrid
+    renderGrid(allSpots, savedSpotIds, followedUsernames);
+
   } catch (err) {
     console.error('Load spots error:', err);
-    grid.innerHTML = '<p style="text-align:center;padding:50px;opacity:0.7;">Error loading spots. Please try again.</p>';
+    grid.innerHTML = '<p style="text-align:center;padding:50px;opacity:0.7;">Error loading spots.</p>';
   }
 }
 
-function renderGrid(spotsToShow, savedSpotIds = []) {
+// ────────────────────────────────────────────────
+// RENDER CARDS – now with follow status
+// ────────────────────────────────────────────────
+function renderGrid(spotsToShow, savedSpotIds = [], followedUsernames = []) {
   const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'};
 
   const html = spotsToShow.map(spot => {
     const firstImage = spot.media_urls?.[0]?.url || spot.media_url || 'https://via.placeholder.com/300x220/141824/FFD88D?text=No+Image';
     const linkUrl = spot.slug ? `/spot?slug=${spot.slug}` : `/spot?id=${spot.id}`;
+
     const isSaved = savedSpotIds.includes(spot.id);
     const heartIcon = isSaved ? '❤️' : '♡';
+    const heartClass = isSaved ? 'active' : '';
+
+    // NEW: Check if current user follows this spot's creator
+    const isFollowing = followedUsernames.includes(spot.username);
+    const followText = isFollowing ? 'Following' : 'Follow';
+    const followClass = isFollowing ? 'following' : '';
 
     return `
     <article class="card">
@@ -450,8 +477,8 @@ function renderGrid(spotsToShow, savedSpotIds = []) {
           <span class="username" onclick="goToProfile('${spot.username}')">@${spot.username || 'traveller'}</span>
         </div>
         <div class="meta-right">
-          <button class="follow" onclick="toggleFollow('${spot.username}', this)">Follow</button>
-          <div class="heart ${isSaved ? 'active' : ''}" onclick="toggleDestiny('${spot.id}', this)">${heartIcon}</div>
+          <button class="follow ${followClass}" onclick="toggleFollow('${spot.username}', this)">${followText}</button>
+          <div class="heart ${heartClass}" onclick="toggleDestiny('${spot.id}', this)">${heartIcon}</div>
         </div>
       </div>
       <div class="card-story">
@@ -592,4 +619,5 @@ document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
+
 

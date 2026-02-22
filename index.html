@@ -494,7 +494,7 @@ function renderGrid(spotsToShow, savedSpotIds = [], followedUsernames = []) {
 // ────────────────────────────────────────────────
 // FOLLOW BUTTON – WORKING FROM REFERENCE CODE
 async function toggleFollow(username, button) {
-  if (!currentUser) {
+  if (!currentUser || !userId) {
     alert('Please login to follow users');
     return;
   }
@@ -502,15 +502,12 @@ async function toggleFollow(username, button) {
   const isFollowing = button.classList.contains('following');
 
   try {
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) throw new Error('No authenticated user');
-
     if (isFollowing) {
       // Unfollow
       await sb
         .from('follows')
         .delete()
-        .eq('follower_id', user.id)
+        .eq('follower_id', userId)
         .eq('following_id', username);
 
       button.textContent = 'Follow';
@@ -520,7 +517,7 @@ async function toggleFollow(username, button) {
       await sb
         .from('follows')
         .insert({
-          follower_id: user.id,
+          follower_id: userId,
           following_id: username
         });
 
@@ -528,8 +525,8 @@ async function toggleFollow(username, button) {
       button.classList.add('following');
     }
   } catch (err) {
-    console.error('Follow error:', err);
-    alert('Failed to update follow status. Check console for details.');
+    console.error('Follow toggle failed:', err);
+    alert('Failed to update follow. Check console for details.');
   }
 }
 
@@ -619,5 +616,6 @@ document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
+
 
 

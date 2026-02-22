@@ -38,10 +38,10 @@
     .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s ease-in-out;}
     .hero-slide.active{opacity:1;}
     .hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(12,15,25,.9) 0%,rgba(12,15,25,.4) 60%,transparent 100%);z-index:1;}
-    .hero-text{position:absolute;bottom:2.6rem;left:2.6rem;z-index:2;max-width:560px;padding:1rem;background:rgba(0,0,0,0.4);border-radius:12px;}
-    .hero-kicker{font-size:.9rem;letter-spacing:2px;opacity:.85;text-transform:uppercase;margin-bottom:.35rem;color:#fff;}
-    .hero-title{font-size:2.4rem;margin-bottom:.6rem;color:#ffd88d;line-height:1.15;}
-    .hero-sub{opacity:.9;font-size:1.06rem;line-height:1.5;color:#fff;}
+    .hero-text{position:absolute;bottom:2.6rem;left:2.6rem;z-index:2;max-width:560px}
+    .hero-kicker{font-size:.9rem;letter-spacing:2px;opacity:.85;text-transform:uppercase;margin-bottom:.35rem}
+    .hero-title{font-size:2.4rem;margin-bottom:.6rem;color:#ffd88d;line-height:1.15}
+    .hero-sub{opacity:.9;font-size:1.06rem;line-height:1.5}
     .hero-cta{margin-top:1rem;padding:.6rem 1.5rem;font-size:1rem;border:none;border-radius:40px;background:linear-gradient(90deg,#ffd88d,#ffb347);color:#0c0f18;font-weight:600;cursor:pointer;transition:.28s;}
     .hero-cta:hover{transform:translateY(-2px);box-shadow:0 0 10px rgba(255,216,141,.4)}
     .categories{display:flex;overflow-x:auto;gap:1rem;padding:1.1rem 2.5rem;margin-top:1rem;scrollbar-width:none;}
@@ -84,7 +84,7 @@
     .nav-icon:hover{color:#FFD88D;transform:translateY(-2px);filter:drop-shadow(0 0 10px rgba(255,216,155,.6))}
     .nav-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.8;fill:none}
     @media(max-width:900px){.hero{height:58vh}.hero-title{font-size:2rem}.hero-sub{font-size:1rem}}
-    @media(max-width:768px){header{padding:1rem 1.5rem}.hero-text{left:1.2rem;right:1.2rem;padding:0.8rem}.grid{padding:1rem 1rem 6.5rem}.floating-btn{bottom:90px;right:22px}.nav-bar{gap:2rem;padding:.9rem 1.6rem}}
+    @media(max-width:768px){header{padding:1rem 1.5rem}.hero-text{left:1.2rem;right:1.2rem}.grid{padding:1rem 1rem 6.5rem}.floating-btn{bottom:90px;right:22px}.nav-bar{gap:2rem;padding:.9rem 1.6rem}}
     .skeleton-card{background:#141824;border-radius:20px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,.35);height:420px;animation:pulse 1.5s infinite ease-in-out;}
     .skeleton-media{height:240px;background:linear-gradient(90deg,#1a1f2e 0%,#22273a 50%,#1a1f2e 100%);background-size:200% 100%;animation:shimmer 2s infinite linear;}
     .skeleton-text{height:20px;margin:1rem 1.2rem;background:#22273a;border-radius:4px;}
@@ -231,9 +231,7 @@ const passwordInput = document.getElementById('password');
 const usernameInput = document.getElementById('username');
 let authMode = 'login';
 
-// ────────────────────────────────────────────────
-// AUTH & UI LOGIC
-// ────────────────────────────────────────────────
+// Auth state & UI
 function updateUI(session) {
   currentUser = session?.user ?? null;
   if (session) {
@@ -245,13 +243,12 @@ function updateUI(session) {
     userMenu.style.display = 'none';
   }
 }
-
 sb.auth.onAuthStateChange((_, session) => updateUI(session));
 sb.auth.getSession().then(({ data }) => updateUI(data.session));
 
+// Auth modal logic
 openLogin.onclick = () => { authMode = 'login'; openAuthModal(); };
 openSignup.onclick = () => { authMode = 'signup'; openAuthModal(); };
-
 function openAuthModal() {
   authTitle.textContent = authMode === 'login' ? 'Login' : 'Signup';
   switchMode.textContent = authMode === 'login' ? 'Switch to Signup' : 'Switch to Login';
@@ -259,24 +256,19 @@ function openAuthModal() {
   usernameInput.style.display = authMode === 'signup' ? 'block' : 'none';
   authModal.style.display = 'flex';
 }
-
 switchMode.onclick = () => {
   authMode = authMode === 'login' ? 'signup' : 'login';
   openAuthModal();
 };
-
 submitAuth.onclick = async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value.trim();
   const username = usernameInput.value.trim();
-
   if (!email || !password || (authMode === 'signup' && !username)) {
     authError.textContent = 'All fields are required';
     return;
   }
-
   authError.textContent = 'Processing...';
-
   let res;
   try {
     if (authMode === 'login') {
@@ -288,12 +280,10 @@ submitAuth.onclick = async () => {
         options: { data: { username, full_name: username } }
       });
     }
-
     if (res.error) {
       authError.textContent = res.error.message;
       return;
     }
-
     authError.textContent = 'Success!';
     setTimeout(() => {
       authModal.style.display = 'none';
@@ -304,29 +294,22 @@ submitAuth.onclick = async () => {
     console.error(err);
   }
 };
-
 avatarBtn.onclick = (e) => {
   e.stopPropagation();
   menuPop.style.display = menuPop.style.display === 'block' ? 'none' : 'block';
 };
-
 menuPop.onclick = e => e.stopPropagation();
 document.addEventListener('click', () => menuPop.style.display = 'none');
-
 logoutBtn.onclick = async (e) => {
   e.stopPropagation();
   await sb.auth.signOut();
   location.reload();
 };
-
-// ────────────────────────────────────────────────
 // AVATAR HELPER
-// ────────────────────────────────────────────────
 function getAvatarUrl(username) {
   if (!username) return 'https://ui-avatars.com/api/?name=User&background=FFD88D&color=0c0f18&size=80';
   return `https://hiden-spots-r2-proxy.whynot555x7.workers.dev/file/avatars/${username}-avatar.jpg`;
 }
-
 // ────────────────────────────────────────────────
 // HERO SLIDESHOW
 // ────────────────────────────────────────────────
@@ -347,7 +330,7 @@ async function loadHeroSlides() {
       .limit(12);
 
     if (error || !spots?.length) {
-      console.warn('No spots for hero slideshow');
+      console.warn('No spots for hero');
       return;
     }
 
@@ -360,7 +343,7 @@ async function loadHeroSlides() {
 
     renderHero(0);
   } catch (err) {
-    console.error('Hero slideshow failed:', err);
+    console.error('Hero load failed:', err);
   }
 }
 
@@ -386,7 +369,7 @@ setInterval(() => {
 }, 5200);
 
 // ────────────────────────────────────────────────
-// LOAD SPOTS FOR CARDS
+// LOAD SPOTS & FILTERS
 // ────────────────────────────────────────────────
 async function loadSpots() {
   grid.innerHTML = '<div class="skeleton-card"></div>'.repeat(5);
@@ -397,13 +380,8 @@ async function loadSpots() {
       .select('id, name, place, city, story, media_urls, media_url, username, category_id, emotion_id, slug')
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Supabase error:', error);
-      grid.innerHTML = '<p style="text-align:center;color:#ff6b6b;padding:50px;">Database error: ' + error.message + '</p>';
-      return;
-    }
-
-    if (!spots || spots.length === 0) {
+    if (error) throw error;
+    if (!spots?.length) {
       grid.innerHTML = '<p style="text-align:center;padding:50px;opacity:0.7;">No hidden spots yet.</p>';
       return;
     }
@@ -411,14 +389,11 @@ async function loadSpots() {
     allSpots = spots;
     renderGrid(allSpots);
   } catch (err) {
-    console.error('loadSpots failed:', err);
-    grid.innerHTML = '<p style="text-align:center;color:#ff6b6b;padding:50px;">Failed to load spots. Check console.</p>';
+    console.error('Load spots error:', err);
+    grid.innerHTML = '<p style="text-align:center;padding:50px;opacity:0.7;">Error loading spots. Please try again.</p>';
   }
 }
 
-// ────────────────────────────────────────────────
-// RENDER CARDS
-// ────────────────────────────────────────────────
 function renderGrid(spotsToShow) {
   const categoryNames = {1:'Adventure',2:'Spiritual',3:'Historical',4:'Horror',5:'Solo',6:'Family',7:'Restaurant',8:'Nature'};
 
@@ -458,9 +433,7 @@ function renderGrid(spotsToShow) {
   grid.innerHTML = html;
 }
 
-// ────────────────────────────────────────────────
 // FILTERS
-// ────────────────────────────────────────────────
 categoryChips.addEventListener('click', (e) => {
   const chip = e.target.closest('.category');
   if (!chip) return;
@@ -481,17 +454,38 @@ categoryChips.addEventListener('click', (e) => {
   }
 });
 
-// ────────────────────────────────────────────────
-// FOLLOW & OTHER PLACEHOLDERS
-// ────────────────────────────────────────────────
+// FOLLOW TOGGLE
 async function toggleFollow(username, button) {
   if (!currentUser) {
     alert('Please login to follow users');
     return;
   }
-  button.textContent = button.textContent === 'Follow' ? 'Following' : 'Follow';
+
+  const isFollowing = button.textContent === 'Following';
+
+  try {
+    if (isFollowing) {
+      await sb.from('follows')
+        .delete()
+        .eq('follower_id', currentUser.id)
+        .eq('following_id', username);
+      button.textContent = 'Follow';
+      button.classList.remove('following');
+    } else {
+      await sb.from('follows').insert({
+        follower_id: currentUser.id,
+        following_id: username
+      });
+      button.textContent = 'Following';
+      button.classList.add('following');
+    }
+  } catch (err) {
+    console.error('Follow error:', err);
+    alert('Failed to update follow status.');
+  }
 }
 
+// PLACEHOLDERS
 function goToProfile(username) {
   if (username) window.location.href = `Profile.html?user=${username}`;
 }
@@ -500,15 +494,13 @@ function toggleDestiny(spotId, button) {
   alert('Saved to Destiny List!');
 }
 
-// ────────────────────────────────────────────────
-// INIT – MUST BE LAST
-// ────────────────────────────────────────────────
+// INIT
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
   updateUI(session);
 
   await loadHeroSlides();
-  await loadSpots();          // this loads cards
+  await loadSpots();
 }
 
 document.addEventListener('DOMContentLoaded', init);

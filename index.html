@@ -33,6 +33,29 @@
     .brand svg{width:36px;height:36px;flex:0 0 36px}
     .brand span{font-size:1.5rem;letter-spacing:3px}
     .brand:hover{color:#ffd88d;transition:.35s}
+    /* Auth buttons */
+    .auth-actions{display:flex;gap:.5rem}
+    .auth-btn{
+      padding:.5rem 1rem;border-radius:999px;border:1px solid rgba(255,255,255,.25);
+      background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:.95rem;
+    }
+    .primary{background:linear-gradient(90deg,#ffd88d,#ffb347);color:#0c0f18;font-weight:600}
+    /* User menu */
+    .user-menu{position:relative}
+    .avatar{
+      width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);
+      border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;
+      cursor:pointer;color:#ffd88d;font-weight:600
+    }
+    .menu-pop{
+      position:absolute;right:0;top:120%;background:#121624;border:1px solid rgba(255,255,255,.12);
+      border-radius:12px;display:none;min-width:160px;overflow:hidden;z-index:100;
+      box-shadow:0 8px 24px rgba(0,0,0,.4)
+    }
+    .menu-pop a,.menu-pop button{
+      display:block;width:100%;padding:.7rem 1rem;background:none;border:0;color:#fff;text-align:left;cursor:pointer
+    }
+    .menu-pop a:hover,.menu-pop button:hover{background:rgba(255,255,255,.08)}
     /* HERO with themed frames */
     .hero{margin-top:84px;height:70vh;position:relative;overflow:hidden;border-radius:20px;margin-inline:3%;animation:fadeUp 1.2s ease-out both;}
     .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s ease-in-out;}
@@ -276,7 +299,7 @@
   </div>
 </header>
 
-<!-- HERO – fully restored from your correct code -->
+<!-- HERO – exactly from your correct code -->
 <section class="hero" id="hero">
   <div class="hero-slide active"></div>
   <div class="hero-slide"></div>
@@ -397,7 +420,7 @@ setInterval(() => {
 }, 5200);
 
 // ────────────────────────────────────────────────
-// AUTH & OTHER LOGIC (YOUR EXISTING WORKING CODE)
+// AUTH & UI (your working version)
 // ────────────────────────────────────────────────
 let currentUser = null;
 
@@ -522,7 +545,7 @@ async function init() {
   updateUI(session);
 
   await loadHeroSlides();
-  // await loadSpots();  // uncomment when ready to add grid loading
+  // await loadSpots(); // uncomment when you want grid loading
 }
 
 document.addEventListener('DOMContentLoaded', init);
